@@ -66,4 +66,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function spaceStorages()
+    {
+        return $this->hasMany(SpaceStorage::class);
+    }
 }
