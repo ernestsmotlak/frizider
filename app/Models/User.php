@@ -20,6 +20,14 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var list<string>
      */
+
+    public function me()
+    {
+        return response()->json([
+            'data' => auth('api')->user(),
+        ]);
+    }
+
     protected $fillable = [
         'name',
         'email',

@@ -1,0 +1,21 @@
+meta {
+  name: deleteMe
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/me
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzY1MTQ0NDg5LCJleHAiOjE3NjUxNDgwODksIm5iZiI6MTc2NTE0NDQ4OSwianRpIjoiSTJFVTFtc3Jwd2NXemRhZCIsInN1YiI6IjYiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.5PRkp2lwmJHXOp6w5dT9XpGBmKl9kDn00_FULQiMh0k
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
