@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\SpaceStorage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Session\Storage\SessionStorageFactoryInterface;
 
 class SpaceStorageController extends Controller
 {
@@ -66,7 +68,7 @@ class SpaceStorageController extends Controller
         }
 
         $validated = $request->validate([
-           'name' => 'sometimes|string|max:255',
+            'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'sort_order' => 'nullable|integer',
         ]);
@@ -74,16 +76,28 @@ class SpaceStorageController extends Controller
         $spaceStorage->update($validated);
 
         return response()->json([
-           'message' => 'Storage space updated successfully.',
+            'message' => 'Storage space updated successfully.',
             'data' => $spaceStorage->fresh()
         ]);
     }
 
     // TODO: bruno for update(), make the destroy.
-    
+
 
     public function destroy(string $id)
     {
-        //
+        $storageSpace = SpaceStorage::findOrFail($id);
+
+        if ($storageSpace->user_id !== $this->user()->id) {
+            return response()->json([
+                'message' => 'You do not have permission to delete this storage space.',
+            ], 403);
+        }
+
+        $storageSpace->delete();
+
+        return response()->json([
+            'message' => 'Storage space deleted successfully.'
+        ], 200);
     }
 }

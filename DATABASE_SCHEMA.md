@@ -451,3 +451,5 @@ The following features are planned for future implementation:
 - Quantity and unit fields are nullable to support flexible data entry
 - The schema is designed to be extensible for future multi-user features while maintaining data integrity
 
+
+
