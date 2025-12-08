@@ -15,6 +15,6 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/me', [UserController::class, 'destroyMe']);
 
     Route::apiResource('space-storages', SpaceStorageController::class);
-    Route::apiResource('pantry-item', PantryItemController::class);
+    Route::apiResource('pantry-items', PantryItemController::class);
 });
 
