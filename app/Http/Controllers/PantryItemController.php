@@ -8,17 +8,9 @@ use Illuminate\Http\Request;
 
 class PantryItemController extends Controller
 {
-    protected function user()
-    {
-        return auth('api')->user();
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $pantryItems = PantryItem::where('user_id', $this->user()->id)
+        $pantryItems = PantryItem::where('user_id', auth()->id())
             ->orderBy('expiry_date')
             ->get();
 
@@ -27,9 +19,6 @@ class PantryItemController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -44,14 +33,14 @@ class PantryItemController extends Controller
 
         if (isset($validated['space_id'])) {
             $space = SpaceStorage::find($validated['space_id']);
-            if ($space && $space->user_id !== $this->user()->id) {
+            if ($space && $space->user_id !== auth()->id()) {
                 return response()->json([
                     'message' => 'You do not have permission to use this storage space.',
                 ], 403);
             }
         }
 
-        $validated['user_id'] = $this->user()->id;
+        $validated['user_id'] = auth()->id();
 
         $pantryItem = PantryItem::create($validated);
 
@@ -61,13 +50,10 @@ class PantryItemController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $pantryItem = PantryItem::where('id', $id)
-            ->where('user_id', $this->user()->id)
+            ->where('user_id', auth()->id())
             ->firstOrFail();
 
         return response()->json([
@@ -75,13 +61,10 @@ class PantryItemController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $pantryItem = PantryItem::where('id', $id)
-            ->where('user_id', $this->user()->id)
+            ->where('user_id', auth()->id())
             ->firstOrFail();
 
         $validated = $request->validate([
@@ -96,7 +79,7 @@ class PantryItemController extends Controller
 
         if (isset($validated['space_id'])) {
             $space = SpaceStorage::find($validated['space_id']);
-            if ($space && $space->user_id !== $this->user()->id) {
+            if ($space && $space->user_id !== auth()->id()) {
                 return response()->json([
                     'message' => 'You do not have permission to use this storage space.',
                 ], 403);
@@ -111,13 +94,10 @@ class PantryItemController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $pantryItem = PantryItem::where('id', $id)
-            ->where('user_id', $this->user()->id)
+            ->where('user_id', auth()->id())
             ->firstOrFail();
 
         $pantryItem->delete();
