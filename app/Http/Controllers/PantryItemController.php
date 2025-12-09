@@ -64,13 +64,12 @@ class PantryItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PantryItem $pantryItem)
+    public function show(string $id)
     {
-        if ($pantryItem->user_id !== $this->user()->id) {
-            return response()->json([
-                'message' => 'You do not have permission to view this pantry item.'
-            ], 403);
-        }
+        $pantryItem = PantryItem::where('id', $id)
+            ->where('user_id', $this->user()->id)
+            ->firstOrFail();
+
         return response()->json([
             'data' => $pantryItem
         ]);
@@ -79,13 +78,11 @@ class PantryItemController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PantryItem $pantryItem)
+    public function update(Request $request, string $id)
     {
-        if ($pantryItem->user_id !== $this->user()->id) {
-            return response()->json([
-                'message' => 'You do not have permission to update this pantry item.',
-            ], 403);
-        }
+        $pantryItem = PantryItem::where('id', $id)
+            ->where('user_id', $this->user()->id)
+            ->firstOrFail();
 
         $validated = $request->validate([
             'space_id' => 'nullable|exists:space_storages,id',
@@ -117,13 +114,11 @@ class PantryItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PantryItem $pantryItem)
+    public function destroy(string $id)
     {
-        if ($pantryItem->user_id !== $this->user()->id) {
-            return response()->json([
-                'message' => 'You do not have permission to delete this pantry item.',
-            ], 403);
-        }
+        $pantryItem = PantryItem::where('id', $id)
+            ->where('user_id', $this->user()->id)
+            ->firstOrFail();
 
         $pantryItem->delete();
 
