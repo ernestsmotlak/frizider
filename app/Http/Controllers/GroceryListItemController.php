@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use Illuminate\Http\Request;
 
@@ -12,23 +13,18 @@ class GroceryListItemController extends Controller
      */
     public function index(Request $request)
     {
-        $groceryListId = GroceryListItem::query('grocery_list_id');
+        $validated = $request->validate([
+            'grocery_list_id' => 'required|integer|exists:grocery_lists,id',
+        ]);
 
-        if (!$groceryListId) {
-            return response()->json([
-                'message' => 'Grocery list id is required.'
-            ], 422);
-        }
+        $groceryList = GroceryList::where('id', $validated['grocery_list_id'])
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
-        $groceryList = GroceryList::findOrFail('grocery_list_id', $groceryListId);
-
-        if ($groceryList->user_id !== auth()->id()) {
-            return response()->json([
-                'message' => 'Forbidden.'
-            ], 403);
-        }
-
-        $groceryListItems = $groceryList->groceries()->get();
+        $groceryListItems = $groceryList->groceryListItems()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
 
         return response()->json([
             'data' => $groceryListItems
@@ -40,7 +36,26 @@ class GroceryListItemController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'grocery_list_id' => 'required|exists:grocery_lists,id',
+            'pantry_item_id' => 'nullable|exists:pantry_items,id',
+            'name' => 'required|string|max:255',
+            'quantity' => 'nullable|numeric',
+            'unit' => 'nullable|string|max:50',
+            'notes' => 'nullable|string',
+            'sort_order' => 'nullable|integer',
+            'is_purchased' => 'nullable|boolean',
+        ]);
+
+        $groceryList = GroceryList::where('user_id', auth()->id())
+            ->findOrFail($validated['grocery_list_id']);
+
+        $item = $groceryList->groceryListItems()->create($validated);
+
+        return response()->json([
+            'message' => 'Grocery list item created.',
+            'data' => $item,
+        ], 201);
     }
 
     /**
@@ -48,7 +63,14 @@ class GroceryListItemController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $groceryListItem = GroceryListItem::whereHas('groceryList', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => $groceryListItem
+        ]);
     }
 
     /**
@@ -56,7 +78,28 @@ class GroceryListItemController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $groceryListItem = GroceryListItem::whereHas('groceryList', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'pantry_item_id' => 'nullable|exists:pantry_items,id',
+            'name' => 'sometimes|string|max:255',
+            'quantity' => 'nullable|numeric',
+            'unit' => 'nullable|string|max:50',
+            'notes' => 'nullable|string',
+            'sort_order' => 'nullable|integer',
+            'is_purchased' => 'nullable|boolean',
+        ]);
+
+        $groceryListItem->update($validated);
+
+        return response()->json([
+            'message' => 'Grocery list item updated.',
+            'data' => $groceryListItem
+        ]);
+
     }
 
     /**
@@ -64,6 +107,15 @@ class GroceryListItemController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $groceryListItem = GroceryListItem::whereHas('groceryList', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+            ->findOrFail($id);
+
+        $groceryListItem->delete();
+
+        return response()->json([
+            'message' => 'Grocery list item deleted.'
+        ]);
     }
 }
