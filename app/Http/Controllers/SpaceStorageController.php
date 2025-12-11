@@ -81,8 +81,6 @@ class SpaceStorageController extends Controller
         ]);
     }
 
-    // TODO: bruno for update(), make the destroy.
-
 
     public function destroy(string $id)
     {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PantryItemController;
+use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\SpaceStorageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -16,5 +17,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('space-storages', SpaceStorageController::class);
     Route::apiResource('pantry-items', PantryItemController::class);
+
+    Route::apiResource('recipes', RecipeController::class);
 });
 
