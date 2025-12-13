@@ -1,9 +1,9 @@
 import axios from 'axios'
 
-const http = axios.create({
+const axiosInstance = axios.create({
     headers: {
         'Accept': 'application/json',
     },
 })
 
-export default http
+export default axiosInstance
