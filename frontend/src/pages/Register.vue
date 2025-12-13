@@ -50,6 +50,9 @@ const validateForm = () => {
     return Object.values(errors.value).some(value => value !== "");
 }
 
+const goToLogin = () => {
+    router.push('/login');
+}
 
 const handleRegister = () => {
     if (validateForm()) {
@@ -88,74 +91,127 @@ const handleRegister = () => {
 
 <template>
     <LoginLayout>
-        <div class="max-w-[400px] mx-auto p-8">
-            <h4 class="text-2xl font-bold mb-6">Register here</h4>
-            <form class="flex flex-col gap-6">
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium">
-                        Username:
-                        <div class="relative">
-                            <input @focus="errors.username = ''" type="text" v-model="userData.username"
-                                   class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <div v-if="isUsernameValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                </svg>
+        <div
+            class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12">
+            <div class="w-full max-w-md">
+                <div class="bg-white rounded-2xl shadow-xl p-8 space-y-6">
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+                        <p class="text-gray-600">Sign up to get started</p>
+                    </div>
+
+                    <form @submit.prevent="handleRegister" class="space-y-5">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                Username
+                            </label>
+                            <div class="relative">
+                                <input @focus="errors.username = ''"
+                                       type="text"
+                                       v-model="userData.username"
+                                       placeholder="Enter your username"
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                <div v-if="isUsernameValid()"
+                                     class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
                             </div>
+                            <span v-if="errors.username" class="text-sm text-red-600 font-medium">{{
+                                    errors.username
+                                }}</span>
                         </div>
-                    </label>
-                    <span v-if="errors.username" class="text-red-500">{{ errors.username }}</span>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium">
-                        Email:
-                        <div class="relative">
-                            <input @focus="errors.email = ''" type="email" v-model="userData.email"
-                                   class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <div v-if="isEmailValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                </svg>
+
+                        <div class="space-y-1">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                Email
+                            </label>
+                            <div class="relative">
+                                <input @focus="errors.email = ''"
+                                       type="email"
+                                       v-model="userData.email"
+                                       placeholder="Enter your email"
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                <div v-if="isEmailValid()"
+                                     class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
                             </div>
+                            <span v-if="errors.email" class="text-sm text-red-600 font-medium">{{ errors.email }}</span>
                         </div>
-                    </label>
-                    <span v-if="errors.email" class="text-red-500">{{ errors.email }}</span>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium">
-                        Password:
-                        <div class="relative">
-                            <input @focus="errors.password = ''" type="password" v-model="userData.password"
-                                   class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <div v-if="isPasswordValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                </svg>
+
+                        <div class="space-y-1">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                Password
+                            </label>
+                            <div class="relative">
+                                <input @focus="errors.password = ''"
+                                       type="password"
+                                       v-model="userData.password"
+                                       placeholder="Enter your password"
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                <div v-if="isPasswordValid()"
+                                     class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
                             </div>
+                            <span v-if="errors.password" class="text-sm text-red-600 font-medium">{{
+                                    errors.password
+                                }}</span>
                         </div>
-                    </label>
-                    <span v-if="errors.password" class="text-red-500">{{ errors.password }}</span>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium">
-                        Repeat password:
-                        <div class="relative">
-                            <input @focus="errors.password = ''" type="password" v-model="userData.repeatPassword"
-                                   class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <div v-if="isPasswordValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                </svg>
+
+                        <div class="space-y-1">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                Repeat Password
+                            </label>
+                            <div class="relative">
+                                <input @focus="errors.password = ''"
+                                       type="password"
+                                       v-model="userData.repeatPassword"
+                                       placeholder="Confirm your password"
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                <div v-if="isPasswordValid()"
+                                     class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
                             </div>
+                            <span v-if="errors.password" class="text-sm text-red-600 font-medium">{{
+                                    errors.password
+                                }}</span>
                         </div>
-                    </label>
-                    <span v-if="errors.password" class="text-red-500">{{ errors.password }}</span>
+
+                        <button type="submit"
+                                class="w-full px-6 py-3 bg-[#646cff] text-white rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[#535bf2] hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+                            Register
+                        </button>
+                    </form>
+
+                    <div class="text-center pt-4">
+                        <p class="text-sm text-gray-600">
+                            Already have an account?
+                            <button @click="goToLogin()"
+                                    class="cursor-pointer text-[#646cff] font-semibold hover:text-[#535bf2] transition-colors">
+                                Sign in
+                            </button>
+                        </p>
+                    </div>
                 </div>
-            </form>
-            <button @click="handleRegister"
-                    class="px-6 py-3 bg-[#646cff] text-white border-none rounded text-base font-medium cursor-pointer transition-colors duration-250 hover:bg-[#535bf2]">
-                Register
-            </button>
+            </div>
         </div>
     </LoginLayout>
 </template>
