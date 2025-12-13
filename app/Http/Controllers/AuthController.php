@@ -13,20 +13,24 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
         ]);
 
         // Because of the 'password' => 'hashed' cast, this will be hashed automatically.
         $user = User::create($data);
 
-        // Use the correct guard: auth('api')
-        $token = auth('api')->login($user);
-
         return response()->json([
-            'user' => $user,
-        ])->cookie('token', $token, auth('api')->factory()->getTTL() * 60, '/', null, true, true, false, 'lax');
+            'message' => 'User successfully created.',
+        ], 201);
+
+        // Use the correct guard: auth('api')
+//        $token = auth('api')->login($user);
+
+//        return response()->json([
+//            'user' => $user,
+//        ])->cookie('token', $token, auth('api')->factory()->getTTL() * 60, '/', null, true, true, false, 'lax');
     }
 
     /**
@@ -35,11 +39,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => 'required|string|email',
+            'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        if (! $token = auth('api')->attempt($credentials)) {
+        if (!$token = auth('api')->attempt($credentials)) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
