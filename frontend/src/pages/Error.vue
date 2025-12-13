@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {useRoute, useRouter} from "vue-router";
-import LoginLayout from "../layouts/LoginLayout.vue";
 
 const route = useRoute();
 const router = useRouter();
