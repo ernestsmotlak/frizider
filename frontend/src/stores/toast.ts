@@ -19,7 +19,7 @@ export const useToastStore = defineStore("toast", () => {
 
         setTimeout(() => {
             remove(id);
-        }, 20000);
+        }, 2000);
     }
 
     function remove(id: string) {
