@@ -3,8 +3,10 @@ import LoginLayout from "../layouts/LoginLayout.vue";
 import {ref, onMounted} from "vue";
 import router from "../router";
 import {useToastStore} from '../stores/toast';
+import {useLoadingStore} from "../stores/loading.ts";
 
 const toastStore = useToastStore();
+const loadingStore = useLoadingStore();
 
 const userData = ref({
     username: '',
@@ -77,6 +79,8 @@ const handleRegister = () => {
         password: userData.value.password,
     }
 
+    loadingStore.start();
+
     axios.post('/api/register', payload)
         .then((response: any) => {
             responseData.value.message = response.data.message;
@@ -97,7 +101,7 @@ const handleRegister = () => {
             console.error(error);
         })
         .finally(() => {
-            // loading = false
+            loadingStore.stop();
         })
 }
 
