@@ -3,6 +3,7 @@ import Login from "../pages/Login.vue";
 import Dashboard from "../pages/Dashboard.vue";
 import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
+import Register from "../pages/Register.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -24,6 +25,12 @@ const router = createRouter({
             name: 'Error',
             component: Error,
             meta: {requiresAuth: false}
+        },
+        {
+            path: '/register',
+            name: 'Register',
+            component: Register,
+            meta: {guest: true}
         },
         {
             path: "/:pathMatch(.*)*",
