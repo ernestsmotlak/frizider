@@ -25,6 +25,18 @@ const router = createRouter({
             component: Error,
             meta: {requiresAuth: false}
         },
+        {
+            path: "/:pathMatch(.*)*",
+            name: "NotFound",
+            redirect: () => ({
+                name: 'Error',
+                query: {
+                    code: '404',
+                    message: 'The page you\'re looking for doesn\'t exist.'
+                }
+            }),
+            meta: {requiresAuth: false}
+        }
     ],
 });
 
