@@ -56,7 +56,6 @@ const validateForm = () => {
 const usernameInputRef = ref<HTMLInputElement | null>(null);
 
 onMounted(() => {
-    toastStore.show('success', 'Registration successful!');
     // Only autofocus on md breakpoint and wider (768px+)
     if (window.innerWidth >= 768 && usernameInputRef.value) {
         usernameInputRef.value.focus();
