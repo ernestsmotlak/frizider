@@ -3,8 +3,10 @@ import {ref, onMounted} from "vue";
 import LoginLayout from "../layouts/LoginLayout.vue";
 import router from "../router";
 import {useToastStore} from "../stores/toast";
+import {useAuthStore} from "../stores/auth";
 
 const toastStore = useToastStore();
+const authStore = useAuthStore();
 
 const email = ref("");
 const password = ref("");
@@ -56,9 +58,10 @@ const handleLogin = () => {
         email: email.value,
         password: password.value,
     })
-        .then((response: any) => {
-            console.log(response.data);
+        .then(async () => {
+            await authStore.fetchUser();
             toastStore.show('success', 'Successfully logged in.');
+            await router.push('/');
         })
         .catch((error: any) => {
             console.error(error);
