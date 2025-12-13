@@ -97,9 +97,11 @@ const handleRegister = () => {
                         <div class="relative">
                             <input @focus="errors.username = ''" type="text" v-model="userData.username"
                                    class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <svg v-if="isUsernameValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
+                            <div v-if="isUsernameValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
                         </div>
                     </label>
                     <span v-if="errors.username" class="text-red-500">{{ errors.username }}</span>
@@ -110,9 +112,11 @@ const handleRegister = () => {
                         <div class="relative">
                             <input @focus="errors.email = ''" type="email" v-model="userData.email"
                                    class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <svg v-if="isEmailValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
+                            <div v-if="isEmailValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
                         </div>
                     </label>
                     <span v-if="errors.email" class="text-red-500">{{ errors.email }}</span>
@@ -123,9 +127,11 @@ const handleRegister = () => {
                         <div class="relative">
                             <input @focus="errors.password = ''" type="password" v-model="userData.password"
                                    class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <svg v-if="isPasswordValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
+                            <div v-if="isPasswordValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
                         </div>
                     </label>
                     <span v-if="errors.password" class="text-red-500">{{ errors.password }}</span>
@@ -136,9 +142,11 @@ const handleRegister = () => {
                         <div class="relative">
                             <input @focus="errors.password = ''" type="password" v-model="userData.repeatPassword"
                                    class="w-full px-3 py-3 pr-10 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]">
-                            <svg v-if="isPasswordValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
+                            <div v-if="isPasswordValid()" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
                         </div>
                     </label>
                     <span v-if="errors.password" class="text-red-500">{{ errors.password }}</span>
