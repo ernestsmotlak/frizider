@@ -25,11 +25,8 @@ class AuthController extends Controller
         $token = auth('api')->login($user);
 
         return response()->json([
-            'user'       => $user,
-            'token'      => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
-        ]);
+            'user' => $user,
+        ])->cookie('token', $token, auth('api')->factory()->getTTL() * 60, '/', null, true, true, false, 'lax');
     }
 
     /**
@@ -47,10 +44,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'user'       => auth('api')->user(),
-            'token'      => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
-        ]);
+            'user' => auth('api')->user(),
+        ])->cookie('token', $token, auth('api')->factory()->getTTL() * 60, '/', null, true, true, false, 'lax');
     }
 }

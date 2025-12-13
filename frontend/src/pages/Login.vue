@@ -1,20 +1,20 @@
 <template>
-    <div class="login-container">
+    <div class="max-w-[400px] mx-auto p-8 bg-cyan-200">
         <h1>Login</h1>
-        <form @submit.prevent="handleLogin" class="login-form">
-            <div class="form-group">
-                <label>
+        <form @submit.prevent="handleLogin" class="flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+                <label class="font-medium">
                     Email:
-                    <input v-model="email" type="email" required/>
+                    <input v-model="email" type="email" required class="px-3 py-3 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]"/>
                 </label>
             </div>
-            <div class="form-group">
-                <label>
+            <div class="flex flex-col gap-2">
+                <label class="font-medium">
                     Password:
-                    <input v-model="password" type="password" required/>
+                    <input v-model="password" type="password" required class="px-3 py-3 border border-gray-300 rounded text-base focus:outline-none focus:border-[#646cff]"/>
                 </label>
             </div>
-            <button type="submit">Login</button>
+            <button type="submit" class="px-6 py-3 bg-[#646cff] text-white border-none rounded text-base font-medium cursor-pointer transition-colors duration-250 hover:bg-[#535bf2]">Login</button>
         </form>
     </div>
 </template>
@@ -41,56 +41,4 @@ const handleLogin = () => {
         });
 };
 </script>
-
-<style scoped>
-.login-container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.form-group label {
-    font-weight: 500;
-}
-
-.form-group input {
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: #646cff;
-}
-
-button {
-    padding: 0.75rem 1.5rem;
-    background-color: #646cff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.25s;
-}
-
-button:hover {
-    background-color: #535bf2;
-}
-</style>
 
