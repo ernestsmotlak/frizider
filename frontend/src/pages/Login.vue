@@ -1,33 +1,67 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {ref, onMounted} from "vue";
 import LoginLayout from "../layouts/LoginLayout.vue";
 import router from "../router";
 import {useToastStore} from "../stores/toast";
-import toast from "../plugins/toast.ts";
 
 const toastStore = useToastStore();
 
 const email = ref("");
 const password = ref("");
 
-const errorMessage = ref("");
+const errors = ref({
+    email: "",
+    password: "",
+});
+
+const validateEmail = (email: string) => {
+    if (!email) return 'Email can not be empty!';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email contains invalid character/s.';
+    return '';
+};
+
+const validatePassword = (password: string) => {
+    if (!password) return 'Password cannot be empty.';
+    return '';
+};
+
+const isEmailValid = () => !validateEmail(email.value);
+const isPasswordValid = () => !validatePassword(password.value);
+
+const validateForm = () => {
+    errors.value.email = validateEmail(email.value);
+    errors.value.password = validatePassword(password.value);
+    return Object.values(errors.value).some(value => value !== "");
+};
+
+const emailInputRef = ref<HTMLInputElement | null>(null);
+
+onMounted(() => {
+    // Only autofocus on md breakpoint and wider (768px+)
+    if (window.innerWidth >= 768 && emailInputRef.value) {
+        emailInputRef.value.focus();
+    }
+});
 
 const goToRegister = () => {
     router.push('/register');
 };
 
 const handleLogin = () => {
+    if (validateForm()) {
+        return;
+    }
+
     axios.post("/api/login", {
         email: email.value,
         password: password.value,
     })
         .then((response: any) => {
             console.log(response.data);
-            toastStore.show('success', 'Succesfully logged in.');
+            toastStore.show('success', 'Successfully logged in.');
         })
         .catch((error: any) => {
             console.error(error);
-            errorMessage.value = error;
             toastStore.show('error', 'Log in failed.');
         })
         .finally(() => {
@@ -47,29 +81,52 @@ const handleLogin = () => {
                         <p class="text-gray-600">Sign in to your account</p>
                     </div>
 
-                    <span v-if="errorMessage" class="text-red-500">{{ errorMessage }}</span>
-
                     <form @submit.prevent="handleLogin" class="space-y-5">
                         <div class="space-y-1">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">
                                 Email
                             </label>
-                            <input v-model="email"
-                                   type="email"
-                                   required
-                                   placeholder="Enter your email"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all"/>
+                            <div class="relative">
+                                <input ref="emailInputRef"
+                                       @focus="errors.email = ''"
+                                       v-model="email"
+                                       type="email"
+                                       placeholder="Enter your email"
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                <div v-if="isEmailValid()"
+                                     class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span v-if="errors.email" class="text-sm text-red-600 font-medium">{{ errors.email }}</span>
                         </div>
 
                         <div class="space-y-1">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">
                                 Password
                             </label>
-                            <input v-model="password"
-                                   type="password"
-                                   required
-                                   placeholder="Enter your password"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all"/>
+                            <div class="relative">
+                                <input @focus="errors.password = ''"
+                                       v-model="password"
+                                       type="password"
+                                       placeholder="Enter your password"
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                <div v-if="isPasswordValid()"
+                                     class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span v-if="errors.password" class="text-sm text-red-600 font-medium">{{
+                                    errors.password
+                                }}</span>
                         </div>
 
                         <button type="submit"
