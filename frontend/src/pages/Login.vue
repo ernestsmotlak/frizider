@@ -1,3 +1,41 @@
+<script setup lang="ts">
+import {ref} from "vue";
+import LoginLayout from "../layouts/LoginLayout.vue";
+import router from "../router";
+import {useToastStore} from "../stores/toast";
+import toast from "../plugins/toast.ts";
+
+const toastStore = useToastStore();
+
+const email = ref("");
+const password = ref("");
+
+const errorMessage = ref("");
+
+const goToRegister = () => {
+    router.push('/register');
+};
+
+const handleLogin = () => {
+    axios.post("/api/login", {
+        email: email.value,
+        password: password.value,
+    })
+        .then((response: any) => {
+            console.log(response.data);
+            toastStore.show('success', 'Succesfully logged in.');
+        })
+        .catch((error: any) => {
+            console.error(error);
+            errorMessage.value = error;
+            toastStore.show('error', 'Log in failed.');
+        })
+        .finally(() => {
+            // Cleanup or final actions
+        });
+};
+</script>
+
 <template>
     <LoginLayout>
         <div
@@ -8,6 +46,8 @@
                         <h1 class="text-3xl font-bold text-gray-900 mb-2">Login</h1>
                         <p class="text-gray-600">Sign in to your account</p>
                     </div>
+
+                    <span v-if="errorMessage" class="text-red-500">{{ errorMessage }}</span>
 
                     <form @submit.prevent="handleLogin" class="space-y-5">
                         <div class="space-y-1">
@@ -52,33 +92,3 @@
         </div>
     </LoginLayout>
 </template>
-
-<script setup lang="ts">
-import {ref} from "vue";
-import LoginLayout from "../layouts/LoginLayout.vue";
-import router from "../router";
-
-const email = ref("");
-const password = ref("");
-
-const goToRegister = () => {
-    router.push('/register');
-};
-
-const handleLogin = () => {
-    axios.post("/api/login", {
-        email: email.value,
-        password: password.value,
-    })
-        .then((response: any) => {
-            console.log(response.data);
-        })
-        .catch((error: any) => {
-            console.error(error);
-        })
-        .finally(() => {
-            // Cleanup or final actions
-        });
-};
-</script>
-
