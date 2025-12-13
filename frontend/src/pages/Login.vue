@@ -4,9 +4,11 @@ import LoginLayout from "../layouts/LoginLayout.vue";
 import router from "../router";
 import {useToastStore} from "../stores/toast";
 import {useAuthStore} from "../stores/auth";
+import {useLoadingStore} from "../stores/loading.ts";
 
 const toastStore = useToastStore();
 const authStore = useAuthStore();
+const loadingStore = useLoadingStore();
 
 const email = ref("");
 const password = ref("");
@@ -53,7 +55,7 @@ const handleLogin = () => {
     if (validateForm()) {
         return;
     }
-
+    loadingStore.start();
     axios.post("/api/login", {
         email: email.value,
         password: password.value,
@@ -68,7 +70,7 @@ const handleLogin = () => {
             toastStore.show('error', 'Log in failed.');
         })
         .finally(() => {
-            // Cleanup or final actions
+            loadingStore.stop();
         });
 };
 </script>
