@@ -1,5 +1,5 @@
 <template>
-    <div class="dashboard-layout min-h-screen bg-green-500">
+    <div class="dashboard-layout min-h-screen bg-green-100">
         <slot />
     </div>
 </template>
