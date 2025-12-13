@@ -1,6 +1,6 @@
 <template>
-    <div class="dashboard-layout min-h-screen bg-green-100">
-        <slot />
+    <div class="min-h-screen bg-green-100">
+        <slot/>
     </div>
 </template>
 

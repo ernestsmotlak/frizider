@@ -1,13 +1,203 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Frizider API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel + Vue.js application for managing refrigerator inventory, pantry items, recipes, and grocery lists.
 
-## About Laravel
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- **PHP** >= 8.2
+- **Composer** (PHP dependency manager)
+- **Node.js** >= 18.x and **npm** (or **yarn**)
+- **SQLite** (or MySQL/PostgreSQL if preferred)
+- **Git**
+
+## Getting Started
+
+### 1. Fork the Repository
+
+1. Navigate to the repository on GitHub
+2. Click the "Fork" button in the top-right corner
+3. Clone your forked repository:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/frizider-api.git
+cd frizider-api
+```
+
+### 2. Install Laravel Dependencies
+
+Install PHP dependencies using Composer:
+
+```bash
+composer install
+```
+
+### 3. Install Frontend Dependencies
+
+Install Node.js dependencies for the Vue.js frontend:
+
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 4. Environment Configuration
+
+Copy the environment example file and generate the application key:
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+**Important**: Edit the `.env` file and configure the following variables:
+
+- `APP_NAME` - Your application name
+- `APP_URL` - Your application URL (default: `http://localhost:8000`)
+- `DB_CONNECTION` - Database connection type (default: `sqlite`)
+- `DB_DATABASE` - Database path (for SQLite: `database/database.sqlite`)
+- `JWT_SECRET` - JWT authentication secret (generate with: `php artisan jwt:secret`)
+
+Generate the JWT secret:
+
+```bash
+php artisan jwt:secret
+```
+
+### 5. Database Setup
+
+If using SQLite, ensure the database file exists:
+
+```bash
+touch database/database.sqlite
+```
+
+Run the database migrations:
+
+```bash
+php artisan migrate
+```
+
+### 6. Build Frontend Assets (Optional for Production)
+
+If you want to build the frontend for production:
+
+```bash
+cd frontend
+npm run build
+cd ..
+```
+
+## Running the Application
+
+### Development Mode
+
+The project includes a convenient dev script that runs both Laravel and Vue development servers:
+
+```bash
+composer run dev
+```
+
+This will start:
+- Laravel server on `http://localhost:8000`
+- Vue development server on `http://localhost:5173`
+- Queue worker
+- Log viewer
+
+### Manual Setup (Alternative)
+
+If you prefer to run servers manually:
+
+**Terminal 1 - Laravel API:**
+```bash
+php artisan serve
+```
+
+**Terminal 2 - Vue Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+The Laravel API will be available at `http://localhost:8000` and the Vue frontend at `http://localhost:5173`.
+
+### Quick Setup Script
+
+Alternatively, you can use the built-in setup script:
+
+```bash
+composer run setup
+```
+
+This will:
+- Install Composer dependencies
+- Create `.env` file if it doesn't exist
+- Generate application key
+- Run database migrations
+- Install npm dependencies
+- Build frontend assets
+
+## Project Structure
+
+```
+frizider-api/
+├── app/                    # Laravel application code
+│   ├── Http/
+│   │   ├── Controllers/    # API controllers
+│   │   └── Middleware/     # Custom middleware
+│   └── Models/             # Eloquent models
+├── frontend/               # Vue.js frontend application
+│   ├── src/
+│   │   ├── api/           # API client configuration
+│   │   ├── components/    # Vue components
+│   │   ├── layouts/       # Layout components
+│   │   ├── pages/         # Page components
+│   │   ├── router/        # Vue Router configuration
+│   │   └── stores/        # Pinia stores
+│   └── package.json       # Frontend dependencies
+├── config/                 # Laravel configuration files
+├── database/
+│   ├── migrations/        # Database migrations
+│   └── database.sqlite    # SQLite database (created after migration)
+└── routes/
+    └── api.php            # API routes
+```
+
+## Technology Stack
+
+### Backend
+- **Laravel 12** - PHP framework
+- **JWT Auth** (tymon/jwt-auth) - Authentication
+- **SQLite** - Database (can be configured for MySQL/PostgreSQL)
+
+### Frontend
+- **Vue 3** - Progressive JavaScript framework
+- **TypeScript** - Type-safe JavaScript
+- **Vue Router** - Client-side routing
+- **Pinia** - State management
+- **Axios** - HTTP client
+- **Tailwind CSS** - Utility-first CSS framework
+- **Vite** - Build tool and development server
+
+## Testing
+
+Run the test suite:
+
+```bash
+composer run test
+```
+
+Or using PHPUnit directly:
+
+```bash
+php artisan test
+```
+
+## Additional Resources
+
+### About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
