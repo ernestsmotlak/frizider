@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LoginLayout from "../layouts/LoginLayout.vue";
 import {ref} from "vue";
+import router from "../router";
 
 const userData = ref({
     username: '',
@@ -31,7 +32,7 @@ const validateForm = () => {
 
     if (!toValidate.username) {
         errors.value.username = 'Username can not be empty.';
-    } else if (!/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(toValidate.username)) {
+    } else if (!/^[a-zA-Z][a-zA-Z0-9_ ]{2,19}$/.test(toValidate.username)) {
         errors.value.username = 'Username contains invalid character/s.';
     }
 
@@ -60,6 +61,7 @@ const handleRegister = () => {
         .then((response: any) => {
             responseData.value.message = response.data.message;
             responseData.value.status = response.status;
+            router.push('/login');
         })
         .catch((error: any) => {
             const status = error?.response?.status ?? 0;
@@ -81,8 +83,6 @@ const handleRegister = () => {
 
 <template>
     <LoginLayout>
-        <pre>Errors: {{ errors }}</pre>
-        <pre>UserData: {{ userData }}</pre>
         <div class="max-w-[400px] mx-auto p-8">
             <h4 class="text-2xl font-bold mb-6">Register here</h4>
             <form class="flex flex-col gap-6">
