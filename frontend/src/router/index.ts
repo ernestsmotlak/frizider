@@ -1,6 +1,7 @@
 import {createRouter, createWebHistory} from "vue-router";
 import Login from "../pages/Login.vue";
 import Dashboard from "../pages/Dashboard.vue";
+import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
 
 const router = createRouter({
@@ -17,6 +18,12 @@ const router = createRouter({
             name: "dashboard",
             component: Dashboard,
             meta: {requiresAuth: true},
+        },
+        {
+            path: "/error",
+            name: 'Error',
+            component: Error,
+            meta: {requiresAuth: false}
         },
     ],
 });
