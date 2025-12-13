@@ -39,16 +39,21 @@
 - Handle user state updates after login/register
 - Add logout that properly clears cookies
 
+#### 4. Add NotFound Catch-All Route
+- Add catch-all route `/:pathMatch(.*)*` to router (must be last route)
+- Redirect to Error page with 404 code and message
+- Handles any non-existent routes (e.g., `/safsdaas` → `/error?code=404&message=The page you're looking for doesn't exist.`)
+
 ---
 
 ### Phase 2: Dashboard & Navigation
 
-#### 4. Build Dashboard
+#### 5. Build Dashboard
 - Add overview cards (storage spaces count, pantry items, recipes, etc.)
 - Add navigation sidebar/menu
 - Quick action buttons
 
-#### 5. Add Navigation Component
+#### 6. Add Navigation Component
 - Create sidebar or top nav in DashboardLayout
 - Links to main sections
 - User profile dropdown/logout
@@ -57,24 +62,24 @@
 
 ### Phase 3: Core Features (Priority Order)
 
-#### 6. SpaceStorage Management (Simplest - Start Here)
+#### 7. SpaceStorage Management (Simplest - Start Here)
 - Create store: `stores/spaceStorage.ts`
 - Pages: List, Create/Edit, Delete
 - Routes: `/storage-spaces`, `/storage-spaces/new`, `/storage-spaces/:id/edit`
 
-#### 7. PantryItem Management
+#### 8. PantryItem Management
 - Create store: `stores/pantryItem.ts`
 - Pages: List (with filters), Create/Edit form, Delete
 - Show expiry dates, group by space
 - Filter by space, expiry date, etc.
 
-#### 8. Recipe Management
+#### 9. Recipe Management
 - Create store: `stores/recipe.ts`
 - Pages: List, Create/Edit (with ingredients), View detail
 - Handle RecipeIngredient nested CRUD
 - Form to add/remove ingredients
 
-#### 9. GroceryList Management
+#### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
 - Pages: List, Create/Edit, View with items
 - Mark items as purchased
@@ -122,6 +127,7 @@ frontend/src/
 1. **Fix Login redirect** - Update auth store, redirect to dashboard
 2. **Add Register page** - Copy Login.vue structure, add registration
 3. **Enhance auth store** - Add login/register methods
+4. **Add NotFound route** - Catch-all route for non-existent paths, redirect to Error page with 404
 
 ### Priority 2: Build Basic Dashboard
 1. **Dashboard overview** - Welcome message, basic layout
