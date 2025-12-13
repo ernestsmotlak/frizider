@@ -5,6 +5,7 @@ import './assets/main.css'
 import router from './router'
 import axiosInstance from './api/http'
 import { useAuthStore } from './stores/auth'
+import toastPlugin from './plugins/toast'
 
 globalThis.axios = axiosInstance;
 
@@ -13,6 +14,7 @@ const pinia = createPinia();
 
 app.use(pinia);
 app.use(router);
+app.use(toastPlugin);
 
 const auth = useAuthStore();
 await auth.fetchUser();

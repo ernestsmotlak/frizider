@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import LoginLayout from "../layouts/LoginLayout.vue";
-import {ref} from "vue";
+import {ref, onMounted} from "vue";
 import router from "../router";
+import {useToastStore} from '../stores/toast';
+
+const toastStore = useToastStore();
 
 const userData = ref({
     username: '',
@@ -50,6 +53,16 @@ const validateForm = () => {
     return Object.values(errors.value).some(value => value !== "");
 }
 
+const usernameInputRef = ref<HTMLInputElement | null>(null);
+
+onMounted(() => {
+    toastStore.show('success', 'Registration successful!');
+    // Only autofocus on md breakpoint and wider (768px+)
+    if (window.innerWidth >= 768 && usernameInputRef.value) {
+        usernameInputRef.value.focus();
+    }
+});
+
 const goToLogin = () => {
     router.push('/login');
 }
@@ -69,6 +82,7 @@ const handleRegister = () => {
         .then((response: any) => {
             responseData.value.message = response.data.message;
             responseData.value.status = response.status;
+            toastStore.show('success', response.data.message || 'Registration successful!');
             router.push('/login');
         })
         .catch((error: any) => {
@@ -76,8 +90,10 @@ const handleRegister = () => {
             responseData.value.status = status;
             if (status === 422) {
                 responseData.value.message = error.response.data.message;
+                toastStore.show('error', error.response.data.message || 'Validation failed. Please check your input.');
             } else {
                 responseData.value.message = 'Server error.';
+                toastStore.show('error', 'Registration failed. Please try again.');
             }
             console.error(error);
         })
@@ -106,7 +122,8 @@ const handleRegister = () => {
                                 Username
                             </label>
                             <div class="relative">
-                                <input @focus="errors.username = ''"
+                                <input ref="usernameInputRef"
+                                       @focus="errors.username = ''"
                                        type="text"
                                        v-model="userData.username"
                                        placeholder="Enter your username"
