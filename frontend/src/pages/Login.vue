@@ -63,7 +63,7 @@ const handleLogin = () => {
         .then(async () => {
             await authStore.fetchUser();
             toastStore.show('success', 'Successfully logged in.');
-            await router.push('/');
+            await router.push('/dashboard');
         })
         .catch((error: any) => {
             console.error(error);

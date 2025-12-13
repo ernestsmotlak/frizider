@@ -4,10 +4,17 @@ import Dashboard from "../pages/Dashboard.vue";
 import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
 import Register from "../pages/Register.vue";
+import Landing from "../pages/Landing.vue";
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
+        {
+            path: "/",
+            name: "landing",
+            component: Landing,
+            meta: {guest: true},
+        },
         {
             path: "/login",
             name: "login",
@@ -15,7 +22,7 @@ const router = createRouter({
             meta: {guest: true},
         },
         {
-            path: "/",
+            path: "/dashboard",
             name: "dashboard",
             component: Dashboard,
             meta: {requiresAuth: true},
@@ -57,7 +64,7 @@ router.beforeEach(async (to, _from, next) => {
     if (to.meta.requiresAuth && !auth.isAuthenticated) {
         next("/login");
     } else if (to.meta.guest && auth.isAuthenticated) {
-        next("/");
+        next("/dashboard");
     } else {
         next();
     }
