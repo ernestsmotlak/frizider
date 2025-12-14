@@ -7,6 +7,6 @@
 </template>
 
 <script setup lang="ts">
-import DashboardLayout from "../layouts/DashboardLayout.vue";
+import DashboardLayout from "../../layouts/DashboardLayout.vue";
 </script>
 

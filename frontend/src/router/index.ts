@@ -5,9 +5,10 @@ import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
 import Register from "../pages/Register.vue";
 import Landing from "../pages/Landing.vue";
-import ShoppingListsPage from "../pages/ShoppingListsPage.vue";
+import ShoppingListsPage from "../pages/ShoppingList/ShoppingListsPage.vue";
 import IngredientsPage from "../pages/IngredientsPage.vue";
-import RecipesPage from "../pages/RecipesPage.vue";
+import RecipesPage from "../pages/Recipe/RecipesPage.vue";
+import RecipePage from "../pages/Recipe/RecipePage.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -47,6 +48,12 @@ const router = createRouter({
             name: "recipes",
             component: RecipesPage,
             meta: {requiresAuth: true},
+        },
+        {
+            path: "/recipe/:id",
+            name: 'Recipe',
+            component: RecipePage,
+            meta: {requiresAuth: true}
         },
         {
             path: "/error",
