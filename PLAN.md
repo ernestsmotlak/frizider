@@ -78,6 +78,7 @@
 - Pages: List, Create/Edit (with ingredients), View detail
 - Handle RecipeIngredient nested CRUD
 - Form to add/remove ingredients
+- Save recipe description as WYSIWYG (rich text editor)
 
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
