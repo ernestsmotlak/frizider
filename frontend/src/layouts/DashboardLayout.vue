@@ -1,6 +1,8 @@
 <template>
     <div class="min-h-screen bg-green-100 pb-16">
-        <slot/>
+        <div class="max-w-md mx-auto min-h-screen">
+            <slot/>
+        </div>
     </div>
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
         <div class="flex justify-around items-center h-16">
