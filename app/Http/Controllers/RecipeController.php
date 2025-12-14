@@ -58,7 +58,8 @@ class RecipeController extends Controller
      */
     public function show(string $id)
     {
-        $recipe = Recipe::where('user_id', auth()->id())
+        $recipe = Recipe::with('recipeIngredients')
+            ->where('user_id', auth()->id())
             ->where('id', $id)
             ->firstOrFail();
 

@@ -5,6 +5,16 @@ import {onMounted, ref} from "vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 
+interface RecipeIngredient {
+    id: number;
+    recipe_id: number;
+    name: string;
+    quantity: number | null;
+    unit: string | null;
+    notes: string | null;
+    sort_order: number;
+}
+
 interface Recipe {
     id: number;
     name: string;
@@ -14,6 +24,7 @@ interface Recipe {
     prep_time: number | null;
     cook_time: number | null;
     image_url: string | null;
+    recipe_ingredients?: RecipeIngredient[];
 }
 
 const route = useRoute();
@@ -53,6 +64,36 @@ const formatTime = (minutes: number | null): string => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
+}
+
+const formatIngredient = (ingredient: RecipeIngredient): string => {
+    const parts: string[] = [];
+
+    if (ingredient.quantity !== null) {
+        parts.push(ingredient.quantity.toString());
+    }
+
+    if (ingredient.unit) {
+        parts.push(ingredient.unit);
+    }
+
+    parts.push(ingredient.name);
+
+    if (ingredient.notes) {
+        parts.push(`(${ingredient.notes})`);
+    }
+
+    return parts.join(' ');
+}
+
+const sortedIngredients = (ingredients: RecipeIngredient[] | undefined): RecipeIngredient[] => {
+    if (!ingredients) return [];
+    return [...ingredients].sort((a, b) => {
+        if (a.sort_order !== b.sort_order) {
+            return a.sort_order - b.sort_order;
+        }
+        return a.id - b.id;
+    });
 }
 
 onMounted(() => {
@@ -119,6 +160,16 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div v-if="recipeData.recipe_ingredients && recipeData.recipe_ingredients.length > 0" class="bg-white rounded-2xl shadow-xl p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
+                    <ul class="space-y-2">
+                        <li v-for="ingredient in sortedIngredients(recipeData.recipe_ingredients)" :key="ingredient.id" class="flex items-start gap-2">
+                            <span class="text-gray-400 mt-1">•</span>
+                            <span class="text-gray-700 leading-relaxed">{{ formatIngredient(ingredient) }}</span>
+                        </li>
+                    </ul>
                 </div>
 
                 <div v-if="recipeData.instructions" class="bg-white rounded-2xl shadow-xl p-8">
