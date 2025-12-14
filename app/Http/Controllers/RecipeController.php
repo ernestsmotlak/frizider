@@ -10,11 +10,13 @@ class RecipeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function paginateRecipes(Request $request)
     {
         $userRecipes = Recipe::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->simplePaginate(
+                $request->integer('per_page', 10)
+            );
 
         return response()->json(['data' => $userRecipes]);
     }

@@ -17,8 +17,12 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::delete('/me', [UserController::class, 'destroyMe']);
 
     Route::apiResource('space-storages', SpaceStorageController::class);
+
     Route::apiResource('pantry-items', PantryItemController::class);
+
     Route::apiResource('recipes', RecipeController::class);
+    Route::post('get-recipes', [RecipeController::class, 'paginateRecipes']);
+
     Route::apiResource('recipe-ingredients', RecipeIngredientController::class);
 });
 
