@@ -91,6 +91,8 @@
   - Change recipe instructions from plain text to WYSIWYG editor
   - Save instructions as HTML
   - Display instructions as HTML on the frontend (use `v-html`)
+  - Edit all recipe and ingredients data from the RecipePage (`frontend/src/pages/Recipe/RecipePage.vue`)
+  - Import a WYSIWYG editor for recipe description
 
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
