@@ -5,9 +5,9 @@ import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
 import Register from "../pages/Register.vue";
 import Landing from "../pages/Landing.vue";
-import ShoppingLists from "../pages/ShoppingLists.vue";
-import Ingredients from "../pages/Ingredients.vue";
-import Recipes from "../pages/Recipes.vue";
+import ShoppingListsPage from "../pages/ShoppingListsPage.vue";
+import IngredientsPage from "../pages/IngredientsPage.vue";
+import RecipesPage from "../pages/RecipesPage.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -33,19 +33,19 @@ const router = createRouter({
         {
             path: "/shopping-list",
             name: "shopping-list",
-            component: ShoppingLists,
+            component: ShoppingListsPage,
             meta: {requiresAuth: true},
         },
         {
             path: "/ingredients",
             name: "ingredients",
-            component: Ingredients,
+            component: IngredientsPage,
             meta: {requiresAuth: true},
         },
         {
             path: "/recipes",
             name: "recipes",
-            component: Recipes,
+            component: RecipesPage,
             meta: {requiresAuth: true},
         },
         {
