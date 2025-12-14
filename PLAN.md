@@ -77,6 +77,7 @@
 #### 9. Recipe Management
 - Create store: `stores/recipe.ts`
 - Pages: List, Create/Edit (with ingredients), View detail
+- Create an add new recipe page or modal, whichever makes the most sense
 - Handle RecipeIngredient nested CRUD
 - Form to add/remove ingredients
 - Save recipe description as WYSIWYG (rich text editor)
