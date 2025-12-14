@@ -12,7 +12,13 @@ class RecipeController extends Controller
      */
     public function paginateRecipes(Request $request)
     {
-        $userRecipes = Recipe::where('user_id', auth()->id())
+        $userRecipes = Recipe::select([
+            'id',
+            'name',
+            'description',
+            'image_url'
+        ])
+            ->where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->simplePaginate(
                 $request->integer('per_page', 10)
