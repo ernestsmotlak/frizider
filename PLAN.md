@@ -58,6 +58,7 @@
 - Create sidebar or top nav in DashboardLayout
 - Links to main sections
 - User profile dropdown/logout
+- Make the Recipes bottom tab be selected when on `/recipe/:id` route
 
 ---
 
