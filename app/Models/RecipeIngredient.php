@@ -22,7 +22,7 @@ class RecipeIngredient extends Model
 
     protected $casts = [
         'quantity' => 'decimal:2',
-        'sort_order' => 'number',
+        'sort_order' => 'integer',
     ];
 
     public function recipe()
