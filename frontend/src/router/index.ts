@@ -5,6 +5,9 @@ import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
 import Register from "../pages/Register.vue";
 import Landing from "../pages/Landing.vue";
+import ShoppingLists from "../pages/ShoppingLists.vue";
+import Ingredients from "../pages/Ingredients.vue";
+import Recipes from "../pages/Recipes.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -25,6 +28,24 @@ const router = createRouter({
             path: "/dashboard",
             name: "dashboard",
             component: Dashboard,
+            meta: {requiresAuth: true},
+        },
+        {
+            path: "/shopping-list",
+            name: "shopping-list",
+            component: ShoppingLists,
+            meta: {requiresAuth: true},
+        },
+        {
+            path: "/ingredients",
+            name: "ingredients",
+            component: Ingredients,
+            meta: {requiresAuth: true},
+        },
+        {
+            path: "/recipes",
+            name: "recipes",
+            component: Recipes,
             meta: {requiresAuth: true},
         },
         {
