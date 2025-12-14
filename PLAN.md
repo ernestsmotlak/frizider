@@ -16,6 +16,7 @@
 - ✅ Basic auth store
 - ✅ Login page (missing success handling)
 - ⚠️ Empty Dashboard
+- ⚠️ RecipePage (basic display done, needs: IngredientRow component, edit/remove/add ingredients, WYSIWYG instructions)
 - ❌ Missing: Register page, resource stores, resource pages, navigation
 
 ---
@@ -79,6 +80,15 @@
 - Handle RecipeIngredient nested CRUD
 - Form to add/remove ingredients
 - Save recipe description as WYSIWYG (rich text editor)
+- **RecipePage Enhancements:**
+  - Create `IngredientRow.vue` component (new component)
+  - Display ingredients using `IngredientRow` component, passing each ingredient as a prop
+  - Add edit functionality to each `IngredientRow` (inline editing)
+  - Add "Remove ingredient" functionality in RecipePage
+  - Add "Add new ingredient" functionality in RecipePage
+  - Change recipe instructions from plain text to WYSIWYG editor
+  - Save instructions as HTML
+  - Display instructions as HTML on the frontend (use `v-html`)
 
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
@@ -117,7 +127,9 @@ frontend/src/
 │       ├── Form.vue
 │       └── Show.vue
 └── components/
-    └── Navigation.vue (new - sidebar/navbar)
+    ├── Navigation.vue (new - sidebar/navbar)
+    └── Recipes/
+        └── IngredientRow.vue (new - for displaying and editing individual ingredients)
 ```
 
 ---
