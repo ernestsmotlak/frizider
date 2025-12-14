@@ -80,6 +80,31 @@ Run the database migrations:
 php artisan migrate
 ```
 
+### 5.1. Seed Database (Optional)
+
+A database seeder is available that creates test data including an admin user, ingredients, recipes, and shopping lists. To seed the database:
+
+```bash
+php artisan db:seed
+```
+
+Or to reset and seed the database:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+**Test User Credentials:**
+- **Email:** `admin@example.com`
+- **Password:** `admin`
+
+The seeder creates:
+- 1 admin user
+- 1 storage space (Main Fridge)
+- 5 pantry items (ingredients)
+- 2 recipes with ingredients
+- 2 shopping lists with items
+
 ### 6. Build Frontend Assets (Optional for Production)
 
 If you want to build the frontend for production:
