@@ -127,3 +127,5 @@ A sleek, intuitive app for managing food at home, recipes, and grocery shopping 
 ### No Pivot Tables Required
 - Direct foreign key relationships only
 - Clean, normalized schema for core functionality
+
+
