@@ -58,6 +58,11 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
         return a.id - b.id;
     });
 }
+
+const updateIngredients = () => {
+
+}
+
 </script>
 
 <template>
@@ -79,6 +84,7 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
             </li>
         </ul>
     </div>
+<!--    <pre>{{formData}}</pre>-->
 
     <Modal :isOpen="isModalOpen" @close="closeModal">
         <template #header>
@@ -156,6 +162,7 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
                     Cancel
                 </button>
                 <button
+                    @click.stop="updateIngredients"
                     class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                     Save Changes

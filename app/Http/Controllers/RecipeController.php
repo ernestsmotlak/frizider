@@ -106,4 +106,17 @@ class RecipeController extends Controller
 
         return response()->json(['message' => 'Recipe successfully deleted.']);
     }
+
+    public function updateIngredients(Request $request, $recipeId)
+    {
+        $recipe = Recipe::findOrFail($recipeId);
+
+        if ($recipe->used_id !== auth()->id()) {
+            return response()->json([
+                'message' => 'Not authorized.'
+            ], 403);
+        }
+
+        take ingredients array from request and validate and save each, then return full recipe with ingredients
+    }
 }
