@@ -79,6 +79,7 @@
 - Handle RecipeIngredient nested CRUD
 - Form to add/remove ingredients
 - Save recipe description as WYSIWYG (rich text editor)
+- Add validation to all recipe subcomponents
 
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`

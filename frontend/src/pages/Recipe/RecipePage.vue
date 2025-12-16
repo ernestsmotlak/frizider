@@ -38,6 +38,10 @@ const recipeId = Number(route.params.id);
 const errorMessage = ref("");
 const recipeData = ref<Recipe | null>(null);
 
+const handleUpdatedRecipe = (updatedRecipe: Recipe) => {
+    recipeData.value = updatedRecipe;
+}
+
 const getRecipe = () => {
     if (!recipeId) {
         errorMessage.value = "Recipe id does not exist.";
@@ -77,6 +81,7 @@ onMounted(() => {
             <div v-if="recipeData" class="space-y-6">
                 <RecipeTitleCard v-if="recipeData"
                                  :recipe="recipeData"
+                                 @updated-recipe="handleUpdatedRecipe"
                 />
 
                 <RecipeIngredientCard

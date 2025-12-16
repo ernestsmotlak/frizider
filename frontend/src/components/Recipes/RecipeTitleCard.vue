@@ -2,6 +2,11 @@
 import {formatTime} from "../../utils/formatTime.ts";
 import {ref} from "vue";
 import Modal from "../Modal.vue";
+import {useToastStore} from "../../stores/toast.ts";
+import {useLoadingStore} from "../../stores/loading.ts";
+
+const toastStore = useToastStore();
+const loadingStore = useLoadingStore();
 
 interface Recipe {
     id: number;
@@ -16,6 +21,10 @@ interface Recipe {
 
 const props = defineProps<{
     recipe: Recipe
+}>();
+
+const emit = defineEmits<{
+    'updatedRecipe': [recipe: Recipe]
 }>();
 
 const isModalOpen = ref(false);
@@ -38,6 +47,33 @@ const openModal = () => {
     };
     isModalOpen.value = true;
 };
+
+const updateRecipe = () => {
+    const payload = {
+        name: formData.value.name,
+        description: formData.value.description,
+        servings: formData.value.servings,
+        prep_time: formData.value.prep_time,
+        cook_time: formData.value.cook_time
+    };
+
+    loadingStore.start();
+
+    axios.patch('/api/recipes/' + props.recipe.id, payload)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+            toastStore.show('success', 'Recipe updated successfully.');
+            closeModal();
+        })
+        .catch((error) => {
+            console.error(error);
+            toastStore.show('error', 'Could not update recipe.');
+        })
+        .finally(() => {
+            loadingStore.stop();
+        })
+}
 
 const closeModal = () => {
     isModalOpen.value = false;
@@ -216,6 +252,7 @@ const closeModal = () => {
                     Cancel
                 </button>
                 <button
+                    @click.stop="updateRecipe"
                     class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                     Save Changes
