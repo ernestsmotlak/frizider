@@ -108,9 +108,9 @@ const closeModal = () => {
         <template #header>
             <h2 class="text-2xl font-bold text-gray-900">Edit Recipe</h2>
         </template>
-        <div class="space-y-4">
-            <p class="text-gray-600">Modal content goes here</p>
-        </div>
+        <template #body>
+            <div>haha</div>
+        </template>
     </Modal>
 </template>
 

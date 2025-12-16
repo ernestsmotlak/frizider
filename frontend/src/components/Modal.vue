@@ -40,7 +40,7 @@ const handleBackdropClick = (event: MouseEvent) => {
                             </button>
                         </div>
                         <div class="flex-1 overflow-y-auto px-6 py-6">
-                            <slot />
+                            <slot name="body" />
                         </div>
                         <div v-if="$slots.footer" class="border-t border-gray-200 px-6 py-4">
                             <slot name="footer" />
