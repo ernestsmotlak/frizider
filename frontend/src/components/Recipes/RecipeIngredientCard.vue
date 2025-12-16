@@ -89,9 +89,9 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
                 <div v-for="(ingredient, index) in sortedIngredients(formData)" :key="ingredient.id"
                      class="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
                     <div class="flex items-start gap-3 mb-3">
-                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">
-                            <circle cx="4" cy="4" r="3"/>
-                        </svg>
+<!--                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">-->
+<!--                            <circle cx="4" cy="4" r="3"/>-->
+<!--                        </svg>-->
                         <div class="flex-1 space-y-3">
                             <div class="grid grid-cols-12 gap-3">
                                 <div class="col-span-5">
