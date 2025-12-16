@@ -182,8 +182,8 @@ onMounted(() => {
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
                     <ul class="space-y-2">
                         <li v-for="ingredient in sortedIngredients(recipeData.recipe_ingredients)" :key="ingredient.id"
-                            class="flex items-start gap-2">
-                            <span class="text-gray-400 mt-1">•</span>
+                            class="flex items-center gap-2">
+                            <span class="text-gray-400">•</span>
                             <span class="text-gray-700 leading-relaxed">{{ formatIngredient(ingredient) }}</span>
                         </li>
                     </ul>
