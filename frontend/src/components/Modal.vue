@@ -16,13 +16,13 @@ const handleBackdropClick = (event: MouseEvent) => {
 
 <template>
     <Teleport to="body">
-        <Transition name="modal">
+        <Transition name="modal-backdrop">
             <div
                 v-if="isOpen"
                 @click="handleBackdropClick"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-gray-200/10 backdrop-blur-sm p-4"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
             >
-                <Transition name="modal-content">
+                <Transition name="modal-content" appear>
                     <div
                         v-if="isOpen"
                         @click.stop
@@ -53,35 +53,35 @@ const handleBackdropClick = (event: MouseEvent) => {
 </template>
 
 <style scoped>
-.modal-enter-active {
-    transition: opacity 0.3s ease-out;
+.modal-backdrop-enter-active {
+    transition: opacity 0.25s ease-out;
 }
 
-.modal-leave-active {
-    transition: opacity 0.3s ease-in;
+.modal-backdrop-leave-active {
+    transition: opacity 0.2s ease-in;
 }
 
-.modal-enter-from,
-.modal-leave-to {
+.modal-backdrop-enter-from,
+.modal-backdrop-leave-to {
     opacity: 0;
 }
 
 .modal-content-enter-active {
-    transition: all 0.3s ease-out;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-content-leave-active {
-    transition: all 0.3s ease-in;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-content-enter-from {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: translateY(100vh);
 }
 
 .modal-content-leave-to {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: translateY(100vh);
 }
 </style>
 
