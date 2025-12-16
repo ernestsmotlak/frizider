@@ -183,7 +183,9 @@ onMounted(() => {
                     <ul class="space-y-2">
                         <li v-for="ingredient in sortedIngredients(recipeData.recipe_ingredients)" :key="ingredient.id"
                             class="flex items-center gap-2">
-                            <span class="text-gray-400">•</span>
+                            <svg class="w-2 h-2 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8">
+                                <circle cx="4" cy="4" r="3"/>
+                            </svg>
                             <span class="text-gray-700 leading-relaxed">{{ formatIngredient(ingredient) }}</span>
                         </li>
                     </ul>
