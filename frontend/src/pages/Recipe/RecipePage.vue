@@ -21,6 +21,7 @@ const getRecipe = () => {
     loadingStore.start();
     const url = '/api/recipes/' + recipeId;
 
+
     axios.get(url)
         .then((response) => {
             recipeData.value = response.data.data;
