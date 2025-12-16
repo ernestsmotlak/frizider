@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recipe;
+use App\Models\RecipeIngredient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RecipeController extends Controller
 {
@@ -111,12 +113,39 @@ class RecipeController extends Controller
     {
         $recipe = Recipe::findOrFail($recipeId);
 
-        if ($recipe->used_id !== auth()->id()) {
+        if ($recipe->user_id !== auth()->id()) {
             return response()->json([
                 'message' => 'Not authorized.'
             ], 403);
         }
 
-        take ingredients array from request and validate and save each, then return full recipe with ingredients
+        $validated = $request->validate([
+            'ingredients' => 'required|array',
+            'ingredients.*.name' => 'required|string|max:255',
+            'ingredients.*.quantity' => 'nullable|numeric',
+            'ingredients.*.unit' => 'nullable|string|max:50',
+            'ingredients.*.notes' => 'nullable|string|max:500',
+            'ingredients.*.sort_order' => 'nullable|integer',
+        ]);
+
+        DB::transaction(function () use ($recipe, $validated) {
+            $recipe->recipeIngredients()->delete();
+
+            foreach ($validated['ingredients'] as $index => $ingredientData) {
+                RecipeIngredient::create([
+                    'recipe_id' => $recipe->id,
+                    'name' => $ingredientData['name'],
+                    'quantity' => $ingredientData['quantity'] ?? null,
+                    'unit' => $ingredientData['unit'] ?? null,
+                    'notes' => $ingredientData['notes'] ?? null,
+                    'sort_order' => $ingredientData['sort_order'] ?? $index,
+                ]);
+            }
+        });
+
+        return response()->json([
+            'message' => 'Ingredients updated.',
+            'data' => $recipe->fresh()->load('recipeIngredients')
+        ]);
     }
 }

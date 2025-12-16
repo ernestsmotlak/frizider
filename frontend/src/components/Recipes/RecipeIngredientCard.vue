@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {ref} from "vue";
 import Modal from "../Modal.vue";
+import {useToastStore} from "../../stores/toast.ts";
+import {useLoadingStore} from "../../stores/loading.ts";
 
 interface RecipeIngredient {
     id: number;
@@ -12,9 +14,28 @@ interface RecipeIngredient {
     sort_order: number;
 }
 
+interface Recipe {
+    id: number;
+    name: string;
+    description: string | null;
+    instructions: string | null;
+    servings: number | null;
+    prep_time: number | null;
+    cook_time: number | null;
+    image_url: string | null;
+    recipe_ingredients?: RecipeIngredient[];
+}
+
 const props = defineProps<{
     ingredients: RecipeIngredient[]
 }>();
+
+const emit = defineEmits<{
+    'updatedRecipe': [recipe: Recipe]
+}>();
+
+const toastStore = useToastStore();
+const loadingStore = useLoadingStore();
 
 const isModalOpen = ref(false);
 
@@ -60,7 +81,40 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
 }
 
 const updateIngredients = () => {
+    if (!props.ingredients || props.ingredients.length === 0) {
+        toastStore.show('error', 'No recipe ID available.');
+        return;
+    }
 
+    const recipeId = props.ingredients[0].recipe_id;
+    const payload = {
+        ingredients: formData.value.map((ingredient, index) => ({
+            id: ingredient.id,
+            name: ingredient.name,
+            quantity: ingredient.quantity ?? null,
+            unit: ingredient.unit ?? null,
+            notes: ingredient.notes ?? null,
+            sort_order: ingredient.sort_order ?? index,
+        }))
+    };
+
+    loadingStore.start();
+
+    axios.post(`/api/recipes/${recipeId}/ingredients`, payload)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+            toastStore.show('success', 'Ingredients updated successfully.');
+            closeModal();
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not update ingredients.';
+            toastStore.show('error', errorMessage);
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
 }
 
 </script>
