@@ -31,7 +31,7 @@ defineProps<{
 
         <div class="p-8 space-y-6">
             <div>
-                <h1 class="text-4xl font-bold text-gray-900 mb-3 bg-red-200 max-w-[330px]">{{ recipe.name }}</h1>
+                <h1 class="text-4xl font-bold text-gray-900 mb-3 max-w-[330px]">{{ recipe.name }}</h1>
                 <p v-if="recipe.description" class="text-lg text-gray-600 leading-relaxed">
                     {{ recipe.description }}
                 </p>
