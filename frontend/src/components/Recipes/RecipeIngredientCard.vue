@@ -87,14 +87,23 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
         <template #body>
             <div class="space-y-4">
                 <div v-for="(ingredient, index) in sortedIngredients(formData)" :key="ingredient.id"
-                     class="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                     class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
                     <div class="flex items-start gap-3 mb-3">
 <!--                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">-->
 <!--                            <circle cx="4" cy="4" r="3"/>-->
 <!--                        </svg>-->
                         <div class="flex-1 space-y-3">
-                            <div class="grid grid-cols-12 gap-3">
-                                <div class="col-span-5">
+                            <div class="sm:hidden">
+                                <label class="block text-xs text-gray-500 font-medium mb-1">Name</label>
+                                <input
+                                    v-model="ingredient.name"
+                                    type="text"
+                                    class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    placeholder="Flour"
+                                />
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-12 gap-3">
+                                <div class="hidden sm:block sm:col-span-5">
                                     <label class="block text-xs text-gray-500 font-medium mb-1">Name</label>
                                     <input
                                         v-model="ingredient.name"
@@ -103,7 +112,7 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
                                         placeholder="Flour"
                                     />
                                 </div>
-                                <div class="col-span-3">
+                                <div class="col-span-1 sm:col-span-3">
                                     <label class="block text-xs text-gray-500 font-medium mb-1">Quantity</label>
                                     <input
                                         v-model.number="ingredient.quantity"
@@ -114,7 +123,7 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
                                         placeholder="2"
                                     />
                                 </div>
-                                <div class="col-span-4">
+                                <div class="col-span-1 sm:col-span-4">
                                     <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
                                     <input
                                         v-model="ingredient.unit"
@@ -139,15 +148,15 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
             </div>
         </template>
         <template #footer>
-            <div class="flex justify-between gap-3">
+            <div class="flex flex-col sm:flex-row justify-between gap-3">
                 <button
                     @click="closeModal"
-                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                    class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
                     Cancel
                 </button>
                 <button
-                    class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                     Save Changes
                 </button>
