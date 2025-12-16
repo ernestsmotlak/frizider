@@ -75,12 +75,13 @@ onMounted(() => {
             </div>
 
             <div v-if="recipeData" class="space-y-6">
-                <RecipeTitleCard :recipe="recipeData"/>
+                <RecipeTitleCard v-if="recipeData" :recipe="recipeData"/>
 
                 <RecipeIngredientCard v-if="recipeData.recipe_ingredients"
                                       :ingredients="recipeData.recipe_ingredients"/>
 
-                <RecipeInstructionsCard :instructions="recipeData.instructions" />
+                <RecipeInstructionsCard v-if="recipeData?.instructions"
+                    :instructions="recipeData.instructions" />
             </div>
 
             <div v-else-if="!errorMessage" class="text-center py-12">
