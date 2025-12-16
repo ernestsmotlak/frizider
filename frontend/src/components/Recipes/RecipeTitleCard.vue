@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import {formatTime} from "../../utils/formatTime.ts";
+
 interface Recipe {
     id: number;
     name: string;
@@ -9,16 +11,10 @@ interface Recipe {
     cook_time: number | null;
     image_url: string | null;
 }
+
 defineProps<{
     recipe: Recipe
 }>();
-const formatTime = (minutes: number | null): string => {
-    if (!minutes) return "N/A";
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
-}
 </script>
 
 <template>
