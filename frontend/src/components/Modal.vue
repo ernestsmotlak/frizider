@@ -26,7 +26,7 @@ const handleBackdropClick = (event: MouseEvent) => {
                     <div
                         v-if="isOpen"
                         @click.stop
-                        class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                        class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
                     >
                         <div class="p-6">
                             <slot />
