@@ -32,9 +32,9 @@ const handleBackdropClick = (event: MouseEvent) => {
                             <slot name="header" />
                             <button
                                 @click="emit('close')"
-                                class="ml-4 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                                class="ml-4 p-2 rounded-lg active:scale-95 transition-transform duration-200"
                             >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 text-gray-500 hover:text-red-700 transition-all duration-200 hover:scale-150" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>

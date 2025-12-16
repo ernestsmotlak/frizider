@@ -208,7 +208,7 @@ const closeModal = () => {
             </div>
         </template>
         <template #footer>
-            <div class="flex justify-end gap-3">
+            <div class="flex justify-between gap-3">
                 <button
                     @click="closeModal"
                     class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
