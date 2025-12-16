@@ -2,6 +2,7 @@
 import DashboardLayout from "../../layouts/DashboardLayout.vue";
 import RecipeTitleCard from "../../components/Recipes/RecipeTitleCard.vue";
 import RecipeIngredientCard from "../../components/Recipes/RecipeIngredientCard.vue";
+import RecipeInstructionsCard from "../../components/Recipes/RecipeInstructionsCard.vue";
 import {useRoute} from "vue-router";
 import {onMounted, ref} from "vue";
 import {useToastStore} from "../../stores/toast.ts";
@@ -74,16 +75,12 @@ onMounted(() => {
             </div>
 
             <div v-if="recipeData" class="space-y-6">
-                <RecipeTitleCard :recipe="recipeData" />
+                <RecipeTitleCard :recipe="recipeData"/>
 
-                <RecipeIngredientCard v-if="recipeData.recipe_ingredients" :ingredients="recipeData.recipe_ingredients" />
+                <RecipeIngredientCard v-if="recipeData.recipe_ingredients"
+                                      :ingredients="recipeData.recipe_ingredients"/>
 
-                <div v-if="recipeData.instructions" class="bg-white rounded-2xl shadow-xl p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Instructions</h2>
-                    <div class="prose max-w-none">
-                        <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ recipeData.instructions }}</p>
-                    </div>
-                </div>
+                <RecipeInstructionsCard :instructions="recipeData.instructions" />
             </div>
 
             <div v-else-if="!errorMessage" class="text-center py-12">
