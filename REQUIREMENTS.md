@@ -129,3 +129,5 @@ A sleek, intuitive app for managing food at home, recipes, and grocery shopping 
 - Clean, normalized schema for core functionality
 
 
+
+
