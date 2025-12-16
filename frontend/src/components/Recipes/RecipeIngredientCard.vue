@@ -18,7 +18,12 @@ const props = defineProps<{
 
 const isModalOpen = ref(false);
 
+const formData = ref<RecipeIngredient[]>([]);
+
 const openModal = () => {
+    formData.value = props.ingredients.map(ingredient => ({
+        ...ingredient
+    }));
     isModalOpen.value = true;
 };
 
@@ -77,23 +82,60 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
 
     <Modal :isOpen="isModalOpen" @close="closeModal">
         <template #header>
-            <h2 class="text-2xl font-bold text-gray-900">Ingredients</h2>
+            <h2 class="text-2xl font-bold text-gray-900">Edit Ingredients</h2>
         </template>
         <template #body>
             <div class="space-y-4">
-                <ul class="space-y-3">
-                    <li v-for="ingredient in sortedIngredients(ingredients)" :key="ingredient.id"
-                        class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <svg class="w-2 h-2 text-black flex-shrink-0 mt-2" fill="currentColor" viewBox="0 0 8 8">
+                <div v-for="(ingredient, index) in sortedIngredients(formData)" :key="ingredient.id"
+                     class="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div class="flex items-start gap-3 mb-3">
+                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">
                             <circle cx="4" cy="4" r="3"/>
                         </svg>
-                        <div class="flex-1">
-                            <div class="text-gray-900 font-medium leading-relaxed">
-                                {{ formatIngredient(ingredient) }}
+                        <div class="flex-1 space-y-3">
+                            <div class="grid grid-cols-12 gap-3">
+                                <div class="col-span-5">
+                                    <label class="block text-xs text-gray-500 font-medium mb-1">Name</label>
+                                    <input
+                                        v-model="ingredient.name"
+                                        type="text"
+                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                        placeholder="Flour"
+                                    />
+                                </div>
+                                <div class="col-span-3">
+                                    <label class="block text-xs text-gray-500 font-medium mb-1">Quantity</label>
+                                    <input
+                                        v-model.number="ingredient.quantity"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                        placeholder="2"
+                                    />
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
+                                    <input
+                                        v-model="ingredient.unit"
+                                        type="text"
+                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                        placeholder="cups"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 font-medium mb-1">Notes (optional)</label>
+                                <input
+                                    v-model="ingredient.notes"
+                                    type="text"
+                                    class="w-full px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    placeholder="e.g. sifted, room temperature"
+                                />
                             </div>
                         </div>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
         </template>
         <template #footer>

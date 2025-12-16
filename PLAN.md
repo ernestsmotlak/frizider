@@ -80,6 +80,7 @@
 - Form to add/remove ingredients
 - Save recipe description as WYSIWYG (rich text editor)
 - Add validation to all recipe subcomponents
+- Make ingredients in Recipes.vue expandable: show symbol if they have a note, make all ingredients expandable, when extended show the notes part of RecipeIngredient
 
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
