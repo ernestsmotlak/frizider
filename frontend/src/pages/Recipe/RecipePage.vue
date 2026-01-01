@@ -91,8 +91,10 @@ onMounted(() => {
                 />
 
                 <RecipeInstructionsCard
-                    v-if="recipeData?.instructions"
+                    v-if="recipeData"
                     :instructions="recipeData.instructions"
+                    :recipe-id="recipeData.id"
+                    @updated-recipe="handleUpdatedRecipe"
                 />
             </div>
 

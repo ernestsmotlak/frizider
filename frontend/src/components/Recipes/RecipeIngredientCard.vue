@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import {ref, nextTick, computed} from "vue";
+import {ref, nextTick, computed, watch} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
+import { QuillEditor } from "@vueup/vue-quill";
+import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
 interface RecipeIngredient {
     id: number | null;
@@ -42,6 +44,9 @@ const confirmStore = useConfirmStore();
 
 const isModalOpen = ref(false);
 const isAddModalOpen = ref(false);
+const isQuillModalOpen = ref(false);
+const quillContent = ref("");
+const quillKey = ref(0);
 
 const formData = ref<RecipeIngredient[]>([]);
 const lastIngredientRef = ref<HTMLElement | null>(null);
@@ -161,6 +166,26 @@ const openAddModal = () => {
 const closeAddModal = () => {
     isAddModalOpen.value = false;
 };
+
+const openQuillModal = () => {
+    quillContent.value = "";
+    isQuillModalOpen.value = true;
+    nextTick(() => {
+        quillKey.value += 1;
+    });
+};
+
+watch(isQuillModalOpen, (newVal) => {
+    if (newVal) {
+        nextTick(() => {
+            quillKey.value += 1;
+        });
+    }
+});
+
+const closeQuillModal = () => {
+    isQuillModalOpen.value = false;
+};
 const formatIngredient = (ingredient: RecipeIngredient): string => {
     const parts: string[] = [];
 
@@ -259,6 +284,15 @@ const addIngredient = () => {
 <template>
     <div class="bg-white rounded-2xl shadow-xl p-8 relative">
         <div class="absolute top-2 right-2 flex gap-2">
+            <button @click="openQuillModal"
+                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200"
+                    title="Open Quill Editor">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </button>
             <button @click="openAddModal"
                     class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
@@ -469,9 +503,80 @@ const addIngredient = () => {
             </div>
         </template>
     </Modal>
+
+    <Modal :isOpen="isQuillModalOpen" @close="closeQuillModal">
+        <template #header>
+            <h2 class="text-2xl font-bold text-gray-900">Quill Editor</h2>
+        </template>
+        <template #body>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-500 font-medium mb-2">Content</label>
+                    <QuillEditor
+                        v-if="isQuillModalOpen"
+                        :key="quillKey"
+                        v-model:content="quillContent"
+                        contentType="html"
+                        theme="snow"
+                        :options="{
+                            placeholder: 'Start typing...',
+                            modules: {
+                                toolbar: [
+                                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                    [{ 'color': [] }, { 'background': [] }],
+                                    [{ 'align': [] }],
+                                    ['link', 'image'],
+                                    ['clean']
+                                ]
+                            }
+                        }"
+                        class="min-h-[300px]"
+                    />
+                </div>
+                <div v-if="quillContent" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <label class="block text-xs text-gray-500 font-medium mb-2">Preview</label>
+                    <div class="prose max-w-none" v-html="quillContent"></div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <div class="flex flex-col sm:flex-row justify-between gap-3">
+                <button
+                    @click="closeQuillModal"
+                    class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
+                    Close
+                </button>
+                <button
+                    @click.stop="() => { toastStore.show('success', 'Content saved!'); closeQuillModal(); }"
+                    class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                    Save
+                </button>
+            </div>
+        </template>
+    </Modal>
 </template>
 
 <style scoped>
+:deep(.ql-editor) {
+    min-height: 300px;
+}
 
+:deep(.ql-container) {
+    font-size: 16px;
+}
+
+:deep(.ql-toolbar) {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+:deep(.ql-container) {
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
 </style>
 
