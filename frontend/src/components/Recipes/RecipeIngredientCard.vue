@@ -5,7 +5,7 @@ import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 
 interface RecipeIngredient {
-    id: number;
+    id: number | null;
     recipe_id: number;
     name: string;
     quantity: number | null;
@@ -124,7 +124,8 @@ const updateIngredients = () => {
         <button @click="openModal"
                 class="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
             </svg>
         </button>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
@@ -138,7 +139,7 @@ const updateIngredients = () => {
             </li>
         </ul>
     </div>
-<!--    <pre>{{formData}}</pre>-->
+    <!--    <pre>{{formData}}</pre>-->
 
     <Modal :isOpen="isModalOpen" @close="closeModal">
         <template #header>
@@ -149,9 +150,9 @@ const updateIngredients = () => {
                 <div v-for="(ingredient, index) in sortedIngredients(formData)" :key="ingredient.id"
                      class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
                     <div class="flex items-start gap-3 mb-3">
-<!--                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">-->
-<!--                            <circle cx="4" cy="4" r="3"/>-->
-<!--                        </svg>-->
+                        <!--                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">-->
+                        <!--                            <circle cx="4" cy="4" r="3"/>-->
+                        <!--                        </svg>-->
                         <div class="flex-1 space-y-3">
                             <div class="sm:hidden">
                                 <label class="block text-xs text-gray-500 font-medium mb-1">Name</label>

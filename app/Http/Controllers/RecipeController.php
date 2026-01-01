@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use App\Models\RecipeIngredient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class RecipeController extends Controller
 {
@@ -109,43 +110,48 @@ class RecipeController extends Controller
         return response()->json(['message' => 'Recipe successfully deleted.']);
     }
 
-    public function updateIngredients(Request $request, $recipeId)
+    public function updateIngredients(Request $request, Recipe $recipe)
     {
-        $recipe = Recipe::findOrFail($recipeId);
 
         if ($recipe->user_id !== auth()->id()) {
-            return response()->json([
-                'message' => 'Not authorized.'
-            ], 403);
+            return response()->json(['message' => 'Not authorized.'], 403);
         }
 
         $validated = $request->validate([
-            'ingredients' => 'required|array',
-            'ingredients.*.name' => 'required|string|max:255',
-            'ingredients.*.quantity' => 'nullable|numeric',
-            'ingredients.*.unit' => 'nullable|string|max:50',
-            'ingredients.*.notes' => 'nullable|string|max:500',
-            'ingredients.*.sort_order' => 'nullable|integer',
+            'ingredients' => ['required', 'array'],
+            'ingredients.*.id' => [
+                'nullable',
+                'integer',
+                Rule::exists('recipe_ingredients', 'id')->where('recipe_id', $recipe->id),
+            ],
+            'ingredients.*.name' => ['required', 'string', 'max:255'],
+            'ingredients.*.quantity' => ['nullable', 'numeric', 'min:0'],
+            'ingredients.*.unit' => ['nullable', 'string', 'max:50'],
+            'ingredients.*.notes' => ['nullable', 'string', 'max:500'],
+            'ingredients.*.sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
         DB::transaction(function () use ($recipe, $validated) {
-            $recipe->recipeIngredients()->delete();
+            foreach ($validated['ingredients'] as $index => $ingredient) {
+                $data = [
+                    'name' => $ingredient['name'],
+                    'quantity' => $ingredient['quantity'] ?? null,
+                    'unit' => $ingredient['unit'] ?? null,
+                    'notes' => $ingredient['notes'] ?? null,
+                    'sort_order' => $ingredient['sort_order'] ?? $index,
+                ];
 
-            foreach ($validated['ingredients'] as $index => $ingredientData) {
-                RecipeIngredient::create([
-                    'recipe_id' => $recipe->id,
-                    'name' => $ingredientData['name'],
-                    'quantity' => $ingredientData['quantity'] ?? null,
-                    'unit' => $ingredientData['unit'] ?? null,
-                    'notes' => $ingredientData['notes'] ?? null,
-                    'sort_order' => $ingredientData['sort_order'] ?? $index,
-                ]);
+                // update existing or create new
+                $recipe->recipeIngredients()->updateOrCreate(
+                    ['id' => $ingredient['id'] ?? null], // if null -> create
+                    $data
+                );
             }
         });
 
         return response()->json([
             'message' => 'Ingredients updated.',
-            'data' => $recipe->fresh()->load('recipeIngredients')
+            'data' => $recipe->fresh()->load('recipeIngredients'),
         ]);
     }
 }
