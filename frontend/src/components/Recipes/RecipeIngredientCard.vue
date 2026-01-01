@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {ref, nextTick, computed} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
@@ -42,6 +42,7 @@ const isModalOpen = ref(false);
 const isAddModalOpen = ref(false);
 
 const formData = ref<RecipeIngredient[]>([]);
+const lastIngredientRef = ref<HTMLElement | null>(null);
 const newIngredient = ref<Omit<RecipeIngredient, 'id'>>({
     recipe_id: props.recipeId,
     name: '',
@@ -60,6 +61,30 @@ const openModal = () => {
 
 const closeModal = () => {
     isModalOpen.value = false;
+};
+
+const addNewIngredientToForm = () => {
+    const maxSortOrder = formData.value.length > 0
+        ? Math.max(...formData.value.map(i => i.sort_order))
+        : -1;
+    const newIngredient: RecipeIngredient = {
+        id: null,
+        recipe_id: props.recipeId,
+        name: '',
+        quantity: null,
+        unit: null,
+        notes: null,
+        sort_order: maxSortOrder + 1,
+    };
+    formData.value.push(newIngredient);
+    nextTick(() => {
+        if (lastIngredientRef.value) {
+            lastIngredientRef.value.scrollIntoView({
+                behavior: 'smooth',
+                block: 'end'
+            });
+        }
+    });
 };
 
 const openAddModal = () => {
@@ -105,9 +130,13 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
         if (a.sort_order !== b.sort_order) {
             return a.sort_order - b.sort_order;
         }
-        return a.id - b.id;
+        const aId = a.id ?? 0;
+        const bId = b.id ?? 0;
+        return aId - bId;
     });
 }
+
+const sortedFormData = computed(() => sortedIngredients(formData.value));
 
 const updateIngredients = () => {
     const recipeId = props.recipeId;
@@ -206,11 +235,23 @@ const addIngredient = () => {
 
     <Modal :isOpen="isModalOpen" @close="closeModal">
         <template #header>
-            <h2 class="text-2xl font-bold text-gray-900">Edit Ingredients</h2>
+            <div class="flex items-center gap-4 flex-1">
+                <h2 class="text-2xl font-bold text-gray-900">Edit Ingredients</h2>
+                <button
+                    @click.stop="addNewIngredientToForm"
+                    class="ml-auto p-2 rounded-lg active:scale-95 transition-transform duration-200"
+                >
+                    <svg class="w-6 h-6 text-gray-500 hover:text-blue-700 transition-all duration-200 hover:scale-150" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </button>
+            </div>
         </template>
         <template #body>
             <div class="space-y-4">
-                <div v-for="(ingredient, index) in sortedIngredients(formData)" :key="ingredient.id"
+                <div v-for="(ingredient, index) in sortedFormData" 
+                     :key="ingredient.id ?? `new-${index}`"
+                     :ref="(el) => { if (index === sortedFormData.length - 1) lastIngredientRef = el as HTMLElement }"
                      class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
                     <div class="flex items-start gap-3 mb-3">
                         <!--                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">-->
