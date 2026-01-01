@@ -27,7 +27,8 @@ interface Recipe {
 }
 
 const props = defineProps<{
-    ingredients: RecipeIngredient[]
+    ingredients: RecipeIngredient[];
+    recipeId: number;
 }>();
 
 const emit = defineEmits<{
@@ -38,8 +39,17 @@ const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
 
 const isModalOpen = ref(false);
+const isAddModalOpen = ref(false);
 
 const formData = ref<RecipeIngredient[]>([]);
+const newIngredient = ref<Omit<RecipeIngredient, 'id'>>({
+    recipe_id: props.recipeId,
+    name: '',
+    quantity: null,
+    unit: null,
+    notes: null,
+    sort_order: 0,
+});
 
 const openModal = () => {
     formData.value = props.ingredients.map(ingredient => ({
@@ -50,6 +60,25 @@ const openModal = () => {
 
 const closeModal = () => {
     isModalOpen.value = false;
+};
+
+const openAddModal = () => {
+    const maxSortOrder = props.ingredients.length > 0
+        ? Math.max(...props.ingredients.map(i => i.sort_order))
+        : -1;
+    newIngredient.value = {
+        recipe_id: props.recipeId,
+        name: '',
+        quantity: null,
+        unit: null,
+        notes: null,
+        sort_order: maxSortOrder + 1,
+    };
+    isAddModalOpen.value = true;
+};
+
+const closeAddModal = () => {
+    isAddModalOpen.value = false;
 };
 const formatIngredient = (ingredient: RecipeIngredient): string => {
     const parts: string[] = [];
@@ -81,12 +110,7 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
 }
 
 const updateIngredients = () => {
-    if (!props.ingredients || props.ingredients.length === 0) {
-        toastStore.show('error', 'No recipe ID available.');
-        return;
-    }
-
-    const recipeId = props.ingredients[0].recipe_id;
+    const recipeId = props.recipeId;
     const payload = {
         ingredients: formData.value.map((ingredient, index) => ({
             id: ingredient.id,
@@ -117,19 +141,55 @@ const updateIngredients = () => {
         });
 }
 
+const addIngredient = () => {
+    if (!newIngredient.value.name.trim()) {
+        toastStore.show('error', 'Ingredient name is required.');
+        return;
+    }
+
+    const recipeId = props.recipeId;
+    loadingStore.start();
+
+    axios.post('/api/recipe-ingredients', newIngredient.value)
+        .then(() => {
+            return axios.get(`/api/recipes/${recipeId}`);
+        })
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+            toastStore.show('success', 'Ingredient added successfully.');
+            closeAddModal();
+        })
+        .catch((error) => {
+            const errorMessage = error?.response?.data?.message || 'Could not add ingredient.';
+            toastStore.show('error', errorMessage);
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+}
+
 </script>
 
 <template>
-    <div v-if="ingredients && ingredients.length > 0" class="bg-white rounded-2xl shadow-xl p-8 relative">
-        <button @click="openModal"
-                class="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
-            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-            </svg>
-        </button>
+    <div class="bg-white rounded-2xl shadow-xl p-8 relative">
+        <div class="absolute top-2 right-2 flex gap-2">
+            <button @click="openAddModal"
+                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </button>
+            <button v-if="ingredients && ingredients.length > 0" @click="openModal"
+                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+            </button>
+        </div>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
-        <ul class="space-y-2">
+        <ul v-if="ingredients && ingredients.length > 0" class="space-y-2">
             <li v-for="ingredient in sortedIngredients(ingredients)" :key="ingredient.id"
                 class="flex items-center gap-2">
                 <svg class="w-2 h-2 text-black flex-shrink-0" fill="currentColor" viewBox="0 0 8 8">
@@ -138,6 +198,9 @@ const updateIngredients = () => {
                 <span class="text-gray-700 leading-relaxed">{{ formatIngredient(ingredient) }}</span>
             </li>
         </ul>
+        <div v-else class="text-center py-8">
+            <p class="text-gray-500 mb-4">No ingredients yet. Click the + button to add your first ingredient.</p>
+        </div>
     </div>
     <!--    <pre>{{formData}}</pre>-->
 
@@ -221,6 +284,76 @@ const updateIngredients = () => {
                     class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                     Save Changes
+                </button>
+            </div>
+        </template>
+    </Modal>
+
+    <Modal :isOpen="isAddModalOpen" @close="closeAddModal">
+        <template #header>
+            <h2 class="text-2xl font-bold text-gray-900">Add Ingredient</h2>
+        </template>
+        <template #body>
+            <div class="space-y-4">
+                <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs text-gray-500 font-medium mb-1">Name *</label>
+                            <input
+                                v-model="newIngredient.name"
+                                type="text"
+                                class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                placeholder="Flour"
+                            />
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-gray-500 font-medium mb-1">Quantity</label>
+                                <input
+                                    v-model.number="newIngredient.quantity"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    placeholder="2"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
+                                <input
+                                    v-model="newIngredient.unit"
+                                    type="text"
+                                    class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    placeholder="cups"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 font-medium mb-1">Notes (optional)</label>
+                            <input
+                                v-model="newIngredient.notes"
+                                type="text"
+                                class="w-full px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                placeholder="e.g. sifted, room temperature"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <div class="flex flex-col sm:flex-row justify-between gap-3">
+                <button
+                    @click="closeAddModal"
+                    class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
+                    Cancel
+                </button>
+                <button
+                    @click.stop="addIngredient"
+                    class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                    Add Ingredient
                 </button>
             </div>
         </template>
