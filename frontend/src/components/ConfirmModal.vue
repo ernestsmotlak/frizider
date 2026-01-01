@@ -35,7 +35,7 @@ const handleCancel = () => {
                         <div class="px-6 py-6">
                             <p class="text-gray-900 text-base leading-relaxed">{{ confirmStore.message }}</p>
                         </div>
-                        <div class="border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
+                        <div class="border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row justify-between gap-3">
                             <button
                                 @click="handleCancel"
                                 class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
