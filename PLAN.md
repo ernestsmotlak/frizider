@@ -76,8 +76,9 @@
 #### 9. Recipe Management
 - Create store: `stores/recipe.ts`
 - Pages: List, Create/Edit (with ingredients), View detail
-- Handle RecipeIngredient nested CRUD
-- Form to add/remove ingredients
+- ✅ Handle RecipeIngredient nested CRUD
+- ✅ Form to add/remove ingredients (add from card and from edit modal)
+- ✅ Delete ingredients with confirmation
 - Save recipe description as WYSIWYG (rich text editor)
 - Add validation to all recipe subcomponents
 - Add validation to the ingredients modal
@@ -152,4 +153,54 @@ frontend/src/
 - HTTP-only cookies are handled automatically by the browser
 - All API calls should use the axios instance from `api/http.ts` (already configured with `withCredentials: true`)
 - Authentication middleware is handled by Laravel (`jwt.cookie` + `auth:api`)
+
+---
+
+## Progress Log
+
+### 2025-01-XX - Recipe Ingredients Management Enhancements
+
+#### Frontend Improvements
+
+**RecipeIngredientCard Component:**
+- ✅ Added "+" button to add new ingredients directly from the ingredient card
+- ✅ Added ability to add new ingredients from within the edit ingredients modal
+- ✅ Added trash/delete button to each ingredient in the edit modal
+- ✅ Implemented delete functionality with confirmation dialog
+- ✅ Added smooth scroll to bottom when adding new ingredient in edit modal
+- ✅ Improved UI/UX with consistent button styling matching modal close button
+
+**ConfirmModal Component (New):**
+- ✅ Created globally registered `ConfirmModal` component
+- ✅ Implemented `$confirm` global method accessible via `useConfirmStore()`
+- ✅ Returns Promise<boolean> - true on confirm, false on cancel/close
+- ✅ Reusable confirmation dialog with customizable message
+- ✅ Styled to match existing modal design patterns
+
+**Delete Functionality:**
+- ✅ Handles deletion of both new (unsaved) and existing ingredients
+- ✅ Shows confirmation dialog before deletion
+- ✅ Updates parent component data via emit after successful deletion
+- ✅ Proper error handling with toast notifications
+
+#### Backend Improvements
+
+**RecipeController:**
+- ✅ Implemented `deleteIngredientFromRecipe()` method
+- ✅ Route: `DELETE /api/recipe/{recipe}/ingredient/{ingredient}`
+- ✅ Verifies recipe ownership and ingredient relationship
+- ✅ Uses soft delete (RecipeIngredient model uses SoftDeletes)
+- ✅ Returns updated recipe with ingredients loaded
+
+**Route Updates:**
+- ✅ Updated route from POST to DELETE method
+- ✅ Changed route pattern to match frontend: `recipe/{recipe}/ingredient/{ingredient}` (singular)
+
+#### Technical Details
+
+- Used Pinia store (`useConfirmStore`) for confirm modal state management
+- Implemented Vue 3 composition API with TypeScript
+- Maintained consistency with existing code patterns
+- Proper error handling and loading states
+- Reactive data updates between parent and child components
 
