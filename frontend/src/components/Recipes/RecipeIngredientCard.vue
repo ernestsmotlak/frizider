@@ -167,25 +167,6 @@ const closeAddModal = () => {
     isAddModalOpen.value = false;
 };
 
-const openQuillModal = () => {
-    quillContent.value = "";
-    isQuillModalOpen.value = true;
-    nextTick(() => {
-        quillKey.value += 1;
-    });
-};
-
-watch(isQuillModalOpen, (newVal) => {
-    if (newVal) {
-        nextTick(() => {
-            quillKey.value += 1;
-        });
-    }
-});
-
-const closeQuillModal = () => {
-    isQuillModalOpen.value = false;
-};
 const formatIngredient = (ingredient: RecipeIngredient): string => {
     const parts: string[] = [];
 
@@ -284,15 +265,15 @@ const addIngredient = () => {
 <template>
     <div class="bg-white rounded-2xl shadow-xl p-8 relative">
         <div class="absolute top-2 right-2 flex gap-2">
-            <button @click="openQuillModal"
-                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200"
-                    title="Open Quill Editor">
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
-                     viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-            </button>
+<!--            <button @click="openQuillModal"-->
+<!--                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200"-->
+<!--                    title="Open Quill Editor">-->
+<!--                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"-->
+<!--                     viewBox="0 0 24 24">-->
+<!--                    <path stroke-linecap="round" stroke-linejoin="round"-->
+<!--                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>-->
+<!--                </svg>-->
+<!--            </button>-->
             <button @click="openAddModal"
                     class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"

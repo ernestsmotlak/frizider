@@ -121,12 +121,8 @@ const saveInstructions = () => {
                             placeholder: 'Enter recipe instructions...',
                             modules: {
                                 toolbar: [
-                                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                                    ['bold', 'italic', 'underline', 'strike'],
+                                    ['bold', 'italic'],
                                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                    [{ 'color': [] }, { 'background': [] }],
-                                    [{ 'align': [] }],
-                                    ['link', 'image'],
                                     ['clean']
                                 ]
                             }
