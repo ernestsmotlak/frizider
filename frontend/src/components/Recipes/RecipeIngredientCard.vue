@@ -3,6 +3,7 @@ import {ref, nextTick, computed} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
+import {useConfirmStore} from "../../stores/confirm.ts";
 
 interface RecipeIngredient {
     id: number | null;
@@ -37,6 +38,7 @@ const emit = defineEmits<{
 
 const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
+const confirmStore = useConfirmStore();
 
 const isModalOpen = ref(false);
 const isAddModalOpen = ref(false);
@@ -87,8 +89,58 @@ const addNewIngredientToForm = () => {
     });
 };
 
-const deleteIngredient = (index: number) => {
-    alert('DELETED');
+const deleteIngredient = async (ingredient: RecipeIngredient) => {
+    if (!ingredient) {
+        toastStore.show('error', 'An error occurred while deleting the ingredient.');
+        return;
+    }
+
+    const ingredientName = ingredient.name || 'this ingredient';
+    const confirmed = await confirmStore.show(`Are you sure you want to delete "${ingredientName}"?`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    // If ingredient has no id, it's a new ingredient that hasn't been saved yet
+    // Just remove it from the formData array
+    if (!ingredient.id) {
+        const index = formData.value.findIndex(i => i === ingredient);
+        if (index > -1) {
+            formData.value.splice(index, 1);
+        }
+        return;
+    }
+
+    // If ingredient has an id, delete it via API
+    // First, remove it from formData immediately for better UX
+    // const index = formData.value.findIndex(i => i.id === ingredient.id);
+    // if (index > -1) {
+    //     formData.value.splice(index, 1);
+    // }
+
+    const recipeId = props.recipeId;
+    const url = `/api/recipe/${recipeId}/ingredient/${ingredient.id}`;
+    loadingStore.start();
+
+    axios.delete(url)
+        .then((response) => {
+            let updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+            if (isModalOpen.value) {
+                formData.value = updatedRecipe.recipe_ingredients?.map(ing => ({...ing})) || [];
+            }
+            toastStore.show('success', 'Ingredient successfully removed from recipe.');
+
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not delete ingredient.';
+            toastStore.show('error', errorMessage);
+        })
+        .finally(() => {
+            loadingStore.stop();
+        })
 };
 
 const openAddModal = () => {
@@ -209,13 +261,15 @@ const addIngredient = () => {
         <div class="absolute top-2 right-2 flex gap-2">
             <button @click="openAddModal"
                     class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                 </svg>
             </button>
             <button v-if="ingredients && ingredients.length > 0" @click="openModal"
                     class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200">
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
@@ -245,7 +299,8 @@ const addIngredient = () => {
                     @click.stop="addNewIngredientToForm"
                     class="ml-auto p-2 rounded-lg active:scale-95 transition-transform duration-200"
                 >
-                    <svg class="w-6 h-6 text-gray-500 hover:text-blue-700 transition-all duration-200 hover:scale-150" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-gray-500 hover:text-blue-700 transition-all duration-200 hover:scale-150"
+                         fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                     </svg>
                 </button>
@@ -258,11 +313,14 @@ const addIngredient = () => {
                      :ref="(el) => { if (index === sortedFormData.length - 1) lastIngredientRef = el as HTMLElement }"
                      class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors relative">
                     <button
-                        @click="deleteIngredient(index)"
+                        @click="deleteIngredient(ingredient)"
                         class="absolute top-0.25 right-0 p-2 rounded-lg active:scale-95 transition-transform duration-200"
                     >
-                        <svg class="w-5 h-5 text-gray-500 hover:text-red-700 transition-all duration-200 hover:scale-150" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"></path>
+                        <svg
+                            class="w-5 h-5 text-gray-500 hover:text-red-700 transition-all duration-200 hover:scale-150"
+                            fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"></path>
                         </svg>
                     </button>
                     <div class="flex items-start gap-3 mb-3 mt-1">

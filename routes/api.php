@@ -25,5 +25,6 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::post('recipes/{recipe}/ingredients', [RecipeController::class, 'updateIngredients']);
 
     Route::apiResource('recipe-ingredients', RecipeIngredientController::class);
+    Route::delete('recipe/{recipe}/ingredient/{ingredient}', [RecipeController::class, 'deleteIngredientFromRecipe']);
 });
 

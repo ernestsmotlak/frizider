@@ -154,4 +154,22 @@ class RecipeController extends Controller
             'data' => $recipe->fresh()->load('recipeIngredients'),
         ]);
     }
+
+    public function deleteIngredientFromRecipe(string $recipe, string $ingredient)
+    {
+        $recipeModel = Recipe::where('user_id', auth()->id())
+            ->where('id', $recipe)
+            ->firstOrFail();
+
+        $ingredientModel = RecipeIngredient::where('recipe_id', $recipeModel->id)
+            ->where('id', $ingredient)
+            ->firstOrFail();
+
+        $ingredientModel->delete();
+
+        return response()->json([
+            'message' => 'Ingredient deleted successfully.',
+            'data' => $recipeModel->fresh()->load('recipeIngredients'),
+        ]);
+    }
 }

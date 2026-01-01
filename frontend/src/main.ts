@@ -6,6 +6,7 @@ import router from './router'
 import axiosInstance from './api/http'
 import {useAuthStore} from './stores/auth'
 import toastPlugin from './plugins/toast'
+import confirmPlugin from './plugins/confirm'
 import {formatTime} from "./utils/formatTime.ts";
 
 globalThis.axios = axiosInstance;
@@ -18,6 +19,7 @@ app.config.globalProperties.$formatTime = formatTime;
 app.use(pinia);
 app.use(router);
 app.use(toastPlugin);
+app.use(confirmPlugin);
 
 const auth = useAuthStore();
 await auth.fetchUser();
