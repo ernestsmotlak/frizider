@@ -326,7 +326,7 @@ const addIngredient = () => {
                 <div v-for="(ingredient, index) in sortedFormData"
                      :key="ingredient.id ?? `new-${index}`"
                      :ref="(el) => { if (index === sortedFormData.length - 1) lastIngredientRef = el as HTMLElement }"
-                     class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors relative">
+                     class="p-3 sm:p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors relative shadow-md">
                     <button
                         @click="deleteIngredient(ingredient)"
                         class="absolute top-0.25 right-0 p-2 rounded-lg active:scale-95 transition-transform duration-200"
@@ -348,7 +348,7 @@ const addIngredient = () => {
                                 <input
                                     v-model="ingredient.name"
                                     type="text"
-                                    class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                                     placeholder="Flour"
                                 />
                             </div>
@@ -358,7 +358,7 @@ const addIngredient = () => {
                                     <input
                                         v-model="ingredient.name"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                                         placeholder="Flour"
                                     />
                                 </div>
@@ -369,7 +369,7 @@ const addIngredient = () => {
                                         type="number"
                                         min="0"
                                         step="0.01"
-                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                                         placeholder="2"
                                     />
                                 </div>
@@ -378,7 +378,7 @@ const addIngredient = () => {
                                     <input
                                         v-model="ingredient.unit"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                                         placeholder="cups"
                                     />
                                 </div>
@@ -388,7 +388,7 @@ const addIngredient = () => {
                                 <input
                                     v-model="ingredient.notes"
                                     type="text"
-                                    class="w-full px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    class="w-full px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                                     placeholder="e.g. sifted, room temperature"
                                 />
                             </div>
