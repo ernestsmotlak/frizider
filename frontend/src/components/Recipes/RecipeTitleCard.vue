@@ -185,15 +185,15 @@ const deleteRecipe = async () => {
         </div>
 
         <div class="p-8 space-y-6">
-            <div class="flex items-start gap-4">
+            <div class="flex items-start gap-4 max-[450px]:flex-col max-[450px]:items-center max-[450px]:gap-2">
                 <div v-if="recipe.image_url" class="flex-shrink-0">
                     <div class="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-5xl md:text-6xl">
                         {{recipe.image_url}}
                     </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h1 class="text-4xl font-bold text-gray-900 mb-3">{{ recipe.name }}</h1>
-                    <p v-if="recipe.description" class="text-lg text-gray-600 leading-relaxed">
+                <div class="flex-1 min-w-0 max-[450px]:flex-1 max-[450px]:w-full max-[450px]:text-center">
+                    <h1 class="text-4xl font-bold text-gray-900 mb-3 max-[450px]:text-3xl max-[450px]:mb-2">{{ recipe.name }}</h1>
+                    <p v-if="recipe.description" class="text-lg text-gray-600 leading-relaxed max-[450px]:text-base">
                         {{ recipe.description }}
                     </p>
                 </div>
