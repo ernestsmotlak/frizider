@@ -32,11 +32,11 @@ const isIngredientsTab = computed(() => {
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
         <div class="flex justify-around items-center h-16">
             <router-link
-                to="/shopping-list"
+                to="/grocery-list"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
                 :class="isShoppingList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
             >
-                <span class="text-sm font-medium">Shopping list</span>
+                <span class="text-sm font-medium">Grocery list</span>
             </router-link>
             <router-link
                 to="/ingredients"

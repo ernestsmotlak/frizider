@@ -5,7 +5,7 @@ import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
 import Register from "../pages/Register.vue";
 import Landing from "../pages/Landing.vue";
-import ShoppingListsPage from "../pages/ShoppingList/ShoppingListsPage.vue";
+import GroceryListsPage from "../pages/ShoppingList/GroceryListsPage.vue";
 import IngredientsPage from "../pages/IngredientsPage.vue";
 import RecipesPage from "../pages/Recipe/RecipesPage.vue";
 import RecipePage from "../pages/Recipe/RecipePage.vue";
@@ -32,9 +32,9 @@ const router = createRouter({
             meta: {requiresAuth: true},
         },
         {
-            path: "/shopping-list",
-            name: "shopping-list",
-            component: ShoppingListsPage,
+            path: "/grocery-list",
+            name: "grocery-list",
+            component: GroceryListsPage,
             meta: {requiresAuth: true},
         },
         {
