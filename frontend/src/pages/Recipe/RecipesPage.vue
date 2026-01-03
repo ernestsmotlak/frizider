@@ -34,6 +34,9 @@ const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
                     <p v-if="allRows > 0" class="text-sm text-gray-600">
                         {{ allRows }} recipe{{ allRows !== 1 ? 's' : '' }}
                     </p>
+                    <p v-if="hasMore && recipes.length > 0 && !isLoading" class="text-sm text-gray-500 mt-2">
+                        Scroll down for more recipes
+                    </p>
                 </div>
 
                 <div v-if="recipes.length === 0 && !isLoading"
