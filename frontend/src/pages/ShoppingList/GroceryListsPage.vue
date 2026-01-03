@@ -21,6 +21,12 @@ const {items: groceryLists, isLoading, hasMore} = usePagination<GroceryList>({
             <h1 class="text-3xl font-bold text-gray-800 mb-4">Welcome to Shopping Lists</h1>
         </div>
         <pre>{{ groceryLists }}</pre>
+        <div v-if="isLoading && groceryLists.length > 0" class="text-center py-4">
+            <p class="text-gray-600">Loading more groceryLists...</p>
+        </div>
+        <div v-if="!hasMore && groceryLists.length > 0" class="text-center py-4">
+            <p class="text-gray-600">No more groceryLists to load.</p>
+        </div>
     </DashboardLayout>
 </template>
 
