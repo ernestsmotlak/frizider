@@ -32,11 +32,18 @@ const createRecipe = () => {
         return;
     }
 
-    const parseInteger = (value: string): number | null => {
-        if (!value || value.trim() === '') {
+    const parseInteger = (value: string | number | null | undefined): number | null => {
+        if (value === null || value === undefined) {
             return null;
         }
-        const parsed = parseInt(value, 10);
+        if (typeof value === 'number') {
+            return isNaN(value) ? null : value;
+        }
+        const strValue = String(value).trim();
+        if (strValue === '') {
+            return null;
+        }
+        const parsed = parseInt(strValue, 10);
         return isNaN(parsed) ? null : parsed;
     };
 
