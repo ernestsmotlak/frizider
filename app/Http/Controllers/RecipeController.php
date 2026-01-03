@@ -15,6 +15,9 @@ class RecipeController extends Controller
      */
     public function paginateRecipes(Request $request)
     {
+
+        $allRecipes = Recipe::where('user_id', auth()->id())->count();
+
         $userRecipes = Recipe::select([
             'id',
             'name',
@@ -27,7 +30,10 @@ class RecipeController extends Controller
                 $request->integer('per_page', 10)
             );
 
-        return response()->json(['data' => $userRecipes]);
+        return response()->json([
+            'data' => $userRecipes,
+            'allRecipes' => $allRecipes
+        ]);
     }
 
     /**

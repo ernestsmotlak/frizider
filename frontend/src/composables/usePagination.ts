@@ -12,11 +12,12 @@ interface PaginationOptions {
 export function usePagination<T>(options: PaginationOptions) {
     const toastStore = useToastStore();
     const loadingStore = useLoadingStore();
-    
+
     const items = ref<T[]>([]);
     const currentPage = ref(0);
     const hasMore = ref(true);
     const isLoading = ref(false);
+    const allRows = ref(0);
     let scrollTimeout: number | null = null;
 
     const fetchPage = (page: number = 1) => {
@@ -29,7 +30,7 @@ export function usePagination<T>(options: PaginationOptions) {
         axios.post(options.endpoint, {page})
             .then((response: any) => {
                 const paginator = response.data.data;
-
+                allRows.value = response.data.allRecipes ?? 0;
                 if (page === 1) {
                     items.value = paginator.data;
                 } else {
@@ -54,7 +55,7 @@ export function usePagination<T>(options: PaginationOptions) {
         scrollTimeout = window.setTimeout(() => {
             if (!hasMore.value || isLoading.value) return;
 
-            const scrolledToBottom = window.innerHeight + window.scrollY >= 
+            const scrolledToBottom = window.innerHeight + window.scrollY >=
                 document.documentElement.scrollHeight - (options.scrollThreshold || 300);
 
             if (scrolledToBottom) {
@@ -79,6 +80,7 @@ export function usePagination<T>(options: PaginationOptions) {
         hasMore,
         isLoading,
         fetchPage,
+        allRows,
         refresh: () => fetchPage(1),
     };
 }

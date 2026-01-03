@@ -18,7 +18,7 @@ const handleRecipeClick = (recipe_id: number) => {
     router.push('/recipe/' + recipe_id);
 }
 
-const {items: recipes, isLoading, hasMore} = usePagination<Recipe>({
+const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
     endpoint: '/api/get-recipes',
     errorMessage: 'Could not fetch recipes.',
 });
@@ -31,8 +31,8 @@ const {items: recipes, isLoading, hasMore} = usePagination<Recipe>({
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-4">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Recipes</h1>
-                    <p v-if="recipes.length > 0" class="text-sm text-gray-600">
-                        {{ recipes.length }} recipe{{ recipes.length !== 1 ? 's' : '' }}
+                    <p v-if="allRows > 0" class="text-sm text-gray-600">
+                        {{ allRows }} recipe{{ allRows !== 1 ? 's' : '' }}
                     </p>
                 </div>
 
