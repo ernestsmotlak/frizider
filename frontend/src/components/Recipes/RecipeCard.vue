@@ -22,14 +22,14 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
 </script>
 
 <template>
-    <div 
-        @click="handleClick" 
+    <div
+        @click="handleClick"
         class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden border border-gray-100 active:scale-[0.98]"
     >
         <div class="relative w-full aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-            <img 
-                v-if="recipe.image_url" 
-                :src="recipe.image_url" 
+            <img
+                v-if="recipe.image_url"
+                :src="recipe.image_url"
                 :alt="recipe.name"
                 class="w-full h-full object-cover"
             />
@@ -40,10 +40,10 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
             </div>
         </div>
         <div class="p-4">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 break-words">
                 {{ recipe.name }}
             </h3>
-            <p v-if="recipe.description" class="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+            <p v-if="recipe.description" class="text-sm text-gray-600 line-clamp-2 leading-relaxed break-words">
                 {{ truncateDescription(recipe.description, 80) }}
             </p>
             <p v-else class="text-sm text-gray-400 italic">
@@ -59,5 +59,11 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.break-words {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
 }
 </style>
