@@ -23,12 +23,20 @@ const createRecipe = () => {
         return;
     }
 
+    const parseInteger = (value: string): number | null => {
+        if (!value || value.trim() === '') {
+            return null;
+        }
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? null : parsed;
+    };
+
     const payload = {
         name: formData.value.name,
         description: formData.value.description || null,
-        servings: formData.value.servings ? parseInt(formData.value.servings) : null,
-        prep_time: formData.value.prep_time ? parseInt(formData.value.prep_time) : null,
-        cook_time: formData.value.cook_time ? parseInt(formData.value.cook_time) : null
+        servings: parseInteger(formData.value.servings),
+        prep_time: parseInteger(formData.value.prep_time),
+        cook_time: parseInteger(formData.value.cook_time)
     };
 
     loadingStore.start();
@@ -99,7 +107,7 @@ const handleCancel = () => {
                                         type="number"
                                         min="1"
                                         class="w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
-                                        placeholder="N/A"
+                                        placeholder="4"
                                     />
                                 </div>
                             </div>
@@ -118,7 +126,7 @@ const handleCancel = () => {
                                         type="number"
                                         min="0"
                                         class="w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                                        placeholder="N/A"
+                                        placeholder="15"
                                     />
                                 </div>
                             </div>
@@ -137,7 +145,7 @@ const handleCancel = () => {
                                         type="number"
                                         min="0"
                                         class="w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
-                                        placeholder="N/A"
+                                        placeholder="30"
                                     />
                                 </div>
                             </div>
