@@ -1,3 +1,28 @@
+<script setup lang="ts">
+import {computed} from "vue";
+import {useRoute} from "vue-router";
+
+const route = useRoute();
+
+const isRecipesTab = computed(() => {
+    if (route.path.startsWith('/recipes')) return true;
+    if (route.path.includes('/recipe')) return true;
+    return false;
+});
+
+const isShoppingList = computed(() => {
+    if (route.path.startsWith('/shopping-lists')) return true;
+    if (route.path.includes('/shopping-list')) return true;
+    return false;
+});
+
+const isIngredientsTab = computed(() => {
+    if (route.path.startsWith('/ingredients')) return true;
+    if (route.path.includes('/ingredient')) return true;
+    return false;
+});
+</script>
+
 <template>
     <div class="min-h-screen bg-green-100 pb-16">
         <div class="max-w-md mx-auto min-h-screen">
@@ -9,28 +34,25 @@
             <router-link
                 to="/shopping-list"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                active-class="!text-green-600 !bg-green-50 border-t-2 border-green-600"
+                :class="isShoppingList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : '' "
             >
                 <span class="text-sm font-medium">Shopping list</span>
             </router-link>
             <router-link
                 to="/ingredients"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                active-class="!text-green-600 !bg-green-50 border-t-2 border-green-600"
+                :class="isIngredientsTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : '' "
             >
                 <span class="text-sm font-medium">Ingredients</span>
             </router-link>
             <router-link
                 to="/recipes"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                active-class="!text-green-600 !bg-green-50 border-t-2 border-green-600"
+                :class="isRecipesTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : '' "
             >
                 <span class="text-sm font-medium">Recipes</span>
             </router-link>
         </div>
     </nav>
 </template>
-
-<script setup lang="ts">
-</script>
 
