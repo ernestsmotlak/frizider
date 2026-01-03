@@ -19,7 +19,7 @@ const handleRecipeClick = (recipe_id: number) => {
 }
 
 const handleAddRecipe = () => {
-    router.push('/recipe/new');
+    router.push('/new/recipe');
 }
 
 const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
