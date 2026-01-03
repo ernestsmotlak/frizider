@@ -263,7 +263,7 @@ const addIngredient = () => {
 </script>
 
 <template>
-    <div class="bg-white rounded-2xl shadow-xl p-8 relative">
+    <div class="bg-white rounded-2xl shadow-xl p-8 relative border-2 border-gray-200">
         <div class="absolute top-2 right-2 flex gap-2">
 <!--            <button @click="openQuillModal"-->
 <!--                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200"-->
