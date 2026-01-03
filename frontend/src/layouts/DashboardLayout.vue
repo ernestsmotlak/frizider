@@ -34,21 +34,21 @@ const isIngredientsTab = computed(() => {
             <router-link
                 to="/shopping-list"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                :class="isShoppingList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : '' "
+                :class="isShoppingList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
             >
                 <span class="text-sm font-medium">Shopping list</span>
             </router-link>
             <router-link
                 to="/ingredients"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                :class="isIngredientsTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : '' "
+                :class="isIngredientsTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
             >
                 <span class="text-sm font-medium">Ingredients</span>
             </router-link>
             <router-link
                 to="/recipes"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                :class="isRecipesTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : '' "
+                :class="isRecipesTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
             >
                 <span class="text-sm font-medium">Recipes</span>
             </router-link>
