@@ -27,12 +27,12 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
         class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden border border-gray-100 active:scale-[0.98]"
     >
         <div class="relative w-full aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-            <img
+            <span
                 v-if="recipe.image_url"
-                :src="recipe.image_url"
-                :alt="recipe.name"
                 class="w-full h-full object-cover"
-            />
+            >
+                {{recipe?.image_url}}
+            </span>
             <div v-else class="w-full h-full flex items-center justify-center">
                 <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
