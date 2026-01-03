@@ -234,3 +234,12 @@ frontend/src/
 - Maintained existing backdrop blur and transparency effects
 - All buttons now provide consistent, polished interaction patterns
 
+---
+
+### 2025-01-XX - Responsive Design Fixes
+
+#### Frontend Improvements
+
+**RecipePage Component:**
+- ❌ TODO: Fix smaller screen alignment for `frontend/src/pages/Recipe/RecipePage.vue`
+

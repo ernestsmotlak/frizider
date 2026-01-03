@@ -29,7 +29,7 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
         <div class="relative w-full aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <span
                 v-if="recipe.image_url"
-                class="w-full h-full object-cover"
+                class="w-full h-full flex items-center justify-center text-6xl"
             >
                 {{recipe?.image_url}}
             </span>
