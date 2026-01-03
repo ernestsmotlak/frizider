@@ -27,7 +27,7 @@ const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
 
 <template>
     <DashboardLayout>
-        <div class="pt-7">
+        <div class="pt-7 px-5">
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-4">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Recipes</h1>
