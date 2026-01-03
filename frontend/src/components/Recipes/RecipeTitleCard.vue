@@ -149,8 +149,8 @@ const deleteRecipe = async () => {
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                     </svg>
                 </button>
-                
-                <div v-if="isMenuOpen" 
+
+                <div v-if="isMenuOpen"
                      class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50"
                      @click.stop>
                     <button @click.stop="handleEdit"
@@ -173,16 +173,19 @@ const deleteRecipe = async () => {
             </div>
         </div>
 
-        <div v-if="recipe.image_url" class="w-full h-64 md:h-96 bg-gray-200">
-            <img :src="recipe.image_url" :alt="recipe.name" class="w-full h-full object-cover">
-        </div>
-
         <div class="p-8 space-y-6">
-            <div>
-                <h1 class="text-4xl font-bold text-gray-900 mb-3 max-w-[330px]">{{ recipe.name }}</h1>
-                <p v-if="recipe.description" class="text-lg text-gray-600 leading-relaxed">
-                    {{ recipe.description }}
-                </p>
+            <div class="flex items-start gap-4">
+                <div v-if="recipe.image_url" class="flex-shrink-0">
+                    <div class="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-5xl md:text-6xl">
+                        {{recipe.image_url}}
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-4xl font-bold text-gray-900 mb-3">{{ recipe.name }}</h1>
+                    <p v-if="recipe.description" class="text-lg text-gray-600 leading-relaxed">
+                        {{ recipe.description }}
+                    </p>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 gap-4 pt-4 border-t border-gray-200">

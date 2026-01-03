@@ -78,6 +78,7 @@ onMounted(() => {
                 <p class="text-red-600 font-medium">{{ errorMessage }}</p>
             </div>
 
+
             <div v-if="recipeData" class="space-y-6">
                 <RecipeTitleCard v-if="recipeData"
                                  :recipe="recipeData"
