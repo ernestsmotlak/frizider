@@ -18,6 +18,10 @@ const handleRecipeClick = (recipe_id: number) => {
     router.push('/recipe/' + recipe_id);
 }
 
+const handleAddRecipe = () => {
+    router.push('/recipe/new');
+}
+
 const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
     endpoint: '/api/get-recipes',
     errorMessage: 'Could not fetch recipes.',
@@ -30,7 +34,18 @@ const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
         <div class="pt-7 px-5">
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-4">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Recipes</h1>
+                    <div class="flex items-center justify-between mb-1">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Recipes</h1>
+                        <button
+                            @click="handleAddRecipe"
+                            class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                        >
+                            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <p v-if="allRows > 0" class="text-sm text-gray-600">
                         {{ allRows }} recipe{{ allRows !== 1 ? 's' : '' }}
                     </p>
