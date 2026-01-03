@@ -293,7 +293,7 @@ const addIngredient = () => {
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
         <ul v-if="ingredients && ingredients.length > 0" class="space-y-2.5">
             <li v-for="(ingredient, index) in sortedIngredients(ingredients)" :key="ingredient.id ?? `ingredient-${index}`"
-                class="ingredient-item flex items-center gap-3 px-4 py-3 bg-gray-100 rounded-lg border border-gray-100 hover:bg-gray-200 hover:border-gray-200 transition-all duration-250">
+                class="ingredient-item flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250">
                 <svg class="w-2.5 h-2.5 text-gray-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 8 8">
                     <circle cx="4" cy="4" r="3"/>
                 </svg>
