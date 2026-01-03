@@ -6,6 +6,7 @@ import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
 import {useRouter} from "vue-router";
+import "emoji-picker-element";
 
 const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
@@ -33,13 +34,15 @@ const emit = defineEmits<{
 
 const isModalOpen = ref(false);
 const isMenuOpen = ref(false);
+const showEmojiPicker = ref(false);
 
 const formData = ref({
     name: "",
     description: "",
     servings: "",
     prep_time: "",
-    cook_time: ""
+    cook_time: "",
+    emoji: ""
 });
 
 const openModal = () => {
@@ -48,9 +51,16 @@ const openModal = () => {
         description: props.recipe.description || "",
         servings: props.recipe.servings?.toString() || "",
         prep_time: props.recipe.prep_time?.toString() || "",
-        cook_time: props.recipe.cook_time?.toString() || ""
+        cook_time: props.recipe.cook_time?.toString() || "",
+        emoji: props.recipe.image_url || ""
     };
+    showEmojiPicker.value = false;
     isModalOpen.value = true;
+};
+
+const handleEmojiSelect = (event: CustomEvent) => {
+    formData.value.emoji = event.detail?.unicode || "";
+    showEmojiPicker.value = false;
 };
 
 const updateRecipe = () => {
@@ -59,7 +69,8 @@ const updateRecipe = () => {
         description: formData.value.description,
         servings: formData.value.servings,
         prep_time: formData.value.prep_time,
-        cook_time: formData.value.cook_time
+        cook_time: formData.value.cook_time,
+        image_url: formData.value.emoji || null
     };
 
     loadingStore.start();
@@ -249,6 +260,41 @@ const deleteRecipe = async () => {
         </template>
         <template #body>
             <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recipe Emoji</label>
+                    <div class="flex items-center gap-3">
+                        <div
+                            v-if="formData.emoji"
+                            class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl cursor-pointer hover:bg-gray-200 transition-colors"
+                            @click="showEmojiPicker = !showEmojiPicker"
+                        >
+                            {{ formData.emoji }}
+                        </div>
+                        <button
+                            v-else
+                            type="button"
+                            @click="showEmojiPicker = !showEmojiPicker"
+                            class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                        >
+                            🥪
+                        </button>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-600">
+                                {{ formData.emoji ? "Click emoji to change" : "Click to select an emoji" }}
+                            </p>
+                        </div>
+                    </div>
+                    <div
+                        v-if="showEmojiPicker"
+                        class="mt-3 relative"
+                    >
+                        <emoji-picker
+                            @emoji-click="handleEmojiSelect"
+                            class="w-full"
+                        ></emoji-picker>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Recipe Name</label>
                     <input
