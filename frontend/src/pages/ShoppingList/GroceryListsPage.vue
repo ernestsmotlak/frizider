@@ -3,17 +3,24 @@ import DashboardLayout from "../../layouts/DashboardLayout.vue";
 import {usePagination} from "../../composables/usePagination.ts";
 
 export interface GroceryList {
-
+    user_id: number;
+    name: string;
+    notes: string | null;
+    completed_at: string | null;
 }
 
-// const {items: recipes, isLoading, hasMore} =
+const {items: groceryLists, isLoading, hasMore} = usePagination<GroceryList>({
+    endpoint: '/api/get-grocery-lists',
+    errorMessage: 'Could not fetch shopping lists.',
+})
 </script>
 
 <template>
-  <DashboardLayout>
-    <div class="p-6 text-center">
-      <h1 class="text-3xl font-bold text-gray-800 mb-4">Welcome to Shopping Lists</h1>
-    </div>
-  </DashboardLayout>
+    <DashboardLayout>
+        <div class="p-6 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Welcome to Shopping Lists</h1>
+        </div>
+        <pre>{{ groceryLists }}</pre>
+    </DashboardLayout>
 </template>
 

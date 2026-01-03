@@ -21,6 +21,17 @@ class GroceryListController extends Controller
         ]);
     }
 
+    public function paginateGroceryLists(Request $request)
+    {
+        $userLists = GroceryList::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->simplePaginate(
+                $request->integer('per_page', 10)
+            );
+
+        return response()->json(['data' => $userLists]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
