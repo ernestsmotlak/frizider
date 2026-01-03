@@ -23,13 +23,19 @@ class GroceryListController extends Controller
 
     public function paginateGroceryLists(Request $request)
     {
-        $userLists = GroceryList::where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->simplePaginate(
-                $request->integer('per_page', 10)
-            );
+        $perPage = $request->integer('per_page', 10);
 
-        return response()->json(['data' => $userLists]);
+        $query = GroceryList::query()
+            ->where('user_id', auth()->id())
+            ->orderByDesc('created_at');
+
+        $userLists = $query->simplePaginate($perPage);
+        $total = (clone $query)->count();
+
+        return response()->json([
+            'data' => $userLists,
+            'allRecipes' => $total, // consider renaming to 'total'
+        ]);
     }
 
     /**
