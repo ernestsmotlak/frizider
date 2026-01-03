@@ -4,6 +4,7 @@ import {ref} from "vue";
 import {useRouter} from "vue-router";
 import {useToastStore} from "../stores/toast.ts";
 import {useLoadingStore} from "../stores/loading.ts";
+import "emoji-picker-element";
 
 const router = useRouter();
 const toastStore = useToastStore();
@@ -14,8 +15,16 @@ const formData = ref({
     description: "",
     servings: "",
     prep_time: "",
-    cook_time: ""
+    cook_time: "",
+    emoji: ""
 });
+
+const showEmojiPicker = ref(false);
+
+const handleEmojiSelect = (event: CustomEvent) => {
+    formData.value.emoji = event.detail?.unicode || "";
+    showEmojiPicker.value = false;
+};
 
 const createRecipe = () => {
     if (!formData.value.name.trim()) {
@@ -36,7 +45,8 @@ const createRecipe = () => {
         description: formData.value.description || null,
         servings: parseInteger(formData.value.servings),
         prep_time: parseInteger(formData.value.prep_time),
-        cook_time: parseInteger(formData.value.cook_time)
+        cook_time: parseInteger(formData.value.cook_time),
+        image_url: formData.value.emoji || null
     };
 
     loadingStore.start();
@@ -71,6 +81,41 @@ const handleCancel = () => {
                         <h1 class="text-4xl font-bold text-gray-900 mb-6">Create New Recipe</h1>
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Recipe Emoji</label>
+                        <div class="flex items-center gap-3">
+                            <div
+                                v-if="formData.emoji"
+                                class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl cursor-pointer hover:bg-gray-200 transition-colors"
+                                @click="showEmojiPicker = !showEmojiPicker"
+                            >
+                                {{ formData.emoji }}
+                            </div>
+                            <button
+                                v-else
+                                type="button"
+                                @click="showEmojiPicker = !showEmojiPicker"
+                                class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                            >
+                                🥪
+                            </button>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-600">
+                                    {{ formData.emoji ? "Click emoji to change" : "Click to select an emoji" }}
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            v-if="showEmojiPicker"
+                            class="mt-3 relative"
+                        >
+                            <emoji-picker
+                                @emoji-click="handleEmojiSelect"
+                                class="w-full"
+                            ></emoji-picker>
+                        </div>
+                    </div>
+
                     <div class="space-y-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Recipe Name *</label>
@@ -94,8 +139,10 @@ const handleCancel = () => {
 
                         <div class="grid grid-cols-1 gap-4 pt-4 border-t border-gray-200">
                             <div class="flex items-center gap-3">
-                                <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                     </svg>
@@ -113,14 +160,17 @@ const handleCancel = () => {
                             </div>
 
                             <div class="flex items-center gap-3">
-                                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <label class="block text-sm text-gray-500 font-medium mb-1">Prep Time (minutes)</label>
+                                    <label class="block text-sm text-gray-500 font-medium mb-1">Prep Time
+                                        (minutes)</label>
                                     <input
                                         v-model="formData.prep_time"
                                         type="number"
@@ -132,14 +182,17 @@ const handleCancel = () => {
                             </div>
 
                             <div class="flex items-center gap-3">
-                                <div class="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <label class="block text-sm text-gray-500 font-medium mb-1">Cook Time (minutes)</label>
+                                    <label class="block text-sm text-gray-500 font-medium mb-1">Cook Time
+                                        (minutes)</label>
                                     <input
                                         v-model="formData.cook_time"
                                         type="number"
