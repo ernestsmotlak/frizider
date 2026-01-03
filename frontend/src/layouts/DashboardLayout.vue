@@ -10,9 +10,9 @@ const isRecipesTab = computed(() => {
     return false;
 });
 
-const isShoppingList = computed(() => {
-    if (route.path.startsWith('/shopping-lists')) return true;
-    if (route.path.includes('/shopping-list')) return true;
+const isGroceryList = computed(() => {
+    if (route.path.startsWith('/grocery-lists')) return true;
+    if (route.path.includes('/grocery-list')) return true;
     return false;
 });
 
@@ -34,7 +34,7 @@ const isIngredientsTab = computed(() => {
             <router-link
                 to="/grocery-list"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                :class="isShoppingList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
+                :class="isGroceryList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
             >
                 <span class="text-sm font-medium">Grocery list</span>
             </router-link>
