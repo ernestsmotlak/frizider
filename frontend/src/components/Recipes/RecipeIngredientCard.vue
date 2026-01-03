@@ -326,7 +326,7 @@ const addIngredient = () => {
                 <div v-for="(ingredient, index) in sortedFormData"
                      :key="ingredient.id ?? `new-${index}`"
                      :ref="(el) => { if (index === sortedFormData.length - 1) lastIngredientRef = el as HTMLElement }"
-                     class="p-3 sm:p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors relative shadow-md">
+                     class="ingredient-card p-3 sm:p-4 bg-white rounded-lg border border-gray-200 transition-all relative shadow-md">
                     <button
                         @click="deleteIngredient(ingredient)"
                         class="absolute top-0.25 right-0 p-2 rounded-lg active:scale-95 transition-transform duration-200"
@@ -556,6 +556,24 @@ const addIngredient = () => {
 :deep(.ql-container) {
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
+}
+
+.ingredient-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.ingredient-card:hover {
+    border-color: rgb(148 163 184);
+    border-width: 2px;
+    box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+}
+
+.ingredient-card:has(input:focus),
+.ingredient-card:has(input:focus-visible) {
+    border-color: rgb(148 163 184);
+    border-width: 2px;
+    box-shadow: 0 4px 6px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+    background-color: rgb(250 250 250);
 }
 </style>
 
