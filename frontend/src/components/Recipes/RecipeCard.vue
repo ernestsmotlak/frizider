@@ -44,7 +44,7 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
                 {{ recipe.name }}
             </h3>
             <p v-if="recipe.description" class="text-sm text-gray-600 line-clamp-2 leading-relaxed break-words">
-                {{ truncateDescription(recipe.description, 80) }}
+                {{ truncateDescription(recipe.description, 100) }}
             </p>
             <p v-else class="text-sm text-gray-400 italic">
                 No description
