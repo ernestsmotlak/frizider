@@ -291,13 +291,13 @@ const addIngredient = () => {
             </button>
         </div>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
-        <ul v-if="ingredients && ingredients.length > 0" class="space-y-2">
-            <li v-for="ingredient in sortedIngredients(ingredients)" :key="ingredient.id"
-                class="flex items-center gap-2">
-                <svg class="w-2 h-2 text-black flex-shrink-0" fill="currentColor" viewBox="0 0 8 8">
+        <ul v-if="ingredients && ingredients.length > 0" class="space-y-2.5">
+            <li v-for="(ingredient, index) in sortedIngredients(ingredients)" :key="ingredient.id ?? `ingredient-${index}`"
+                class="ingredient-item flex items-center gap-3 px-4 py-3 bg-gray-100 rounded-lg border border-gray-100 hover:bg-gray-200 hover:border-gray-200 transition-all duration-250">
+                <svg class="w-2.5 h-2.5 text-gray-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 8 8">
                     <circle cx="4" cy="4" r="3"/>
                 </svg>
-                <span class="text-gray-700 leading-relaxed">{{ formatIngredient(ingredient) }}</span>
+                <span class="text-gray-800 leading-relaxed text-[15px] font-medium">{{ formatIngredient(ingredient) }}</span>
             </li>
         </ul>
         <div v-else class="text-center py-8">
@@ -559,7 +559,7 @@ const addIngredient = () => {
 }
 
 .ingredient-card {
-    transition: all 0.2s ease-in-out;
+    transition: all 0.1s ease-in-out;
 }
 
 .ingredient-card:hover {
