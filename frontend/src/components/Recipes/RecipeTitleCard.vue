@@ -194,8 +194,8 @@ const deleteRecipe = async () => {
                         {{ recipe.image_url }}
                     </div>
                 </div>
-                <div class="flex-1 min-w-0 max-[450px]:flex-1 max-[450px]:w-full max-[450px]:text-center">
-                    <h1 class="text-4xl font-bold text-gray-900 mb-3 max-[450px]:text-3xl max-[450px]:mb-2">
+                <div class="flex-1 min-w-0 max-[450px]:flex-1 max-[450px]:w-full max-[450px]:text-center max-[450px]:text-base">
+                    <h1 class="text-4xl font-bold text-gray-900 mb-3 max-[450px]:text-3xl max-[450px]:mb-2 max-w-[220px] break-words mx-auto">
                         {{ recipe.name }}</h1>
                     <p v-if="recipe.description" class="text-lg text-gray-600 leading-relaxed max-[450px]:text-base">
                         {{ recipe.description }}
