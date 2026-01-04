@@ -75,9 +75,9 @@ onMounted(() => {
 <template>
     <DashboardLayout>
         <div class="p-6 max-w-4xl mx-auto">
-            <div class="mb-6">
-                <BackButton to="/recipes" />
-            </div>
+<!--            <div class="mb-6">-->
+<!--                <BackButton to="/recipes" />-->
+<!--            </div>-->
 
             <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                 <p class="text-red-600 font-medium">{{ errorMessage }}</p>

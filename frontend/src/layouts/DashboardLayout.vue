@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {computed} from "vue";
 import {useRoute} from "vue-router";
+import BackButton from "../components/BackButton.vue";
+import LogoComponent from "../components/LogoComponent.vue";
 
 const route = useRoute();
 
@@ -25,6 +27,14 @@ const isIngredientsTab = computed(() => {
 
 <template>
     <div class="min-h-screen bg-green-100 pb-16">
+        <div class="max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
+            <div class="">
+                <BackButton to="/recipes"/>
+            </div>
+            <div class="">
+                <LogoComponent/>
+            </div>
+        </div>
         <div class="max-w-md mx-auto min-h-screen">
             <slot/>
         </div>
