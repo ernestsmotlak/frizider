@@ -156,8 +156,10 @@ const deleteRecipe = async () => {
             <div class="relative menu-container">
                 <button @click.stop="toggleMenu"
                         class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
-                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                     </svg>
                 </button>
 
@@ -187,12 +189,14 @@ const deleteRecipe = async () => {
         <div class="p-8 space-y-6">
             <div class="flex items-start gap-4 max-[450px]:flex-col max-[450px]:items-center max-[450px]:gap-2">
                 <div v-if="recipe.image_url" class="flex-shrink-0">
-                    <div class="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-5xl md:text-6xl">
-                        {{recipe.image_url}}
+                    <div
+                        class="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-5xl md:text-6xl">
+                        {{ recipe.image_url }}
                     </div>
                 </div>
                 <div class="flex-1 min-w-0 max-[450px]:flex-1 max-[450px]:w-full max-[450px]:text-center">
-                    <h1 class="text-4xl font-bold text-gray-900 mb-3 max-[450px]:text-3xl max-[450px]:mb-2">{{ recipe.name }}</h1>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-3 max-[450px]:text-3xl max-[450px]:mb-2">
+                        {{ recipe.name }}</h1>
                     <p v-if="recipe.description" class="text-lg text-gray-600 leading-relaxed max-[450px]:text-base">
                         {{ recipe.description }}
                     </p>
