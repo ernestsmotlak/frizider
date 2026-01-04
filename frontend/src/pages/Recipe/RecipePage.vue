@@ -3,6 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.vue";
 import RecipeTitleCard from "../../components/Recipes/RecipeTitleCard.vue";
 import RecipeIngredientCard from "../../components/Recipes/RecipeIngredientCard.vue";
 import RecipeInstructionsCard from "../../components/Recipes/RecipeInstructionsCard.vue";
+import BackButton from "../../components/BackButton.vue";
 import {useRoute} from "vue-router";
 import {onMounted, ref} from "vue";
 import {useToastStore} from "../../stores/toast.ts";
@@ -74,6 +75,10 @@ onMounted(() => {
 <template>
     <DashboardLayout>
         <div class="p-6 max-w-4xl mx-auto">
+            <div class="mb-6">
+                <BackButton to="/recipes" />
+            </div>
+
             <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                 <p class="text-red-600 font-medium">{{ errorMessage }}</p>
             </div>
