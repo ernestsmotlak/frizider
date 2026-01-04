@@ -35,7 +35,7 @@ const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-4">
                     <div class="flex items-center justify-between mb-1">
-                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Recipes</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">Recipes</h1>
                         <button
                             @click="handleAddRecipe"
                             class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
@@ -65,7 +65,7 @@ const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
                 </div>
 
                 <div v-else class="px-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 gap-4">
                         <RecipeCard
                             v-for="recipe in recipes"
                             :key="recipe.id"
