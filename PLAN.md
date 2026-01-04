@@ -236,6 +236,30 @@ frontend/src/
 
 ---
 
+### 2025-01-XX - Recipe Card Layout & UI Improvements
+
+#### Frontend Improvements
+
+**RecipeCard Component (`frontend/src/components/Recipes/RecipeCard.vue`):**
+- ✅ Fixed layout for larger screens (sm and above) to properly display title and description
+- ✅ Changed placeholder SVG icon from book icon to recipe-related document icon
+- ✅ Improved content alignment on larger screens with `sm:justify-start` for better text positioning
+- ✅ Added `line-clamp-3` support for description on larger screens (shows up to 3 lines instead of 1)
+
+**RecipeTitleCard Component (`frontend/src/components/Recipes/RecipeTitleCard.vue`):**
+- ✅ Fixed title centering issue when using `max-w-[220px]` constraint
+- ✅ Added `mx-auto` to center the h1 element horizontally, matching the description alignment
+- ✅ Added `break-words` to ensure long recipe titles wrap properly instead of overlapping the menu button
+- ✅ Title now properly wraps to new lines when exceeding 220px width, preventing overlap with the three-dot menu button
+
+#### Technical Details
+- Used Tailwind CSS responsive utilities (`sm:`) for larger screen layouts
+- Implemented proper text wrapping with `break-words` and `line-clamp` utilities
+- Fixed flexbox alignment issues with `mx-auto` for centered elements with max-width constraints
+- Maintained small screen layout (mobile-first approach) while improving larger screen experience
+
+---
+
 ### 2025-01-XX - Responsive Design Fixes
 
 #### Frontend Improvements
