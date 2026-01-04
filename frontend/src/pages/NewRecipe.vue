@@ -93,7 +93,7 @@ const handleCancel = () => {
                         <div class="flex items-center gap-3">
                             <div
                                 v-if="formData.emoji"
-                                class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl cursor-pointer hover:bg-gray-200 transition-colors"
+                                class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl cursor-pointer hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
                                 @click="showEmojiPicker = !showEmojiPicker"
                             >
                                 {{ formData.emoji }}
@@ -102,7 +102,7 @@ const handleCancel = () => {
                                 v-else
                                 type="button"
                                 @click="showEmojiPicker = !showEmojiPicker"
-                                class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                                class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
                             >
                                 🥪
                             </button>
@@ -233,5 +233,16 @@ const handleCancel = () => {
 </template>
 
 <style scoped>
+@keyframes pulsate {
+    0%, 100% {
+        background-color: rgb(243, 244, 246);
+    }
+    50% {
+        background-color: rgb(229, 231, 235);
+    }
+}
 
+.emoji-pulsate {
+    animation: pulsate 1.25s ease-in-out infinite;
+}
 </style>
