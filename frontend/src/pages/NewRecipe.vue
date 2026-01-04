@@ -106,7 +106,7 @@ const handleCancel = () => {
                                 v-else
                                 type="button"
                                 @click="showEmojiPicker = !showEmojiPicker"
-                                class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                                class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
                             >
                                 🥪
                             </button>
