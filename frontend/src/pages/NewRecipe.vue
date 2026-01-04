@@ -5,7 +5,6 @@ import {useRouter} from "vue-router";
 import {useToastStore} from "../stores/toast.ts";
 import {useLoadingStore} from "../stores/loading.ts";
 import "emoji-picker-element";
-import BackButton from "../components/BackButton.vue";
 
 const router = useRouter();
 const toastStore = useToastStore();
@@ -83,9 +82,6 @@ const handleCancel = () => {
 <template>
     <DashboardLayout>
         <div class="p-6 max-w-4xl mx-auto">
-            <div class="mb-5">
-                <BackButton/>
-            </div>
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden relative border-2 border-gray-200">
                 <div class="p-8 space-y-6">
                     <div>
