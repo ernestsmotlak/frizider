@@ -233,16 +233,5 @@ const handleCancel = () => {
 </template>
 
 <style scoped>
-@keyframes pulsate {
-    0%, 100% {
-        background-color: rgb(243, 244, 246);
-    }
-    50% {
-        background-color: rgb(229, 231, 235);
-    }
-}
 
-.emoji-pulsate {
-    animation: pulsate 1.25s ease-in-out infinite;
-}
 </style>
