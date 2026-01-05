@@ -4,7 +4,6 @@ import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
-import {VueDraggable} from 'vue-draggable-plus';
 
 interface RecipeInstruction {
     id: number | null;
@@ -147,19 +146,13 @@ const sortedInstructions = (instructions: RecipeInstruction[]): RecipeInstructio
 
 const sortedFormData = computed(() => sortedInstructions(formData.value));
 
-const onDragEnd = () => {
-    formData.value.forEach((instruction, index) => {
-        instruction.sort_order = index;
-    });
-};
-
 const updateInstructions = () => {
     const recipeId = props.recipeId;
     const payload = {
-        instructions: formData.value.map((instruction, index) => ({
+        instructions: sortedFormData.value.map((instruction, index) => ({
             id: instruction.id,
             instruction: instruction.instruction,
-            sort_order: instruction.sort_order ?? index,
+            sort_order: index,
             completed: instruction.completed ?? false,
         }))
     };
@@ -300,41 +293,31 @@ const toggleStep = (instruction: RecipeInstruction) => {
         </template>
         <template #body>
             <div class="space-y-4">
-                <VueDraggable
-                    v-model="formData"
-                    @end="onDragEnd"
-                    handle=".drag-handle"
-                    item-key="id"
+                <div
+                    v-for="(instruction, index) in sortedFormData"
+                    :key="instruction.id ?? `instruction-${index}`"
+                    class="instruction-card p-3 sm:p-4 bg-white rounded-lg border border-gray-200 transition-all relative shadow-md mb-4"
                 >
-                    <template #item="{ element: instruction, index }">
-                        <div class="instruction-card p-3 sm:p-4 bg-white rounded-lg border border-gray-200 transition-all relative shadow-md mb-4">
-                            <button
-                                @click="deleteInstruction(instruction)"
-                                class="absolute top-0.25 right-0 p-2 rounded-lg active:scale-95 transition-transform duration-200"
-                            >
-                                <svg
-                                    class="w-5 h-5 text-red-700 hover:text-red-700 transition-all duration-200 hover:scale-150"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"></path>
-                                </svg>
-                            </button>
-                            <div class="flex items-start gap-3">
-                                <div class="drag-handle cursor-move p-2 hover:bg-gray-100 rounded">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
-                                    </svg>
-                                </div>
-                                <textarea
-                                    v-model="instruction.instruction"
-                                    rows="2"
-                                    class="flex-1 px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                    placeholder="Enter instruction step..."
-                                />
-                            </div>
-                        </div>
-                    </template>
-                </VueDraggable>
+                    <button
+                        @click="deleteInstruction(instruction)"
+                        class="absolute top-0.25 right-0 p-2 rounded-lg active:scale-95 transition-transform duration-200"
+                    >
+                        <svg
+                            class="w-5 h-5 text-red-700 hover:text-red-700 transition-all duration-200 hover:scale-150"
+                            fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"></path>
+                        </svg>
+                    </button>
+                    <div class="flex items-start gap-3">
+                        <textarea
+                            v-model="instruction.instruction"
+                            rows="2"
+                            class="flex-1 px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                            placeholder="Enter instruction step..."
+                        />
+                    </div>
+                </div>
             </div>
         </template>
         <template #footer>
