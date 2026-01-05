@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, nextTick, computed, watch} from "vue";
+import {ref, nextTick, computed} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
