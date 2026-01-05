@@ -253,7 +253,7 @@ class RecipeController extends Controller
 
         return response()->json([
             'message' => 'Instruction status updated.',
-            'data' => $recipeModel->fresh()->load('recipeInstructions'),
+            'data' => $recipeModel->fresh()->load(['recipeInstructions', 'recipeIngredients']),
         ]);
     }
 }
