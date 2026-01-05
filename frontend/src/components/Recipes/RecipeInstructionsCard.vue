@@ -440,4 +440,59 @@ const toggleStep = (instruction: RecipeInstruction) => {
     border-width: 2px;
     box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
 }
+
+/* Styles for dragged item */
+:deep(.sortable-drag) {
+    opacity: 0.8;
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.15);
+    border: 2px solid rgb(59 130 246);
+    background: rgb(239 246 255);
+    z-index: 1000;
+}
+
+/* Styles for placeholder (where item will be dropped) */
+:deep(.sortable-ghost) {
+    opacity: 0.4;
+    background: rgb(229 231 235);
+    border: 2px dashed rgb(156 163 175);
+    border-radius: 0.5rem;
+}
+
+/* Styles for item being dragged */
+:deep(li.sortable-drag) {
+    cursor: grabbing !important;
+}
+
+/* Styles for items NOT being dragged - when dragging is active */
+:deep(ol.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost) {
+    transition: all 0.2s ease;
+    border-color: rgb(229 231 235);
+    background: rgb(249 250 251);
+}
+
+/* When dragging, make non-dragged items slightly dimmed */
+:deep(ol.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost) {
+    opacity: 0.7;
+    transform: scale(0.98);
+}
+
+/* Hover effect on non-dragged items during drag */
+:deep(ol.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost):hover {
+    opacity: 0.85;
+    transform: scale(0.99);
+    border-color: rgb(209 213 219);
+    background: rgb(243 244 246);
+}
+
+/* Make the drag handle more prominent on non-dragged items during drag */
+:deep(ol.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost) .drag-handle {
+    background: rgb(243 244 246);
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.375rem;
+}
+
+/* Smooth transitions for all list items */
+:deep(ol li) {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 </style>
