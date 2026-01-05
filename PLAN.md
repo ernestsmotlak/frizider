@@ -84,6 +84,7 @@
 - Add validation to the ingredients modal
 - Make ingredients in Recipes.vue expandable: show symbol if they have a note, make all ingredients expandable, when extended show the notes part of RecipeIngredient
 - Add emoji/image picker using emoji-mart-vue: https://serebrov.github.io/emoji-mart-vue/
+- - ❌ TODO: Fix the edit and delete buttons going under the components and having opacity not set to full
 
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
