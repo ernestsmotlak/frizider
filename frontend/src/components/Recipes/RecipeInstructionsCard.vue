@@ -230,6 +230,10 @@ const toggleStep = (instruction: RecipeInstruction) => {
         .then((response) => {
             const updatedInstruction = response.data.data;
             const index = props.instructions.findIndex(i => i.id === instructionId);
+            // catch here the instructions please.
+            // and emit to parent if needed
+            // remove the other fetch please
+            //error message and in toast if error or anything else wrong.
             if (index > -1) {
                 props.instructions[index].completed = updatedInstruction.completed;
             }
@@ -268,15 +272,15 @@ const toggleStep = (instruction: RecipeInstruction) => {
         </div>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Instructions</h2>
         <ol v-if="instructions && instructions.length > 0" class="space-y-3">
-            <li v-for="(step, index) in sortedInstructions(instructions)" 
+            <li v-for="(step, index) in sortedInstructions(instructions)"
                 :key="step.id ?? `step-${index}`"
                 @click="toggleStep(step)"
                 :class="[
                     'flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer',
                     step.completed ? 'line-through opacity-60' : ''
                 ]">
-                <input 
-                    type="checkbox" 
+                <input
+                    type="checkbox"
                     :checked="step.completed"
                     @click.stop="toggleStep(step)"
                     class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"

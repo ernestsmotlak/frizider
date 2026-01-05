@@ -251,9 +251,11 @@ class RecipeController extends Controller
         $instructionModel->completed = !$instructionModel->completed;
         $instructionModel->save();
 
+
         return response()->json([
             'message' => 'Instruction status updated.',
             'data' => $instructionModel,
+            'instructions' => $recipeModel->recipeInstructions()->orderBy('sort_order')->get(),
         ]);
     }
 }
