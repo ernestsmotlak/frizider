@@ -24,9 +24,12 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::apiResource('recipes', RecipeController::class);
     Route::post('get-recipes', [RecipeController::class, 'paginateRecipes']);
     Route::post('recipes/{recipe}/ingredients', [RecipeController::class, 'updateIngredients']);
+    Route::post('recipes/{recipe}/instructions', [RecipeController::class, 'updateInstructions']);
 
     Route::apiResource('recipe-ingredients', RecipeIngredientController::class);
     Route::delete('recipe/{recipe}/ingredient/{ingredient}', [RecipeController::class, 'deleteIngredientFromRecipe']);
+    Route::delete('recipe/{recipe}/instruction/{instruction}', [RecipeController::class, 'deleteInstructionFromRecipe']);
+    Route::post('recipe/{recipe}/instruction/{instruction}/toggle-completed', [RecipeController::class, 'toggleInstructionCompleted']);
 
     Route::apiResource('grocery-lists', GroceryListController::class);
     Route::post('get-grocery-lists', [GroceryListController::class, 'paginateGroceryLists']);

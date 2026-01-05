@@ -15,7 +15,6 @@ class Recipe extends Model
         'user_id',
         'name',
         'description',
-        'instructions',
         'servings',
         'prep_time',
         'cook_time',
@@ -36,5 +35,10 @@ class Recipe extends Model
     public function recipeIngredients()
     {
         return $this->hasMany(RecipeIngredient::class);
+    }
+
+    public function recipeInstructions()
+    {
+        return $this->hasMany(RecipeInstruction::class);
     }
 }

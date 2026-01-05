@@ -18,16 +18,24 @@ interface RecipeIngredient {
     sort_order: number;
 }
 
+interface RecipeInstruction {
+    id: number;
+    recipe_id: number;
+    instruction: string;
+    sort_order: number;
+    completed: boolean;
+}
+
 interface Recipe {
     id: number;
     name: string;
     description: string | null;
-    instructions: string | null;
     servings: number | null;
     prep_time: number | null;
     cook_time: number | null;
     image_url: string | null;
     recipe_ingredients?: RecipeIngredient[];
+    recipe_instructions?: RecipeInstruction[];
 }
 
 const route = useRoute();
@@ -97,7 +105,7 @@ onMounted(() => {
 
                 <RecipeInstructionsCard
                     v-if="recipeData"
-                    :instructions="recipeData.instructions"
+                    :instructions="recipeData.recipe_instructions || []"
                     :recipe-id="recipeData.id"
                     @updated-recipe="handleUpdatedRecipe"
                 />

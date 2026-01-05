@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
+use App\Models\RecipeInstruction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -44,7 +45,6 @@ class RecipeController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'instructions' => 'nullable|string',
             'servings' => 'nullable|integer|min:1',
             'prep_time' => 'nullable|integer|min:0',
             'cook_time' => 'nullable|integer|min:0',
@@ -67,7 +67,7 @@ class RecipeController extends Controller
      */
     public function show(string $id)
     {
-        $recipe = Recipe::with('recipeIngredients')
+        $recipe = Recipe::with(['recipeIngredients', 'recipeInstructions'])
             ->where('user_id', auth()->id())
             ->where('id', $id)
             ->firstOrFail();
@@ -87,7 +87,6 @@ class RecipeController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'instructions' => 'nullable|string',
             'servings' => 'nullable|integer|min:1',
             'prep_time' => 'nullable|integer|min:0',
             'cook_time' => 'nullable|integer|min:0',
@@ -176,6 +175,85 @@ class RecipeController extends Controller
         return response()->json([
             'message' => 'Ingredient deleted successfully.',
             'data' => $recipeModel->fresh()->load('recipeIngredients'),
+        ]);
+    }
+
+    public function updateInstructions(Request $request, Recipe $recipe)
+    {
+        if ($recipe->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Not authorized.'], 403);
+        }
+
+        $validated = $request->validate([
+            'instructions' => ['required', 'array'],
+            'instructions.*.id' => [
+                'nullable',
+                'integer',
+                Rule::exists('recipe_instructions', 'id')->where('recipe_id', $recipe->id),
+            ],
+            'instructions.*.instruction' => ['required', 'string'],
+            'instructions.*.sort_order' => ['nullable', 'integer', 'min:0'],
+            'instructions.*.completed' => ['nullable', 'boolean'],
+        ]);
+
+        DB::transaction(function () use ($recipe, $validated) {
+            foreach ($validated['instructions'] as $index => $instruction) {
+                $data = [
+                    'instruction' => $instruction['instruction'],
+                    'sort_order' => $instruction['sort_order'] ?? $index,
+                ];
+
+                if (isset($instruction['completed'])) {
+                    $data['completed'] = $instruction['completed'];
+                }
+
+                $recipe->recipeInstructions()->updateOrCreate(
+                    ['id' => $instruction['id'] ?? null],
+                    $data
+                );
+            }
+        });
+
+        return response()->json([
+            'message' => 'Instructions updated.',
+            'data' => $recipe->fresh()->load(['recipeIngredients', 'recipeInstructions']),
+        ]);
+    }
+
+    public function deleteInstructionFromRecipe(string $recipe, string $instruction)
+    {
+        $recipeModel = Recipe::where('user_id', auth()->id())
+            ->where('id', $recipe)
+            ->firstOrFail();
+
+        $instructionModel = RecipeInstruction::where('recipe_id', $recipeModel->id)
+            ->where('id', $instruction)
+            ->firstOrFail();
+
+        $instructionModel->delete();
+
+        return response()->json([
+            'message' => 'Instruction deleted successfully.',
+            'data' => $recipeModel->fresh()->load(['recipeIngredients', 'recipeInstructions']),
+        ]);
+    }
+
+    public function toggleInstructionCompleted(string $recipe, string $instruction)
+    {
+        $recipeModel = Recipe::where('user_id', auth()->id())
+            ->where('id', $recipe)
+            ->firstOrFail();
+
+        $instructionModel = RecipeInstruction::where('recipe_id', $recipeModel->id)
+            ->where('id', $instruction)
+            ->firstOrFail();
+
+        $instructionModel->completed = !$instructionModel->completed;
+        $instructionModel->save();
+
+        return response()->json([
+            'message' => 'Instruction status updated.',
+            'data' => $instructionModel,
         ]);
     }
 }

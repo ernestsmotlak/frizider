@@ -17,7 +17,6 @@ interface Recipe {
     id: number;
     name: string;
     description: string | null;
-    instructions: string | null;
     servings: number | null;
     prep_time: number | null;
     cook_time: number | null;
