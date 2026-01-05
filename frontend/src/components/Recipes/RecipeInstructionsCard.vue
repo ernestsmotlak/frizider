@@ -307,10 +307,10 @@ const toggleStep = (instruction: RecipeInstruction) => {
                     :key="step.id ?? `tmp-${step.recipe_id}-${step.sort_order}-${index}`"
                     @click="toggleStep(step)"
                     :class="[
-                        'flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer',
+                        'flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer',
                         step.completed ? 'line-through opacity-60' : ''
                     ]">
-                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded mt-1" @click.stop>
+                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                         </svg>
@@ -319,7 +319,7 @@ const toggleStep = (instruction: RecipeInstruction) => {
                         type="checkbox"
                         :checked="step.completed"
                         @click.stop="toggleStep(step)"
-                        class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer flex-shrink-0"
                     />
                     <span class="text-gray-800 leading-relaxed text-[15px] font-medium flex-1">
                         <span class="font-semibold text-gray-600">{{ index + 1 }}.</span> {{ step.instruction }}
