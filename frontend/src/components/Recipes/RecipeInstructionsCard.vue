@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {ref, watchEffect} from "vue";
+import {ref, watchEffect, onMounted, onUnmounted} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
+import {useConfirmStore} from "../../stores/confirm.ts";
 import {VueDraggable} from 'vue-draggable-plus';
 
 interface RecipeInstruction {
@@ -38,8 +39,12 @@ const emit = defineEmits<{
 
 const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
+const confirmStore = useConfirmStore();
 
 const isAddModalOpen = ref(false);
+const isEditModalOpen = ref(false);
+const openDropdownId = ref<number | null>(null);
+const editingInstruction = ref<RecipeInstruction | null>(null);
 
 const newInstruction = ref<Omit<RecipeInstruction, 'id'>>({
     recipe_id: props.recipeId,
@@ -123,12 +128,23 @@ const addInstruction = () => {
     const recipeId = props.recipeId;
     loadingStore.start();
 
-    axios.post(`/api/recipes/${recipeId}/instructions`, {
-        instructions: [{
+    // Include all existing instructions with their current completed status
+    const allInstructions = [
+        ...props.instructions.map(inst => ({
+            id: inst.id,
+            instruction: inst.instruction,
+            sort_order: inst.sort_order,
+            completed: inst.completed ?? false,
+        })),
+        {
             instruction: newInstruction.value.instruction,
             sort_order: newInstruction.value.sort_order,
             completed: false,
-        }]
+        }
+    ];
+
+    axios.post(`/api/recipes/${recipeId}/instructions`, {
+        instructions: allInstructions
     })
         .then(() => {
             return axios.get(`/api/recipes/${recipeId}`);
@@ -168,6 +184,138 @@ const toggleStep = (instruction: RecipeInstruction) => {
             toastStore.show('error', errorMessage);
         });
 };
+
+const toggleDropdown = (instructionId: number | null) => {
+    if (openDropdownId.value === instructionId) {
+        openDropdownId.value = null;
+    } else {
+        openDropdownId.value = instructionId;
+    }
+};
+
+const closeDropdown = () => {
+    openDropdownId.value = null;
+};
+
+const openEditModal = (instruction: RecipeInstruction) => {
+    editingInstruction.value = {
+        ...instruction
+    };
+    closeDropdown();
+    isEditModalOpen.value = true;
+};
+
+const closeEditModal = () => {
+    isEditModalOpen.value = false;
+    editingInstruction.value = null;
+};
+
+const updateInstruction = () => {
+    if (!editingInstruction.value || !editingInstruction.value.instruction.trim()) {
+        toastStore.show('error', 'Instruction text is required.');
+        return;
+    }
+
+    const recipeId = props.recipeId;
+    loadingStore.start();
+
+    // Update the instruction in the draggableInstructions array
+    const index = draggableInstructions.value.findIndex(i => i.id === editingInstruction.value?.id);
+    if (index > -1 && editingInstruction.value) {
+        draggableInstructions.value[index].instruction = editingInstruction.value.instruction;
+    }
+
+    // Send all instructions to update
+    const payload = {
+        instructions: draggableInstructions.value.map((inst) => ({
+            id: inst.id,
+            instruction: inst.instruction,
+            sort_order: inst.sort_order,
+            completed: inst.completed ?? false,
+        }))
+    };
+
+    axios.post(`/api/recipes/${recipeId}/instructions`, payload)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+            toastStore.show('success', 'Instruction updated successfully.');
+            closeEditModal();
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not update instruction.';
+            toastStore.show('error', errorMessage);
+            // Revert the change
+            if (index > -1 && editingInstruction.value) {
+                const originalInstruction = props.instructions.find(i => i.id === editingInstruction.value?.id);
+                if (originalInstruction) {
+                    draggableInstructions.value[index].instruction = originalInstruction.instruction;
+                }
+            }
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+};
+
+const deleteInstruction = async (instruction: RecipeInstruction) => {
+    if (!instruction) {
+        toastStore.show('error', 'An error occurred while deleting the instruction.');
+        return;
+    }
+
+    const confirmed = await confirmStore.show(`Are you sure you want to delete this step?`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    if (!instruction.id) {
+        const index = draggableInstructions.value.findIndex(i => i === instruction);
+        if (index > -1) {
+            draggableInstructions.value.splice(index, 1);
+        }
+        closeDropdown();
+        return;
+    }
+
+    const recipeId = props.recipeId;
+    const url = `/api/recipe/${recipeId}/instruction/${instruction.id}`;
+    loadingStore.start();
+
+    axios.delete(url)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+            toastStore.show('success', 'Step successfully removed.');
+            closeDropdown();
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not delete step.';
+            toastStore.show('error', errorMessage);
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+};
+
+// Close dropdown when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-container')) {
+        closeDropdown();
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <template>
@@ -195,7 +343,7 @@ const toggleStep = (instruction: RecipeInstruction) => {
                     :key="step.id ?? `tmp-${step.recipe_id}-${step.sort_order}-${index}`"
                     @click="toggleStep(step)"
                     :class="[
-                        'flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer',
+                        'flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative',
                         step.completed ? 'line-through opacity-60' : ''
                     ]">
                     <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
@@ -212,6 +360,40 @@ const toggleStep = (instruction: RecipeInstruction) => {
                     <span class="text-gray-800 leading-relaxed text-[15px] font-medium flex-1">
                         <span class="font-semibold text-gray-600">{{ index + 1 }}.</span> {{ step.instruction }}
                     </span>
+                    <div class="relative flex-shrink-0 dropdown-container" @click.stop>
+                        <button
+                            @click="toggleDropdown(step.id)"
+                            class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            title="More options"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                        <div
+                            v-if="openDropdownId === step.id"
+                            class="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10"
+                        >
+                            <button
+                                @click="openEditModal(step)"
+                                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Edit
+                            </button>
+                            <button
+                                @click="deleteInstruction(step)"
+                                class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
                 </li>
             </VueDraggable>
         </template>
@@ -250,6 +432,42 @@ const toggleStep = (instruction: RecipeInstruction) => {
                     class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                     Add Step
+                </button>
+            </div>
+        </template>
+    </Modal>
+
+    <Modal :isOpen="isEditModalOpen" @close="closeEditModal">
+        <template #header>
+            <h2 class="text-2xl font-bold text-gray-900">Edit Instruction Step</h2>
+        </template>
+        <template #body>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-500 font-medium mb-1">Instruction *</label>
+                    <textarea
+                        v-if="editingInstruction"
+                        v-model="editingInstruction.instruction"
+                        rows="3"
+                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                        placeholder="Enter instruction step..."
+                    />
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <div class="flex flex-col sm:flex-row justify-between gap-3">
+                <button
+                    @click="closeEditModal"
+                    class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
+                    Cancel
+                </button>
+                <button
+                    @click.stop="updateInstruction"
+                    class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                    Save Changes
                 </button>
             </div>
         </template>
