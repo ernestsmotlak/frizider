@@ -105,7 +105,7 @@ onMounted(() => {
 
                 <RecipeInstructionsCard
                     v-if="recipeData"
-                    :instructions="recipeData.recipe_instructions || []"
+                    :instructions="recipeData.recipe_instructions ?? []"
                     :recipe-id="recipeData.id"
                     @updated-recipe="handleUpdatedRecipe"
                 />

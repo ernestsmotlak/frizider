@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import {ref, nextTick, computed} from "vue";
+import {ref, computed, watchEffect} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
+import {VueDraggable} from 'vue-draggable-plus';
 
 interface RecipeInstruction {
     id: number | null;
@@ -25,10 +26,12 @@ interface Recipe {
     recipe_instructions?: RecipeInstruction[];
 }
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     instructions: RecipeInstruction[];
     recipeId: number;
-}>();
+}>(), {
+    instructions: () => []
+});
 
 const emit = defineEmits<{
     'updatedRecipe': [recipe: Recipe]
@@ -146,6 +149,45 @@ const sortedInstructions = (instructions: RecipeInstruction[]): RecipeInstructio
 
 const sortedFormData = computed(() => sortedInstructions(formData.value));
 
+const draggableInstructions = ref<RecipeInstruction[]>([]);
+
+watchEffect(() => {
+    draggableInstructions.value = sortedInstructions(props.instructions).map(inst => ({...inst}));
+});
+
+const onDragEnd = () => {
+    draggableInstructions.value.forEach((instruction, index) => {
+        instruction.sort_order = index;
+    });
+
+    const recipeId = props.recipeId;
+    const payload = {
+        instructions: draggableInstructions.value.map((instruction) => ({
+            id: instruction.id,
+            instruction: instruction.instruction,
+            sort_order: instruction.sort_order,
+            completed: instruction.completed ?? false,
+        }))
+    };
+
+    loadingStore.start();
+
+    axios.post(`/api/recipes/${recipeId}/instructions`, payload)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not update instruction order.';
+            toastStore.show('error', errorMessage);
+            draggableInstructions.value = sortedInstructions(props.instructions).map(inst => ({...inst}));
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+};
+
 const updateInstructions = () => {
     const recipeId = props.recipeId;
     const payload = {
@@ -252,25 +294,39 @@ const toggleStep = (instruction: RecipeInstruction) => {
             </button>
         </div>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Instructions</h2>
-        <ol v-if="instructions && instructions.length > 0" class="space-y-3">
-            <li v-for="(step, index) in sortedInstructions(instructions)"
-                :key="step.id ?? `step-${index}`"
-                @click="toggleStep(step)"
-                :class="[
-                    'flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer',
-                    step.completed ? 'line-through opacity-60' : ''
-                ]">
-                <input
-                    type="checkbox"
-                    :checked="step.completed"
-                    @click.stop="toggleStep(step)"
-                    class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
-                />
-                <span class="text-gray-800 leading-relaxed text-[15px] font-medium flex-1">
-                    <span class="font-semibold text-gray-600">{{ index + 1 }}.</span> {{ step.instruction }}
-                </span>
-            </li>
-        </ol>
+        <template v-if="draggableInstructions && draggableInstructions.length > 0">
+            <VueDraggable
+                v-model="draggableInstructions"
+                @end="onDragEnd"
+                handle=".drag-handle"
+                tag="ol"
+                class="space-y-3"
+            >
+                <li
+                    v-for="(step, index) in draggableInstructions"
+                    :key="step.id ?? `tmp-${step.recipe_id}-${step.sort_order}-${index}`"
+                    @click="toggleStep(step)"
+                    :class="[
+                        'flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer',
+                        step.completed ? 'line-through opacity-60' : ''
+                    ]">
+                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded mt-1" @click.stop>
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                        </svg>
+                    </div>
+                    <input
+                        type="checkbox"
+                        :checked="step.completed"
+                        @click.stop="toggleStep(step)"
+                        class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span class="text-gray-800 leading-relaxed text-[15px] font-medium flex-1">
+                        <span class="font-semibold text-gray-600">{{ index + 1 }}.</span> {{ step.instruction }}
+                    </span>
+                </li>
+            </VueDraggable>
+        </template>
         <div v-else class="text-center py-8">
             <p class="text-gray-500 mb-4">No instructions yet. Click the + button to add your first step.</p>
         </div>
