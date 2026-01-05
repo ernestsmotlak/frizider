@@ -228,20 +228,8 @@ const toggleStep = (instruction: RecipeInstruction) => {
 
     axios.post(url)
         .then((response) => {
-            const updatedInstruction = response.data.data;
-            const index = props.instructions.findIndex(i => i.id === instructionId);
-            // catch here the instructions please.
-            // and emit to parent if needed
-            // remove the other fetch please
-            //error message and in toast if error or anything else wrong.
-            if (index > -1) {
-                props.instructions[index].completed = updatedInstruction.completed;
-            }
-            axios.get(`/api/recipes/${recipeId}`)
-                .then((response) => {
-                    const updatedRecipe = response.data.data;
-                    emit('updatedRecipe', updatedRecipe);
-                });
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
         })
         .catch((error) => {
             console.error(error);
