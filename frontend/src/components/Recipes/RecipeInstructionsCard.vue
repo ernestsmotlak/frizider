@@ -229,7 +229,6 @@ const toggleStep = (instruction: RecipeInstruction) => {
     axios.post(url)
         .then((response) => {
             const updatedRecipe = response.data.data;
-            console.log('recipe: ', response.data.data);
             emit('updatedRecipe', updatedRecipe);
         })
         .catch((error) => {
