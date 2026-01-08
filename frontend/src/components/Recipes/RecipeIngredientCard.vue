@@ -42,9 +42,6 @@ const confirmStore = useConfirmStore();
 
 const isModalOpen = ref(false);
 const isAddModalOpen = ref(false);
-const isQuillModalOpen = ref(false);
-const quillContent = ref("");
-const quillKey = ref(0);
 
 const formData = ref<RecipeIngredient[]>([]);
 const lastIngredientRef = ref<HTMLElement | null>(null);
