@@ -5,7 +5,7 @@ import Error from "../pages/Error.vue";
 import {useAuthStore} from "../stores/auth";
 import Register from "../pages/Register.vue";
 import Landing from "../pages/Landing.vue";
-import GroceryListsPage from "../pages/ShoppingList/GroceryListsPage.vue";
+import GroceryListsPage from "../pages/GroceryList/GroceryListsPage.vue";
 import IngredientsPage from "../pages/IngredientsPage.vue";
 import RecipesPage from "../pages/Recipe/RecipesPage.vue";
 import RecipePage from "../pages/Recipe/RecipePage.vue";
