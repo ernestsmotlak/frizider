@@ -342,10 +342,8 @@ onUnmounted(() => {
                     v-for="(step, index) in draggableInstructions"
                     :key="step.id ?? `tmp-${step.recipe_id}-${step.sort_order}-${index}`"
                     @click="toggleStep(step)"
-                    :class="[
-                        'flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative',
-                        step.completed ? 'line-through opacity-60' : ''
-                    ]">
+                    class="flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative"
+                >
                     <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
@@ -357,13 +355,16 @@ onUnmounted(() => {
                         @click.stop="toggleStep(step)"
                         class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer flex-shrink-0"
                     />
-                    <span class="text-gray-800 leading-relaxed text-[15px] font-medium flex-1">
+                    <span :class="[
+                        'text-gray-800 leading-relaxed text-[15px] font-medium flex-1',
+                        step.completed ? 'line-through opacity-60' : ''
+                    ]">
                         <span class="font-semibold text-gray-600">{{ index + 1 }}.</span> {{ step.instruction }}
                     </span>
-                    <div class="relative flex-shrink-0 dropdown-container" @click.stop>
+                    <div class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
                         <button
                             @click="toggleDropdown(step.id)"
-                            class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                            class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors opacity-100"
                             title="More options"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -372,7 +373,7 @@ onUnmounted(() => {
                         </button>
                         <div
                             v-if="openDropdownId === step.id"
-                            class="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10"
+                            class="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 opacity-100"
                         >
                             <button
                                 @click="openEditModal(step)"
