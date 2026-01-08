@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DashboardLayout from "../../layouts/DashboardLayout.vue";
 import {ref} from "vue";
+import GroceryListTitleCard from "../../components/GroceryLists/GroceryListTitleCard.vue";
 
 const errorMessage = ref("");
 const groceryListData = ref({});
@@ -16,8 +17,8 @@ const groceryListData = ref({});
                 <p class="text-red-600 font-medium">{{ errorMessage }}</p>
             </div>
 
-            <div v-if="groceryListData">
-                Main
+            <div v-if="groceryListData" class="space-y-6">
+                <GroceryListTitleCard/>
             </div>
 
             <div v-else-if="!errorMessage" class="text-center py-12">
