@@ -344,7 +344,7 @@ onUnmounted(() => {
                     @click="toggleStep(step)"
                     class="flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative"
                 >
-                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
+                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0 animate-pulse-icon" @click.stop>
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                         </svg>
@@ -529,5 +529,26 @@ onUnmounted(() => {
 /* Smooth transitions for all list items */
 :deep(ol li) {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Pulsating animation for drag handle */
+@keyframes pulse-icon {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+.drag-handle.animate-pulse-icon {
+    animation: pulse-icon 2s ease-in-out infinite;
+}
+
+.drag-handle.animate-pulse-icon:hover {
+    animation: none;
+    transform: scale(1.05);
 }
 </style>
