@@ -19,6 +19,20 @@ const formData = ref({
     emoji: ""
 });
 
+interface Ingredient {
+    name: string;
+    quantity: string;
+    unit: string;
+    notes: string;
+}
+
+interface Instruction {
+    instruction: string;
+}
+
+const ingredients = ref<Ingredient[]>([]);
+const instructions = ref<Instruction[]>([]);
+
 const showEmojiPicker = ref(false);
 
 const handleEmojiSelect = (event: CustomEvent) => {
@@ -29,6 +43,18 @@ const handleEmojiSelect = (event: CustomEvent) => {
 const createRecipe = () => {
     if (!formData.value.name.trim()) {
         toastStore.show('error', 'Recipe name is required.');
+        return;
+    }
+
+    const emptyIngredients = ingredients.value.filter(ing => !ing.name.trim());
+    if (emptyIngredients.length > 0) {
+        toastStore.show('error', 'Please fill in the name for all ingredients or remove empty ones.');
+        return;
+    }
+
+    const emptyInstructions = instructions.value.filter(inst => !inst.instruction.trim());
+    if (emptyInstructions.length > 0) {
+        toastStore.show('error', 'Please fill in all instructions or remove empty ones.');
         return;
     }
 
@@ -47,18 +73,37 @@ const createRecipe = () => {
         return isNaN(parsed) ? null : parsed;
     };
 
+    const validIngredients = ingredients.value
+        .filter(ing => ing.name.trim())
+        .map((ing, index) => ({
+            name: ing.name.trim(),
+            quantity: ing.quantity && String(ing.quantity).trim() ? parseFloat(String(ing.quantity)) : null,
+            unit: ing.unit?.trim() || null,
+            notes: ing.notes?.trim() || null,
+            sort_order: index
+        }));
+
+    const validInstructions = instructions.value
+        .filter(inst => inst.instruction.trim())
+        .map((inst, index) => ({
+            instruction: inst.instruction.trim(),
+            sort_order: index
+        }));
+
     const payload = {
         name: formData.value.name,
         description: formData.value.description || null,
         servings: parseInteger(formData.value.servings),
         prep_time: parseInteger(formData.value.prep_time),
         cook_time: parseInteger(formData.value.cook_time),
-        image_url: formData.value.emoji || null
+        image_url: formData.value.emoji || null,
+        ingredients: validIngredients,
+        instructions: validInstructions
     };
 
     loadingStore.start();
 
-    axios.post('/api/recipes', payload)
+    axios.post('/api/save-recipe-data', payload)
         .then((response) => {
             const createdRecipe = response.data.data;
             toastStore.show('success', 'Recipe created successfully.');
@@ -76,6 +121,29 @@ const createRecipe = () => {
 
 const handleCancel = () => {
     router.push('/recipes');
+};
+
+const addIngredient = () => {
+    ingredients.value.push({
+        name: "",
+        quantity: "",
+        unit: "",
+        notes: ""
+    });
+};
+
+const removeIngredient = (index: number) => {
+    ingredients.value.splice(index, 1);
+};
+
+const addInstruction = () => {
+    instructions.value.push({
+        instruction: ""
+    });
+};
+
+const removeInstruction = (index: number) => {
+    instructions.value.splice(index, 1);
 };
 </script>
 
@@ -208,6 +276,117 @@ const handleCancel = () => {
                                         placeholder="30"
                                     />
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-2xl font-bold text-gray-900">Ingredients</h2>
+                            <button
+                                type="button"
+                                @click="addIngredient"
+                                class="px-3 py-1.5 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                            >
+                                + Add Ingredient
+                            </button>
+                        </div>
+                        <div v-if="ingredients.length === 0" class="text-sm text-gray-500 italic">
+                            No ingredients added yet. Click "Add Ingredient" to get started.
+                        </div>
+                        <div v-for="(ingredient, index) in ingredients" :key="index" class="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                                        <input
+                                            v-model="ingredient.name"
+                                            type="text"
+                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            placeholder="e.g., Flour"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                        <input
+                                            v-model="ingredient.quantity"
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            placeholder="2"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                                        <input
+                                            v-model="ingredient.unit"
+                                            type="text"
+                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            placeholder="cups"
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="removeIngredient(index)"
+                                    class="flex-shrink-0 mt-6 px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Remove ingredient"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+                                <input
+                                    v-model="ingredient.notes"
+                                    type="text"
+                                    class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                    placeholder="e.g., sifted, room temperature"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-2xl font-bold text-gray-900">Instructions</h2>
+                            <button
+                                type="button"
+                                @click="addInstruction"
+                                class="px-3 py-1.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                            >
+                                + Add Instruction
+                            </button>
+                        </div>
+                        <div v-if="instructions.length === 0" class="text-sm text-gray-500 italic">
+                            No instructions added yet. Click "Add Instruction" to get started.
+                        </div>
+                        <div v-for="(instruction, index) in instructions" :key="index" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600 mt-1">
+                                    {{ index + 1 }}
+                                </div>
+                                <div class="flex-1">
+                                    <textarea
+                                        v-model="instruction.instruction"
+                                        rows="2"
+                                        class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                                        placeholder="Enter instruction step..."
+                                    ></textarea>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="removeInstruction(index)"
+                                    class="flex-shrink-0 mt-1 px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Remove instruction"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>

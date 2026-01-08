@@ -256,4 +256,70 @@ class RecipeController extends Controller
             'data' => $recipeModel->fresh()->load(['recipeInstructions', 'recipeIngredients']),
         ]);
     }
+
+    public function saveRecipeWithData(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'servings' => 'nullable|integer|min:1',
+            'prep_time' => 'nullable|integer|min:0',
+            'cook_time' => 'nullable|integer|min:0',
+            'image_url' => 'nullable|string|max:500',
+            'ingredients' => 'nullable|array',
+            'ingredients.*.name' => 'required|string|max:255',
+            'ingredients.*.quantity' => 'nullable|numeric|min:0',
+            'ingredients.*.unit' => 'nullable|string|max:50',
+            'ingredients.*.notes' => 'nullable|string|max:500',
+            'ingredients.*.sort_order' => 'nullable|integer|min:0',
+            'instructions' => 'nullable|array',
+            'instructions.*.instruction' => 'required|string',
+            'instructions.*.sort_order' => 'nullable|integer|min:0',
+        ]);
+
+        $validated['user_id'] = auth()->id();
+
+        $ingredients = $validated['ingredients'] ?? [];
+        $instructions = $validated['instructions'] ?? [];
+        unset($validated['ingredients'], $validated['instructions']);
+
+        DB::beginTransaction();
+        try {
+            $recipe = Recipe::create($validated);
+
+            foreach ($ingredients as $index => $ingredient) {
+                RecipeIngredient::create([
+                    'recipe_id' => $recipe->id,
+                    'name' => $ingredient['name'],
+                    'quantity' => $ingredient['quantity'] ?? null,
+                    'unit' => $ingredient['unit'] ?? null,
+                    'notes' => $ingredient['notes'] ?? null,
+                    'sort_order' => $ingredient['sort_order'] ?? $index,
+                ]);
+            }
+
+            foreach ($instructions as $index => $instruction) {
+                RecipeInstruction::create([
+                    'recipe_id' => $recipe->id,
+                    'instruction' => $instruction['instruction'],
+                    'sort_order' => $instruction['sort_order'] ?? $index,
+                    'completed' => false,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Recipe created.',
+                'data' => $recipe->fresh()->load(['recipeIngredients', 'recipeInstructions'])
+            ], 201);
+        } catch (\Throwable $error) {
+            DB::rollBack();
+            report($error);
+            return response()->json([
+                'message' => 'Failed to create recipe.',
+                'error' => $error->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -22,6 +22,7 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::apiResource('pantry-items', PantryItemController::class);
 
     Route::apiResource('recipes', RecipeController::class);
+    Route::post('save-recipe-data', [RecipeController::class, 'saveRecipeWithData']);
     Route::post('get-recipes', [RecipeController::class, 'paginateRecipes']);
     Route::post('recipes/{recipe}/ingredients', [RecipeController::class, 'updateIngredients']);
     Route::post('recipes/{recipe}/instructions', [RecipeController::class, 'updateInstructions']);
