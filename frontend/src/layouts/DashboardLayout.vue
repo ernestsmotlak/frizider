@@ -29,7 +29,7 @@ const isIngredientsTab = computed(() => {
     <div class="min-h-screen bg-green-100 pb-16">
         <div class="max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
             <div class="">
-                <BackButton to="/recipes"/>
+                <BackButton/>
             </div>
             <div class="">
                 <LogoComponent/>
