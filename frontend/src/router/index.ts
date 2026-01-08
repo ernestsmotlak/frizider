@@ -10,6 +10,7 @@ import IngredientsPage from "../pages/IngredientsPage.vue";
 import RecipesPage from "../pages/Recipe/RecipesPage.vue";
 import RecipePage from "../pages/Recipe/RecipePage.vue";
 import NewRecipe from "../pages/NewRecipe.vue";
+import GroceryListPage from "../pages/GroceryList/GroceryListPage.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -37,6 +38,12 @@ const router = createRouter({
             name: "grocery-list",
             component: GroceryListsPage,
             meta: {requiresAuth: true},
+        },
+        {
+            path: "/grocery-list/:id",
+            name: "Grocery List",
+            component: GroceryListPage,
+            meta: {requiresAuth: true}
         },
         {
             path: "/ingredients",
