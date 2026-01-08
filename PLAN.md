@@ -268,3 +268,17 @@ frontend/src/
 **RecipePage Component:**
 - ❌ TODO: Fix smaller screen alignment for `frontend/src/pages/Recipe/RecipePage.vue`
 
+---
+
+### 2025-01-XX - Database Seeding
+
+#### Backend Tasks
+
+**GroceryList Seeder:**
+- ❌ TODO: Make a seeder to add grocery_list_items to grocery lists
+
+#### Frontend Improvements
+
+**RecipePage Component:**
+- ❌ TODO: Fix smaller screen alignment for `frontend/src/pages/Recipe/RecipePage.vue`
+
