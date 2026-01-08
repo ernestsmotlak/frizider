@@ -4,7 +4,6 @@ import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
-import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
 interface RecipeIngredient {
@@ -264,15 +263,15 @@ const addIngredient = () => {
 <template>
     <div class="bg-white rounded-2xl shadow-xl p-8 relative border-2 border-gray-200">
         <div class="absolute top-2 right-2 flex gap-2">
-<!--            <button @click="openQuillModal"-->
-<!--                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200"-->
-<!--                    title="Open Quill Editor">-->
-<!--                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"-->
-<!--                     viewBox="0 0 24 24">-->
-<!--                    <path stroke-linecap="round" stroke-linejoin="round"-->
-<!--                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>-->
-<!--                </svg>-->
-<!--            </button>-->
+            <!--            <button @click="openQuillModal"-->
+            <!--                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200"-->
+            <!--                    title="Open Quill Editor">-->
+            <!--                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"-->
+            <!--                     viewBox="0 0 24 24">-->
+            <!--                    <path stroke-linecap="round" stroke-linejoin="round"-->
+            <!--                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>-->
+            <!--                </svg>-->
+            <!--            </button>-->
             <button @click="openAddModal"
                     class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
@@ -291,12 +290,15 @@ const addIngredient = () => {
         </div>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
         <ul v-if="ingredients && ingredients.length > 0" class="space-y-2.5">
-            <li v-for="(ingredient, index) in sortedIngredients(ingredients)" :key="ingredient.id ?? `ingredient-${index}`"
+            <li v-for="(ingredient, index) in sortedIngredients(ingredients)"
+                :key="ingredient.id ?? `ingredient-${index}`"
                 class="ingredient-item flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250">
                 <svg class="w-2.5 h-2.5 text-gray-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 8 8">
                     <circle cx="4" cy="4" r="3"/>
                 </svg>
-                <span class="text-gray-800 leading-relaxed text-[15px] font-medium">{{ formatIngredient(ingredient) }}</span>
+                <span class="text-gray-800 leading-relaxed text-[15px] font-medium">{{
+                        formatIngredient(ingredient)
+                    }}</span>
             </li>
         </ul>
         <div v-else class="text-center py-8">
