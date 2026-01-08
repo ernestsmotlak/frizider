@@ -481,61 +481,6 @@ const addIngredient = () => {
             </div>
         </template>
     </Modal>
-
-    <Modal :isOpen="isQuillModalOpen" @close="closeQuillModal">
-        <template #header>
-            <h2 class="text-2xl font-bold text-gray-900">Quill Editor</h2>
-        </template>
-        <template #body>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs text-gray-500 font-medium mb-2">Content</label>
-                    <QuillEditor
-                        v-if="isQuillModalOpen"
-                        :key="quillKey"
-                        v-model:content="quillContent"
-                        contentType="html"
-                        theme="snow"
-                        :options="{
-                            placeholder: 'Start typing...',
-                            modules: {
-                                toolbar: [
-                                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                                    ['bold', 'italic', 'underline', 'strike'],
-                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                    [{ 'color': [] }, { 'background': [] }],
-                                    [{ 'align': [] }],
-                                    ['link', 'image'],
-                                    ['clean']
-                                ]
-                            }
-                        }"
-                        class="min-h-[300px]"
-                    />
-                </div>
-                <div v-if="quillContent" class="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <label class="block text-xs text-gray-500 font-medium mb-2">Preview</label>
-                    <div class="prose max-w-none" v-html="quillContent"></div>
-                </div>
-            </div>
-        </template>
-        <template #footer>
-            <div class="flex flex-col sm:flex-row justify-between gap-3">
-                <button
-                    @click="closeQuillModal"
-                    class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                >
-                    Close
-                </button>
-                <button
-                    @click.stop="() => { toastStore.show('success', 'Content saved!'); closeQuillModal(); }"
-                    class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                    Save
-                </button>
-            </div>
-        </template>
-    </Modal>
 </template>
 
 <style scoped>
