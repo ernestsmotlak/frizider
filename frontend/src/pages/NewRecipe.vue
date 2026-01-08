@@ -294,7 +294,8 @@ const removeInstruction = (index: number) => {
                         <div v-if="ingredients.length === 0" class="text-sm text-gray-500 italic">
                             No ingredients added yet. Click "Add Ingredient" to get started.
                         </div>
-                        <div v-for="(ingredient, index) in ingredients" :key="index" class="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
+                        <div v-for="(ingredient, index) in ingredients" :key="index"
+                             class="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
                                     <div class="md:col-span-2">
@@ -334,7 +335,8 @@ const removeInstruction = (index: number) => {
                                     title="Remove ingredient"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
                                 </button>
                             </div>
@@ -364,9 +366,11 @@ const removeInstruction = (index: number) => {
                         <div v-if="instructions.length === 0" class="text-sm text-gray-500 italic">
                             No instructions added yet. Click "Add Instruction" to get started.
                         </div>
-                        <div v-for="(instruction, index) in instructions" :key="index" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div v-for="(instruction, index) in instructions" :key="index"
+                             class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                             <div class="flex items-start gap-3">
-                                <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600 mt-1">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600 mt-1">
                                     {{ index + 1 }}
                                 </div>
                                 <div class="flex-1">
@@ -384,7 +388,8 @@ const removeInstruction = (index: number) => {
                                     title="Remove instruction"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
                                 </button>
                             </div>
