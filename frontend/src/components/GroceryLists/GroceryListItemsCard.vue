@@ -412,7 +412,7 @@ const addItem = () => {
                 </li>
             </VueDraggable>
         </template>
-        <div v-else class="text-center py-8">
+        <div v-else class="text-center py-2">
             <p class="text-gray-500 mb-4">No items yet. Click the + button to add your first item.</p>
         </div>
     </div>
