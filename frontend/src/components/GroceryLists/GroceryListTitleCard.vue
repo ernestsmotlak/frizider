@@ -5,6 +5,7 @@ import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
 import {useRouter} from "vue-router";
+import "emoji-picker-element";
 
 const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
@@ -16,6 +17,7 @@ interface GroceryList {
     user_id: number;
     name: string | null;
     notes: string | null;
+    image_url: string | null;
     completed_at: string | null;
     created_at: string | null;
     updated_at: string | null;
@@ -33,24 +35,34 @@ const emit = defineEmits<{
 
 const isModalOpen = ref(false);
 const isMenuOpen = ref(false);
+const showEmojiPicker = ref(false);
 
 const formData = ref({
     name: "",
-    notes: ""
+    notes: "",
+    emoji: ""
 });
 
 const openModal = () => {
     formData.value = {
         name: props.groceryListData.name || "",
-        notes: props.groceryListData.notes || ""
+        notes: props.groceryListData.notes || "",
+        emoji: props.groceryListData.image_url || ""
     };
+    showEmojiPicker.value = false;
     isModalOpen.value = true;
+};
+
+const handleEmojiSelect = (event: CustomEvent) => {
+    formData.value.emoji = event.detail?.unicode || "";
+    showEmojiPicker.value = false;
 };
 
 const updateGroceryList = () => {
     const payload = {
         name: formData.value.name,
-        notes: formData.value.notes || null
+        notes: formData.value.notes || null,
+        image_url: formData.value.emoji || null
     };
 
     loadingStore.start();
@@ -174,7 +186,14 @@ const formatDate = (dateString: string | null): string => {
 
         <div class="p-8 space-y-6">
             <div class="flex items-start gap-4 max-[450px]:flex-col max-[450px]:items-center max-[450px]:gap-2">
-                <div class="flex-1 min-w-0 max-[450px]:flex-1 max-[450px]:w-full max-[450px]:text-center max-[450px]:text-base">
+                <div v-if="groceryListData.image_url" class="flex-shrink-0">
+                    <div
+                        class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center text-5xl">
+                        {{ groceryListData.image_url }}
+                    </div>
+                </div>
+                <div
+                    class="flex-1 min-w-0 max-[450px]:flex-1 max-[450px]:w-full max-[450px]:text-center max-[450px]:text-base">
                     <h1 class="text-4xl font-bold text-gray-900 mb-3 max-[450px]:text-3xl max-[450px]:mb-2 max-w-[220px] break-words mx-auto">
                         {{ groceryListData.name || "Unnamed List" }}</h1>
                     <p v-if="groceryListData.notes" class="text-lg text-gray-600 leading-relaxed max-[450px]:text-base">
@@ -244,6 +263,41 @@ const formatDate = (dateString: string | null): string => {
         </template>
         <template #body>
             <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">List Emoji</label>
+                    <div class="flex items-center gap-3">
+                        <div
+                            v-if="formData.emoji"
+                            class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl cursor-pointer hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                            @click="showEmojiPicker = !showEmojiPicker"
+                        >
+                            {{ formData.emoji }}
+                        </div>
+                        <button
+                            v-else
+                            type="button"
+                            @click="showEmojiPicker = !showEmojiPicker"
+                            class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-3xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                        >
+                            🛒
+                        </button>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-600">
+                                {{ formData.emoji ? "Click emoji to change" : "Click to select an emoji" }}
+                            </p>
+                        </div>
+                    </div>
+                    <div
+                        v-if="showEmojiPicker"
+                        class="mt-3 relative"
+                    >
+                        <emoji-picker
+                            @emoji-click="handleEmojiSelect"
+                            class="w-full"
+                        ></emoji-picker>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">List Name</label>
                     <input

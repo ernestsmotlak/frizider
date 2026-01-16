@@ -9,6 +9,7 @@ export interface GroceryList {
     user_id: number;
     name: string;
     notes: string | null;
+    image_url: string | null;
     completed_at: string | null;
     created_at: string;
     updated_at: string;

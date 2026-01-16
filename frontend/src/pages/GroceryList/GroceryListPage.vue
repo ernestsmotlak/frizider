@@ -58,6 +58,7 @@ onMounted(() => {
                 <GroceryListTitleCard
                     v-if="groceryListData"
                     :grocery-list-data="groceryListData"
+                    @updatedGroceryList="handleGroceryListUpdate"
                 />
             </div>
 
