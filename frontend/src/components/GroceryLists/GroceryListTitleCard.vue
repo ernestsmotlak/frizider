@@ -6,24 +6,12 @@ import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
 import {useRouter} from "vue-router";
 import "emoji-picker-element";
+import type {GroceryList} from "../../pages/GroceryList/GroceryListsPage.vue";
 
 const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
 const confirmStore = useConfirmStore();
 const router = useRouter();
-
-interface GroceryList {
-    id: number;
-    user_id: number;
-    name: string | null;
-    notes: string | null;
-    image_url: string | null;
-    completed_at: string | null;
-    created_at: string | null;
-    updated_at: string | null;
-    deleted_at: string | null;
-    grocery_list_data: [];
-}
 
 const props = defineProps<{
     groceryListData: GroceryList
