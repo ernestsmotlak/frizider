@@ -117,7 +117,7 @@ const deleteGroceryList = async () => {
     axios.delete(`/api/grocery-lists/${props.groceryListData.id}`)
         .then(() => {
             toastStore.show('success', 'Grocery list deleted successfully.');
-            router.push('/grocery-lists');
+            router.push('/grocery-list');
         })
         .catch((error) => {
             console.error(error);

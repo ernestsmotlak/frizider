@@ -60,6 +60,8 @@ onMounted(() => {
                     :grocery-list-data="groceryListData"
                     @updatedGroceryList="handleGroceryListUpdate"
                 />
+
+
             </div>
 
             <div v-else-if="!errorMessage" class="text-center py-12">
