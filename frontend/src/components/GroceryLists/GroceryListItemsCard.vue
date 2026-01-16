@@ -339,7 +339,7 @@ const addItem = () => {
                 </svg>
             </button>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Items</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Grocery list items</h2>
         <template v-if="draggableItems && draggableItems.length > 0">
             <VueDraggable
                 v-model="draggableItems"
