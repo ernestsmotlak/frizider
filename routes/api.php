@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GroceryListController;
+use App\Http\Controllers\GroceryListItemController;
 use App\Http\Controllers\PantryItemController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RecipeIngredientController;
@@ -34,5 +35,6 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::apiResource('grocery-lists', GroceryListController::class);
     Route::post('get-grocery-lists', [GroceryListController::class, 'paginateGroceryLists']);
+    Route::apiResource('grocery-list-items', GroceryListItemController::class);
 });
 
