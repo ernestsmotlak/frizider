@@ -15,6 +15,7 @@ class GroceryList extends Model
         'user_id',
         'name',
         'notes',
+        'image_url',
         'completed_at',
     ];
 

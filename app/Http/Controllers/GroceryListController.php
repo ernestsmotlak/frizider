@@ -46,6 +46,7 @@ class GroceryListController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'notes' => 'nullable|string',
+            'image_url' => 'nullable|string|max:500',
             'completed_at' => 'nullable|date',
         ]);
 
@@ -94,6 +95,7 @@ class GroceryListController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'notes' => 'nullable|string',
+            'image_url' => 'nullable|string|max:500',
             'completed_at' => 'nullable|date',
         ]);
 
