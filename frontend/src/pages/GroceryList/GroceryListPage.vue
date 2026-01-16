@@ -6,6 +6,7 @@ import type {GroceryList} from "./GroceryListsPage.vue";
 import {useRoute} from "vue-router";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
+import GroceryListItemsCard from "../../components/GroceryLists/GroceryListItemsCard.vue";
 
 const route = useRoute();
 const toasterStore = useToastStore();
@@ -61,7 +62,10 @@ onMounted(() => {
                     @updatedGroceryList="handleGroceryListUpdate"
                 />
 
-
+                <GroceryListItemsCard
+                    v-if="groceryListData?.grocery_list_items"
+                    :grocery-list-items="groceryListData?.grocery_list_items"
+                />
             </div>
 
             <div v-else-if="!errorMessage" class="text-center py-12">

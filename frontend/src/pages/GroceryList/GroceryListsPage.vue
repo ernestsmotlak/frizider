@@ -3,6 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.vue";
 import {usePagination} from "../../composables/usePagination.ts";
 import GroceryListCard from "../../components/GroceryLists/GroceryListCard.vue";
 import router from "../../router";
+import type {GroceryListItem} from "../../components/GroceryLists/GroceryListItemsCard.vue";
 
 export interface GroceryList {
     id: number;
@@ -14,6 +15,7 @@ export interface GroceryList {
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
+    grocery_list_items: GroceryListItem[]
 }
 
 const handleGroceryListClick = (grocery_list_id: number) => {
