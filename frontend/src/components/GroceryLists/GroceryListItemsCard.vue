@@ -145,6 +145,14 @@ const closeDropdown = () => {
     openDropdownId.value = null;
 };
 
+const clearNewItem = () => {
+    newItem.value.name = '';
+    newItem.value.quantity = null;
+    newItem.value.unit = null;
+    newItem.value.notes = null;
+    newItem.value.is_purchased = false;
+};
+
 const openAddModal = () => {
     const maxSortOrder = props.groceryListItems.length > 0
         ? Math.max(...props.groceryListItems.map(i => i.sort_order))
@@ -300,7 +308,7 @@ onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 
-const addItem = () => {
+const addItem = (addAnother: boolean = false) => {
     if (!newItem.value.name.trim()) {
         toastStore.show('error', 'Item name is required.');
         return;
@@ -316,7 +324,11 @@ const addItem = () => {
             const updatedGroceryList = response.data.data;
             emit('updatedGroceryList', updatedGroceryList);
             toastStore.show('success', 'Item added successfully.');
-            closeAddModal();
+            if (addAnother) {
+                clearNewItem();
+            } else {
+                closeAddModal();
+            }
         })
         .catch((error) => {
             const errorMessage = error?.response?.data?.message || 'Could not add item.';
@@ -565,12 +577,20 @@ const addItem = () => {
                 >
                     Cancel
                 </button>
-                <button
-                    @click.stop="addItem"
-                    class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                    Add Item
-                </button>
+                <div class="flex flex-row gap-2">
+                    <button
+                        @click.stop="addItem(false)"
+                        class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    >
+                        Add Item
+                    </button>
+                    <button
+                        @click.stop="addItem(true)"
+                        class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    >
+                        Add Another Item
+                    </button>
+                </div>
             </div>
         </template>
     </Modal>
