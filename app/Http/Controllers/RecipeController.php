@@ -134,6 +134,7 @@ class RecipeController extends Controller
             'ingredients.*.unit' => ['nullable', 'string', 'max:50'],
             'ingredients.*.notes' => ['nullable', 'string', 'max:500'],
             'ingredients.*.sort_order' => ['nullable', 'integer', 'min:0'],
+            'ingredients.*.completed' => ['nullable', 'boolean'],
         ]);
 
         DB::transaction(function () use ($recipe, $validated) {
@@ -145,6 +146,10 @@ class RecipeController extends Controller
                     'notes' => $ingredient['notes'] ?? null,
                     'sort_order' => $ingredient['sort_order'] ?? $index,
                 ];
+
+                if (isset($ingredient['completed'])) {
+                    $data['completed'] = $ingredient['completed'];
+                }
 
                 // update existing or create new
                 $recipe->recipeIngredients()->updateOrCreate(
@@ -254,6 +259,25 @@ class RecipeController extends Controller
         return response()->json([
             'message' => 'Instruction status updated.',
             'data' => $recipeModel->fresh()->load(['recipeInstructions', 'recipeIngredients']),
+        ]);
+    }
+
+    public function toggleIngredientCompleted(string $recipe, string $ingredient)
+    {
+        $recipeModel = Recipe::where('user_id', auth()->id())
+            ->where('id', $recipe)
+            ->firstOrFail();
+
+        $ingredientModel = RecipeIngredient::where('recipe_id', $recipeModel->id)
+            ->where('id', $ingredient)
+            ->firstOrFail();
+
+        $ingredientModel->completed = !$ingredientModel->completed;
+        $ingredientModel->save();
+
+        return response()->json([
+            'message' => 'Ingredient status updated.',
+            'data' => $recipeModel->fresh()->load(['recipeIngredients', 'recipeInstructions']),
         ]);
     }
 

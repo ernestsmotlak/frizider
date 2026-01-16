@@ -18,11 +18,13 @@ class RecipeIngredient extends Model
         'unit',
         'notes',
         'sort_order',
+        'completed',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:2',
         'sort_order' => 'integer',
+        'completed' => 'boolean',
     ];
 
     public function recipe()

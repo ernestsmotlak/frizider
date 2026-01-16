@@ -30,6 +30,7 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::apiResource('recipe-ingredients', RecipeIngredientController::class);
     Route::delete('recipe/{recipe}/ingredient/{ingredient}', [RecipeController::class, 'deleteIngredientFromRecipe']);
+    Route::post('recipe/{recipe}/ingredient/{ingredient}/toggle-completed', [RecipeController::class, 'toggleIngredientCompleted']);
     Route::delete('recipe/{recipe}/instruction/{instruction}', [RecipeController::class, 'deleteInstructionFromRecipe']);
     Route::post('recipe/{recipe}/instruction/{instruction}/toggle-completed', [RecipeController::class, 'toggleInstructionCompleted']);
 

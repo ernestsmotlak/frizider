@@ -20,12 +20,14 @@ class GroceryListItem extends Model
         'notes',
         'sort_order',
         'is_purchased',
+        'completed',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:2',
         'sort_order' => 'integer',
         'is_purchased' => 'boolean',
+        'completed' => 'boolean',
     ];
 
     public function groceryList()

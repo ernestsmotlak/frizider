@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import {ref, nextTick, computed} from "vue";
+import {ref, watchEffect, onMounted, onUnmounted} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
+import {VueDraggable} from 'vue-draggable-plus';
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
 interface RecipeIngredient {
@@ -14,6 +15,7 @@ interface RecipeIngredient {
     unit: string | null;
     notes: string | null;
     sort_order: number;
+    completed: boolean;
 }
 
 interface Recipe {
@@ -40,11 +42,11 @@ const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
 const confirmStore = useConfirmStore();
 
-const isModalOpen = ref(false);
 const isAddModalOpen = ref(false);
+const isEditModalOpen = ref(false);
+const openDropdownId = ref<number | null>(null);
+const editingIngredient = ref<RecipeIngredient | null>(null);
 
-const formData = ref<RecipeIngredient[]>([]);
-const lastIngredientRef = ref<HTMLElement | null>(null);
 const newIngredient = ref<Omit<RecipeIngredient, 'id'>>({
     recipe_id: props.recipeId,
     name: '',
@@ -52,41 +54,163 @@ const newIngredient = ref<Omit<RecipeIngredient, 'id'>>({
     unit: null,
     notes: null,
     sort_order: 0,
+    completed: false,
 });
 
-const openModal = () => {
-    formData.value = props.ingredients.map(ingredient => ({
-        ...ingredient
-    }));
-    isModalOpen.value = true;
-};
-
-const closeModal = () => {
-    isModalOpen.value = false;
-};
-
-const addNewIngredientToForm = () => {
-    const maxSortOrder = formData.value.length > 0
-        ? Math.max(...formData.value.map(i => i.sort_order))
-        : -1;
-    const newIngredient: RecipeIngredient = {
-        id: null,
-        recipe_id: props.recipeId,
-        name: '',
-        quantity: null,
-        unit: null,
-        notes: null,
-        sort_order: maxSortOrder + 1,
-    };
-    formData.value.push(newIngredient);
-    nextTick(() => {
-        if (lastIngredientRef.value) {
-            lastIngredientRef.value.scrollIntoView({
-                behavior: 'smooth',
-                block: 'end'
-            });
+const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] => {
+    return [...ingredients].sort((a, b) => {
+        if (a.sort_order !== b.sort_order) {
+            return a.sort_order - b.sort_order;
         }
+        const aId = a.id ?? 0;
+        const bId = b.id ?? 0;
+        return aId - bId;
     });
+}
+
+const draggableIngredients = ref<RecipeIngredient[]>([]);
+
+watchEffect(() => {
+    draggableIngredients.value = sortedIngredients(props.ingredients).map(ing => ({...ing}));
+});
+
+const onDragEnd = () => {
+    draggableIngredients.value.forEach((ingredient, index) => {
+        ingredient.sort_order = index;
+    });
+
+    const recipeId = props.recipeId;
+    const payload = {
+        ingredients: draggableIngredients.value.map((ingredient) => ({
+            id: ingredient.id,
+            name: ingredient.name,
+            quantity: ingredient.quantity ?? null,
+            unit: ingredient.unit ?? null,
+            notes: ingredient.notes ?? null,
+            sort_order: ingredient.sort_order,
+            completed: ingredient.completed ?? false,
+        }))
+    };
+
+    loadingStore.start();
+
+    axios.post(`/api/recipes/${recipeId}/ingredients`, payload)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not update ingredient order.';
+            toastStore.show('error', errorMessage);
+            draggableIngredients.value = sortedIngredients(props.ingredients).map(ing => ({...ing}));
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+};
+
+const toggleIngredient = (ingredient: RecipeIngredient) => {
+    if (!ingredient.id) {
+        return;
+    }
+
+    const recipeId = props.recipeId;
+    const ingredientId = ingredient.id;
+    const url = `/api/recipe/${recipeId}/ingredient/${ingredientId}/toggle-completed`;
+
+    axios.post(url)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not update ingredient status.';
+            toastStore.show('error', errorMessage);
+        });
+};
+
+const toggleDropdown = (ingredientId: number | null) => {
+    if (openDropdownId.value === ingredientId) {
+        openDropdownId.value = null;
+    } else {
+        openDropdownId.value = ingredientId;
+    }
+};
+
+const closeDropdown = () => {
+    openDropdownId.value = null;
+};
+
+const openEditModal = (ingredient: RecipeIngredient) => {
+    editingIngredient.value = {
+        ...ingredient
+    };
+    closeDropdown();
+    isEditModalOpen.value = true;
+};
+
+const closeEditModal = () => {
+    isEditModalOpen.value = false;
+    editingIngredient.value = null;
+};
+
+const updateIngredient = () => {
+    if (!editingIngredient.value || !editingIngredient.value.name.trim()) {
+        toastStore.show('error', 'Ingredient name is required.');
+        return;
+    }
+
+    if (!editingIngredient.value.id) {
+        toastStore.show('error', 'Cannot update ingredient without ID.');
+        return;
+    }
+
+    const recipeId = props.recipeId;
+    const ingredientId = editingIngredient.value.id;
+    loadingStore.start();
+
+    const payload = {
+        ingredients: draggableIngredients.value.map((ing) => {
+            if (ing.id === ingredientId) {
+                return {
+                    id: editingIngredient.value!.id,
+                    name: editingIngredient.value!.name,
+                    quantity: editingIngredient.value!.quantity ?? null,
+                    unit: editingIngredient.value!.unit ?? null,
+                    notes: editingIngredient.value!.notes ?? null,
+                    sort_order: ing.sort_order,
+                    completed: ing.completed ?? false,
+                };
+            }
+            return {
+                id: ing.id,
+                name: ing.name,
+                quantity: ing.quantity ?? null,
+                unit: ing.unit ?? null,
+                notes: ing.notes ?? null,
+                sort_order: ing.sort_order,
+                completed: ing.completed ?? false,
+            };
+        })
+    };
+
+    axios.post(`/api/recipes/${recipeId}/ingredients`, payload)
+        .then((response) => {
+            const updatedRecipe = response.data.data;
+            emit('updatedRecipe', updatedRecipe);
+            toastStore.show('success', 'Ingredient updated successfully.');
+            closeEditModal();
+        })
+        .catch((error) => {
+            console.error(error);
+            const errorMessage = error?.response?.data?.message || 'Could not update ingredient.';
+            toastStore.show('error', errorMessage);
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
 };
 
 const deleteIngredient = async (ingredient: RecipeIngredient) => {
@@ -95,29 +219,20 @@ const deleteIngredient = async (ingredient: RecipeIngredient) => {
         return;
     }
 
-    const ingredientName = ingredient.name || 'this ingredient';
-    const confirmed = await confirmStore.show(`Are you sure you want to delete "${ingredientName}"?`);
+    const confirmed = await confirmStore.show(`Are you sure you want to delete "${ingredient.name || 'this ingredient'}"?`);
 
     if (!confirmed) {
         return;
     }
 
-    // If ingredient has no id, it's a new ingredient that hasn't been saved yet
-    // Just remove it from the formData array
     if (!ingredient.id) {
-        const index = formData.value.findIndex(i => i === ingredient);
+        const index = draggableIngredients.value.findIndex(i => i === ingredient);
         if (index > -1) {
-            formData.value.splice(index, 1);
+            draggableIngredients.value.splice(index, 1);
         }
+        closeDropdown();
         return;
     }
-
-    // If ingredient has an id, delete it via API
-    // First, remove it from formData immediately for better UX
-    // const index = formData.value.findIndex(i => i.id === ingredient.id);
-    // if (index > -1) {
-    //     formData.value.splice(index, 1);
-    // }
 
     const recipeId = props.recipeId;
     const url = `/api/recipe/${recipeId}/ingredient/${ingredient.id}`;
@@ -125,13 +240,10 @@ const deleteIngredient = async (ingredient: RecipeIngredient) => {
 
     axios.delete(url)
         .then((response) => {
-            let updatedRecipe = response.data.data;
+            const updatedRecipe = response.data.data;
             emit('updatedRecipe', updatedRecipe);
-            if (isModalOpen.value) {
-                formData.value = updatedRecipe.recipe_ingredients?.map(ing => ({...ing})) || [];
-            }
-            toastStore.show('success', 'Ingredient successfully removed from recipe.');
-
+            toastStore.show('success', 'Ingredient successfully removed.');
+            closeDropdown();
         })
         .catch((error) => {
             console.error(error);
@@ -140,8 +252,23 @@ const deleteIngredient = async (ingredient: RecipeIngredient) => {
         })
         .finally(() => {
             loadingStore.stop();
-        })
+        });
 };
+
+const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-container')) {
+        closeDropdown();
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
 
 const openAddModal = () => {
     const maxSortOrder = props.ingredients.length > 0
@@ -182,50 +309,6 @@ const formatIngredient = (ingredient: RecipeIngredient): string => {
     return parts.join(" ");
 }
 
-const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] => {
-    return [...ingredients].sort((a, b) => {
-        if (a.sort_order !== b.sort_order) {
-            return a.sort_order - b.sort_order;
-        }
-        const aId = a.id ?? 0;
-        const bId = b.id ?? 0;
-        return aId - bId;
-    });
-}
-
-const sortedFormData = computed(() => sortedIngredients(formData.value));
-
-const updateIngredients = () => {
-    const recipeId = props.recipeId;
-    const payload = {
-        ingredients: formData.value.map((ingredient, index) => ({
-            id: ingredient.id,
-            name: ingredient.name,
-            quantity: ingredient.quantity ?? null,
-            unit: ingredient.unit ?? null,
-            notes: ingredient.notes ?? null,
-            sort_order: ingredient.sort_order ?? index,
-        }))
-    };
-
-    loadingStore.start();
-
-    axios.post(`/api/recipes/${recipeId}/ingredients`, payload)
-        .then((response) => {
-            const updatedRecipe = response.data.data;
-            emit('updatedRecipe', updatedRecipe);
-            toastStore.show('success', 'Ingredients updated successfully.');
-            closeModal();
-        })
-        .catch((error) => {
-            console.error(error);
-            const errorMessage = error?.response?.data?.message || 'Could not update ingredients.';
-            toastStore.show('error', errorMessage);
-        })
-        .finally(() => {
-            loadingStore.stop();
-        });
-}
 
 const addIngredient = () => {
     if (!newIngredient.value.name.trim()) {
@@ -260,15 +343,6 @@ const addIngredient = () => {
 <template>
     <div class="bg-white rounded-2xl shadow-xl p-8 relative border-2 border-gray-200">
         <div class="absolute top-2 right-2 flex gap-2">
-            <!--            <button @click="openQuillModal"-->
-            <!--                    class="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200"-->
-            <!--                    title="Open Quill Editor">-->
-            <!--                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"-->
-            <!--                     viewBox="0 0 24 24">-->
-            <!--                    <path stroke-linecap="round" stroke-linejoin="round"-->
-            <!--                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>-->
-            <!--                </svg>-->
-            <!--            </button>-->
             <button @click="openAddModal"
                     class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
@@ -276,121 +350,131 @@ const addIngredient = () => {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                 </svg>
             </button>
-            <button v-if="ingredients && ingredients.length > 0" @click="openModal"
-                    class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
-                     viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-            </button>
         </div>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
-        <ul v-if="ingredients && ingredients.length > 0" class="space-y-2.5">
-            <li v-for="(ingredient, index) in sortedIngredients(ingredients)"
-                :key="ingredient.id ?? `ingredient-${index}`"
-                class="ingredient-item flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250">
-                <svg class="w-2.5 h-2.5 text-gray-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 8 8">
-                    <circle cx="4" cy="4" r="3"/>
-                </svg>
-                <span class="text-gray-800 leading-relaxed text-[15px] font-medium">{{
-                        formatIngredient(ingredient)
-                    }}</span>
-            </li>
-        </ul>
+        <template v-if="draggableIngredients && draggableIngredients.length > 0">
+            <VueDraggable
+                v-model="draggableIngredients"
+                @end="onDragEnd"
+                handle=".drag-handle"
+                tag="ul"
+                class="space-y-2.5"
+            >
+                <li
+                    v-for="(ingredient, index) in draggableIngredients"
+                    :key="ingredient.id ?? `tmp-${ingredient.recipe_id}-${ingredient.sort_order}-${index}`"
+                    @click="toggleIngredient(ingredient)"
+                    class="flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative"
+                >
+                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 8h16M4 16h16"></path>
+                        </svg>
+                    </div>
+                    <input
+                        type="checkbox"
+                        :checked="ingredient.completed"
+                        @click.stop="toggleIngredient(ingredient)"
+                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                    />
+                    <span :class="[
+                        'text-gray-800 leading-relaxed text-[15px] font-medium flex-1',
+                        ingredient.completed ? 'line-through opacity-60' : ''
+                    ]">
+                        {{ formatIngredient(ingredient) }}
+                    </span>
+                    <div class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
+                        <button
+                            @click="toggleDropdown(ingredient.id)"
+                            class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors opacity-100"
+                            title="More options"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                        <div
+                            v-if="openDropdownId === ingredient.id"
+                            class="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 opacity-100"
+                        >
+                            <button
+                                @click="openEditModal(ingredient)"
+                                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Edit
+                            </button>
+                            <button
+                                @click="deleteIngredient(ingredient)"
+                                class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            </VueDraggable>
+        </template>
         <div v-else class="text-center py-8">
             <p class="text-gray-500 mb-4">No ingredients yet. Click the + button to add your first ingredient.</p>
         </div>
     </div>
-    <!--    <pre>{{formData}}</pre>-->
 
-    <Modal :isOpen="isModalOpen" @close="closeModal">
+    <Modal :isOpen="isEditModalOpen" @close="closeEditModal">
         <template #header>
-            <div class="flex items-center gap-4 flex-1">
-                <h2 class="text-2xl font-bold text-gray-900">Edit Ingredients</h2>
-                <button
-                    @click.stop="addNewIngredientToForm"
-                    class="ml-auto p-2 rounded-lg active:scale-95 transition-transform duration-200"
-                >
-                    <svg class="w-6 h-6 text-gray-500 hover:text-blue-700 transition-all duration-200 hover:scale-150"
-                         fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                </button>
-            </div>
+            <h2 class="text-2xl font-bold text-gray-900">Edit Ingredient</h2>
         </template>
         <template #body>
             <div class="space-y-4">
-                <div v-for="(ingredient, index) in sortedFormData"
-                     :key="ingredient.id ?? `new-${index}`"
-                     :ref="(el) => { if (index === sortedFormData.length - 1) lastIngredientRef = el as HTMLElement }"
-                     class="ingredient-card p-3 sm:p-4 bg-white rounded-lg border border-gray-200 transition-all relative shadow-md">
-                    <button
-                        @click="deleteIngredient(ingredient)"
-                        class="absolute top-0.25 right-0 p-2 rounded-lg active:scale-95 transition-transform duration-200"
-                    >
-                        <svg
-                            class="w-5 h-5 text-red-700 hover:text-red-700 transition-all duration-200 hover:scale-150"
-                            fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"></path>
-                        </svg>
-                    </button>
-                    <div class="flex items-start gap-3 mb-3 mt-1">
-                        <!--                        <svg class="w-2 h-2 text-gray-600 flex-shrink-0 mt-3" fill="currentColor" viewBox="0 0 8 8">-->
-                        <!--                            <circle cx="4" cy="4" r="3"/>-->
-                        <!--                        </svg>-->
-                        <div class="flex-1 space-y-3">
-                            <div class="sm:hidden">
-                                <label class="block text-xs text-gray-500 font-medium mb-1">Name</label>
-                                <input
-                                    v-model="ingredient.name"
-                                    type="text"
-                                    class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                    placeholder="Flour"
-                                />
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-12 gap-3">
-                                <div class="hidden sm:block sm:col-span-5">
-                                    <label class="block text-xs text-gray-500 font-medium mb-1">Name</label>
-                                    <input
-                                        v-model="ingredient.name"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                        placeholder="Flour"
-                                    />
-                                </div>
-                                <div class="col-span-1 sm:col-span-3">
-                                    <label class="block text-xs text-gray-500 font-medium mb-1">Quantity</label>
-                                    <input
-                                        v-model.number="ingredient.quantity"
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                        placeholder="2"
-                                    />
-                                </div>
-                                <div class="col-span-1 sm:col-span-4">
-                                    <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
-                                    <input
-                                        v-model="ingredient.unit"
-                                        type="text"
-                                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                        placeholder="cups"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-500 font-medium mb-1">Notes (optional)</label>
-                                <input
-                                    v-model="ingredient.notes"
-                                    type="text"
-                                    class="w-full px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                    placeholder="e.g. sifted, room temperature"
-                                />
-                            </div>
+                <div v-if="editingIngredient">
+                    <div>
+                        <label class="block text-xs text-gray-500 font-medium mb-1">Name *</label>
+                        <input
+                            v-model="editingIngredient.name"
+                            type="text"
+                            class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                            placeholder="Flour"
+                        />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <label class="block text-xs text-gray-500 font-medium mb-1">Quantity</label>
+                            <input
+                                v-model.number="editingIngredient.quantity"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                                placeholder="2"
+                            />
                         </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
+                            <input
+                                v-model="editingIngredient.unit"
+                                type="text"
+                                class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                                placeholder="cups"
+                            />
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-xs text-gray-500 font-medium mb-1">Notes (optional)</label>
+                        <input
+                            v-model="editingIngredient.notes"
+                            type="text"
+                            class="w-full px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                            placeholder="e.g. sifted, room temperature"
+                        />
                     </div>
                 </div>
             </div>
@@ -398,13 +482,13 @@ const addIngredient = () => {
         <template #footer>
             <div class="flex flex-col sm:flex-row justify-between gap-3">
                 <button
-                    @click="closeModal"
+                    @click="closeEditModal"
                     class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
                     Cancel
                 </button>
                 <button
-                    @click.stop="updateIngredients"
+                    @click.stop="updateIngredient"
                     class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                     Save Changes
@@ -483,40 +567,59 @@ const addIngredient = () => {
 </template>
 
 <style scoped>
-:deep(.ql-editor) {
-    min-height: 300px;
+/* Styles for dragged item */
+:deep(.sortable-drag) {
+    opacity: 0.8;
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.15);
+    border: 2px solid rgb(59 130 246);
+    background: rgb(239 246 255);
+    z-index: 1000;
 }
 
-:deep(.ql-container) {
-    font-size: 16px;
+/* Styles for placeholder (where item will be dropped) */
+:deep(.sortable-ghost) {
+    opacity: 0.4;
+    background: rgb(229 231 235);
+    border: 2px dashed rgb(156 163 175);
+    border-radius: 0.5rem;
 }
 
-:deep(.ql-toolbar) {
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
+/* Styles for item being dragged */
+:deep(li.sortable-drag) {
+    cursor: grabbing !important;
 }
 
-:deep(.ql-container) {
-    border-bottom-left-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
+/* Styles for items NOT being dragged - when dragging is active */
+:deep(ul.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost) {
+    transition: all 0.2s ease;
+    border-color: rgb(229 231 235);
+    background: rgb(249 250 251);
 }
 
-.ingredient-card {
-    transition: all 0.1s ease-in-out;
+/* When dragging, make non-dragged items slightly dimmed */
+:deep(ul.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost) {
+    opacity: 0.7;
+    transform: scale(0.98);
 }
 
-.ingredient-card:hover {
-    border-color: rgb(148 163 184);
-    border-width: 2px;
-    box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+/* Hover effect on non-dragged items during drag */
+:deep(ul.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost):hover {
+    opacity: 0.85;
+    transform: scale(0.99);
+    border-color: rgb(209 213 219);
+    background: rgb(243 244 246);
 }
 
-.ingredient-card:has(input:focus),
-.ingredient-card:has(input:focus-visible) {
-    border-color: rgb(148 163 184);
-    border-width: 2px;
-    box-shadow: 0 4px 6px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-    background-color: rgb(250 250 250);
+/* Make the drag handle more prominent on non-dragged items during drag */
+:deep(ul.sortable-drag) li:not(.sortable-drag):not(.sortable-ghost) .drag-handle {
+    background: rgb(243 244 246);
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.375rem;
+}
+
+/* Smooth transitions for all list items */
+:deep(ul li) {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
 
