@@ -50,16 +50,15 @@ onMounted(() => {
 <template>
     <DashboardLayout>
         <div class="p-6 max-w-4xl mx-auto">
-            GL page!
-
-
             <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                 <p class="text-red-600 font-medium">{{ errorMessage }}</p>
             </div>
 
             <div v-if="groceryListData" class="space-y-6">
-                <pre>Here main data: {{ groceryListData }}</pre>
-                <GroceryListTitleCard/>
+                <GroceryListTitleCard
+                    v-if="groceryListData"
+                    :grocery-list-data="groceryListData"
+                />
             </div>
 
             <div v-else-if="!errorMessage" class="text-center py-12">
