@@ -119,9 +119,6 @@ const toggleItem = (item: GroceryListItem) => {
     axios.patch(`/api/grocery-list-items/${itemId}`, {
         is_purchased: newPurchasedState
     })
-        .then(() => {
-            return axios.get(`/api/grocery-lists/${props.groceryListId}`);
-        })
         .then((response) => {
             const updatedGroceryList = response.data.data;
             emit('updatedGroceryList', updatedGroceryList);

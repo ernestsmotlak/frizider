@@ -95,9 +95,11 @@ class GroceryListItemController extends Controller
 
         $groceryListItem->update($validated);
 
+        $groceryList = $groceryListItem->groceryList;
+
         return response()->json([
             'message' => 'Grocery list item updated.',
-            'data' => $groceryListItem
+            'data' => $groceryList->fresh()->load('groceryListItems')
         ]);
 
     }
