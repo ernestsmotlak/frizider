@@ -28,14 +28,16 @@ const showEmojiPicker = ref(false);
 const formData = ref({
     name: "",
     notes: "",
-    emoji: ""
+    emoji: "",
+    status: "active"
 });
 
 const openModal = () => {
     formData.value = {
         name: props.groceryListData.name || "",
         notes: props.groceryListData.notes || "",
-        emoji: props.groceryListData.image_url || ""
+        emoji: props.groceryListData.image_url || "",
+        status: props.groceryListData.completed_at ? "completed" : "active"
     };
     showEmojiPicker.value = false;
     isModalOpen.value = true;
@@ -50,7 +52,8 @@ const updateGroceryList = () => {
     const payload = {
         name: formData.value.name,
         notes: formData.value.notes || null,
-        image_url: formData.value.emoji || null
+        image_url: formData.value.emoji || null,
+        completed_at: formData.value.status === "completed" ? new Date().toISOString() : null
     };
 
     loadingStore.start();
@@ -304,6 +307,36 @@ const formatDate = (dateString: string | null): string => {
                         class="w-full px-4 py-3 text-lg text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                         placeholder="Enter notes"
                     ></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <div class="flex gap-3">
+                        <button
+                            type="button"
+                            @click="formData.status = 'active'"
+                            :class="[
+                                'flex-1 px-4 py-3 rounded-lg font-medium transition-all',
+                                formData.status === 'active'
+                                    ? 'bg-green-600 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ]"
+                        >
+                            Active
+                        </button>
+                        <button
+                            type="button"
+                            @click="formData.status = 'completed'"
+                            :class="[
+                                'flex-1 px-4 py-3 rounded-lg font-medium transition-all',
+                                formData.status === 'completed'
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ]"
+                        >
+                            Completed
+                        </button>
+                    </div>
                 </div>
             </div>
         </template>
