@@ -65,7 +65,10 @@ const {items: recipes, isLoading, hasMore, allRows} = usePagination<Recipe>({
                 </div>
 
                 <div v-else class="px-4">
-                    <div class="grid grid-cols-1 gap-4">
+                    <div
+                        class="grid grid-cols-1 gap-4"
+                        :class="{ 'mb-10': hasMore}"
+                    >
                         <RecipeCard
                             v-for="recipe in recipes"
                             :key="recipe.id"
