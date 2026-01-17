@@ -35,6 +35,7 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::post('recipe/{recipe}/instruction/{instruction}/toggle-completed', [RecipeController::class, 'toggleInstructionCompleted']);
 
     Route::apiResource('grocery-lists', GroceryListController::class);
+    Route::post('save-grocery-list-data', [GroceryListController::class, 'saveGroceryListWithData']);
     Route::post('get-grocery-lists', [GroceryListController::class, 'paginateGroceryLists']);
     Route::apiResource('grocery-list-items', GroceryListItemController::class);
 });

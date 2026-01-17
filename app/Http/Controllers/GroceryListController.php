@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\GroceryList;
+use App\Models\GroceryListItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GroceryListController extends Controller
 {
@@ -125,5 +127,56 @@ class GroceryListController extends Controller
         return response()->json([
             'message' => 'Grocery list deleted.'
         ]);
+    }
+
+    public function saveGroceryListWithData(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'notes' => 'nullable|string',
+            'image_url' => 'nullable|string|max:500',
+            'items' => 'nullable|array',
+            'items.*.name' => 'required|string|max:255',
+            'items.*.quantity' => 'nullable|numeric|min:0',
+            'items.*.unit' => 'nullable|string|max:50',
+            'items.*.notes' => 'nullable|string|max:500',
+            'items.*.sort_order' => 'nullable|integer|min:0',
+        ]);
+
+        $validated['user_id'] = auth()->id();
+
+        $items = $validated['items'] ?? [];
+        unset($validated['items']);
+
+        DB::beginTransaction();
+        try {
+            $groceryList = GroceryList::create($validated);
+
+            foreach ($items as $index => $item) {
+                GroceryListItem::create([
+                    'grocery_list_id' => $groceryList->id,
+                    'name' => $item['name'],
+                    'quantity' => $item['quantity'] ?? null,
+                    'unit' => $item['unit'] ?? null,
+                    'notes' => $item['notes'] ?? null,
+                    'sort_order' => $item['sort_order'] ?? $index,
+                    'is_purchased' => false,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Grocery list created.',
+                'data' => $groceryList->fresh()->load('groceryListItems')
+            ], 201);
+        } catch (\Throwable $error) {
+            DB::rollBack();
+            report($error);
+            return response()->json([
+                'message' => 'Failed to create grocery list.',
+                'error' => $error->getMessage()
+            ], 500);
+        }
     }
 }
