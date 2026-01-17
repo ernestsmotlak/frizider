@@ -6,11 +6,7 @@ const route = useRoute();
 const router = useRouter();
 
 const errorCode = route.params.code || route.query.code || "404";
-const errorMessage = route.query.message as string ||
-    (errorCode === "404" ? "The page you're looking for doesn't exist." :
-        errorCode === "403" ? "You don't have permission to access this page." :
-            errorCode === "500" ? "Something went wrong on our end. Please try again later." :
-                "An unexpected error occurred.");
+const errorMessage = "The page you're looking for doesn't exist.";
 
 const goHome = () => {
     router.push("/");
@@ -22,7 +18,7 @@ const goHome = () => {
         <div class="px-6 py-6 text-center shadow-2xl mt-5 bg-gray-50 rounded-2xl border-2 border-gray-200">
             <div class="mb-8">
                 <h1 class="text-5xl font-bold text-red-600 mb-4">{{ errorCode }}</h1>
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">Oops! Something went wrong</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Oops! Something went wrong.</h2>
                 <p class="text-lg text-gray-600 mb-6">
                     {{ errorMessage }}
                 </p>
