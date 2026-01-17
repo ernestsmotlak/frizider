@@ -355,7 +355,16 @@ const addItem = (addAnother: boolean = false) => {
                 </svg>
             </button>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Grocery list items</h2>
+        <div class="flex items-center gap-3 pb-4 mb-5 border-b border-gray-200">
+            <div class="flex-1">
+                <h2 class="text-2xl sm:text-xl font-bold tracking-tight text-gray-900">
+                    Grocery List Items
+                </h2>
+                <p class="text-xs text-gray-500">
+                    Drag to reorder • Tap to mark done
+                </p>
+            </div>
+        </div>
         <template v-if="draggableItems && draggableItems.length > 0">
             <VueDraggable
                 v-model="draggableItems"
