@@ -72,7 +72,10 @@ const {items: groceryLists, isLoading, hasMore, allRows} = usePagination<Grocery
                 </div>
 
                 <div v-else class="px-4">
-                    <div class="grid grid-cols-1 gap-4">
+                    <div
+                        class="grid grid-cols-1 gap-4"
+                        :class="{ 'mb-10': hasMore}"
+                    >
                         <GroceryListCard
                             v-for="groceryList in groceryLists"
                             :key="groceryList.id"
