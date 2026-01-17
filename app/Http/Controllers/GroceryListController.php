@@ -179,4 +179,32 @@ class GroceryListController extends Controller
             ], 500);
         }
     }
+
+    public function updateItems(Request $request, GroceryList $groceryList)
+    {
+        if ($groceryList->user_id !== auth()->id()) {
+            return response()->json([
+                'message' => 'Forbidden.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:grocery_list_items,id',
+            'items.*.sort_order' => 'required|integer|min:0',
+        ]);
+
+        DB::transaction(function () use ($groceryList, $validated) {
+            foreach ($validated['items'] as $item) {
+                GroceryListItem::where('id', $item['id'])
+                    ->where('grocery_list_id', $groceryList->id)
+                    ->update(['sort_order' => $item['sort_order']]);
+            }
+        });
+
+        return response()->json([
+            'message' => 'Items order updated.',
+            'data' => $groceryList->fresh()->load('groceryListItems'),
+        ]);
+    }
 }

@@ -36,6 +36,7 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::apiResource('grocery-lists', GroceryListController::class);
     Route::post('save-grocery-list-data', [GroceryListController::class, 'saveGroceryListWithData']);
+    Route::post('grocery-lists/{groceryList}/items', [GroceryListController::class, 'updateItems']);
     Route::post('get-grocery-lists', [GroceryListController::class, 'paginateGroceryLists']);
     Route::apiResource('grocery-list-items', GroceryListItemController::class);
 });

@@ -88,14 +88,14 @@ const onDragEnd = async () => {
     loadingStore.start();
 
     try {
-        const updatePromises = draggableItems.value.map((item) => {
-            return axios.patch(`/api/grocery-list-items/${item.id}`, {
+        const payload = {
+            items: draggableItems.value.map((item) => ({
+                id: item.id,
                 sort_order: item.sort_order
-            });
-        });
+            }))
+        };
 
-        await Promise.all(updatePromises);
-        const response = await axios.get(`/api/grocery-lists/${props.groceryListId}`);
+        const response = await axios.post(`/api/grocery-lists/${props.groceryListId}/items`, payload);
         const updatedGroceryList = response.data.data;
         emit('updatedGroceryList', updatedGroceryList);
     } catch (error: any) {
@@ -108,13 +108,17 @@ const onDragEnd = async () => {
     }
 };
 
+const isTogglingItem = ref(false);
+
 const toggleItem = (item: GroceryListItem) => {
-    if (!item.id) {
+    if (!item.id || isTogglingItem.value) {
         return;
     }
 
     const itemId = item.id;
     const newPurchasedState = !item.is_purchased;
+
+    isTogglingItem.value = true;
 
     axios.patch(`/api/grocery-list-items/${itemId}`, {
         is_purchased: newPurchasedState
@@ -127,6 +131,9 @@ const toggleItem = (item: GroceryListItem) => {
             console.error(error);
             const errorMessage = error?.response?.data?.message || 'Could not update item status.';
             toastStore.show('error', errorMessage);
+        })
+        .finally(() => {
+            isTogglingItem.value = false;
         });
 };
 
@@ -360,7 +367,6 @@ const addItem = (addAnother: boolean = false) => {
                 <li
                     v-for="(item, index) in draggableItems"
                     :key="item.id ?? `tmp-${item.grocery_list_id}-${item.sort_order}-${index}`"
-                    @click="toggleItem(item)"
                     class="flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative"
                 >
                     <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
