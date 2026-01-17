@@ -42,7 +42,7 @@ const isIngredientsTab = computed(() => {
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
         <div class="flex justify-around items-center h-16">
             <router-link
-                to="/grocery-list"
+                to="/grocery-lists"
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
                 :class="isGroceryList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
             >

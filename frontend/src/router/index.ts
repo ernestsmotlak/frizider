@@ -35,8 +35,8 @@ const router = createRouter({
             meta: {requiresAuth: true},
         },
         {
-            path: "/grocery-list",
-            name: "grocery-list",
+            path: "/grocery-lists",
+            name: "Grocery Lists",
             component: GroceryListsPage,
             meta: {requiresAuth: true},
         },
