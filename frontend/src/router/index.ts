@@ -87,7 +87,7 @@ const router = createRouter({
             redirect: () => ({
                 name: 'Error',
                 query: {
-                    code: 'Koji kurac!?',
+                    code: '404',
                     message: 'The page you\'re looking for doesn\'t exist.'
                 }
             }),
