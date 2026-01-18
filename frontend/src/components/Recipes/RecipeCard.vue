@@ -24,7 +24,7 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
 <template>
     <div
         @click="handleClick"
-        class="rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden border border-gray-100 active:scale-[0.98] flex flex-row"
+        class="rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden border border-gray-100 active:scale-[0.98] flex flex-row"
     >
         <div
             class="relative w-24 h-full flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden self-stretch">
