@@ -24,7 +24,10 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
 <template>
     <div
         @click="handleClick"
-        class="rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden border border-gray-100 active:scale-[0.98] flex flex-row"
+        :class="[
+            'rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden border active:scale-[0.98] flex flex-row',
+            groceryList.completed_at ? 'border-green-200 bg-green-50/40' : 'border-gray-100'
+        ]"
     >
         <div
             class="relative w-24 h-full flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden self-stretch">
@@ -40,9 +43,18 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
             </div>
         </div>
         <div class="p-4 flex-1 min-w-0 flex flex-col justify-center">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 break-words">
-                {{ groceryList.name }}
-            </h3>
+            <div class="flex items-start justify-between gap-3">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 break-words">
+                    {{ groceryList.name }}
+                </h3>
+                <span
+                    v-if="groceryList.completed_at"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
+                >
+                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                    Completed
+                </span>
+            </div>
             <p class="text-sm text-gray-600 line-clamp-1 leading-relaxed break-words min-h-[1.25rem]">
                 <template v-if="groceryList.notes">{{ truncateNotes(groceryList.notes, 100) }}</template>
 <!--                <template v-else>&nbsp;</template>-->

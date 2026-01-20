@@ -371,7 +371,7 @@ const addItem = (addAnother: boolean = false) => {
                     <span class="font-medium text-gray-700 tabular-nums">
                         {{ numberOfSelectedDraggableItems }}/{{ draggableItems.length }}
                     </span>
-                    checked
+                    purchased
                 </p>
             </div>
         </div>
@@ -386,8 +386,20 @@ const addItem = (addAnother: boolean = false) => {
                 <li
                     v-for="(item, index) in draggableItems"
                     :key="item.id ?? `tmp-${item.grocery_list_id}-${item.sort_order}-${index}`"
-                    class="flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative"
+                    @click="toggleItem(item)"
+                    role="checkbox"
+                    :aria-checked="item.is_purchased"
+                    :class="[
+                        'flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-hidden',
+                        item.is_purchased
+                            ? 'bg-green-50 border-green-200 ring-1 ring-green-100'
+                            : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-blue-200'
+                    ]"
                 >
+                    <div
+                        v-if="item.is_purchased"
+                        class="absolute left-0 top-0 h-full w-1 bg-green-500"
+                    ></div>
                     <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -398,13 +410,22 @@ const addItem = (addAnother: boolean = false) => {
                         type="checkbox"
                         :checked="item.is_purchased"
                         @click.stop="toggleItem(item)"
-                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                        :class="[
+                            'w-5 h-5 rounded cursor-pointer flex-shrink-0',
+                            item.is_purchased ? 'text-green-600 focus:ring-green-500' : 'text-blue-600 focus:ring-blue-500'
+                        ]"
                     />
                     <span :class="[
-                        'text-gray-800 leading-relaxed text-[15px] font-medium flex-1',
-                        item.is_purchased ? 'line-through opacity-60' : ''
+                        'leading-relaxed text-[15px] font-medium flex-1',
+                        item.is_purchased ? 'text-gray-600 line-through' : 'text-gray-800'
                     ]">
                         {{ formatItem(item) }}
+                    </span>
+                    <span
+                        v-if="item.is_purchased"
+                        class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
+                    >
+                        Purchased
                     </span>
                     <div class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
                         <button

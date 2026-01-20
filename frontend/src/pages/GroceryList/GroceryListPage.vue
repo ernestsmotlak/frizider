@@ -36,7 +36,7 @@ const getGroceryList = () => {
         .catch((error) => {
             console.error(error);
             errorMessage.value = 'Could not fetch grocery list data.';
-            toasterStore.show('error', 'Could not get recipe.');
+            toasterStore.show('error', 'Could not get shopping list.');
         })
         .finally(() => {
             loadingStore.stop();
@@ -71,7 +71,7 @@ onMounted(() => {
             </div>
 
             <div v-else-if="!errorMessage" class="text-center py-12">
-                <p class="text-gray-600 text-lg">Loading recipe...</p>
+                <p class="text-gray-600 text-lg">Loading shopping list...</p>
             </div>
         </div>
     </DashboardLayout>

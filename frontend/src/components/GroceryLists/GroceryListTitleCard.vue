@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted} from "vue";
+import {computed, ref, onMounted, onUnmounted} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
@@ -32,6 +32,25 @@ const formData = ref({
     status: "active"
 });
 
+const totalItemsCount = computed(() => {
+    return props.groceryListData.grocery_list_items?.length ?? 0;
+});
+
+const purchasedItemsCount = computed(() => {
+    return props.groceryListData.grocery_list_items?.filter((i) => i.is_purchased).length ?? 0;
+});
+
+const purchasedPercent = computed(() => {
+    if (totalItemsCount.value <= 0) {
+        return 0;
+    }
+    return Math.round((purchasedItemsCount.value / totalItemsCount.value) * 100);
+});
+
+const isCompleted = computed(() => {
+    return !!props.groceryListData.completed_at;
+});
+
 const openModal = () => {
     formData.value = {
         name: props.groceryListData.name || "",
@@ -48,22 +67,17 @@ const handleEmojiSelect = (event: CustomEvent) => {
     showEmojiPicker.value = false;
 };
 
-const updateGroceryList = () => {
-    const payload = {
-        name: formData.value.name,
-        notes: formData.value.notes || null,
-        image_url: formData.value.emoji || null,
-        completed_at: formData.value.status === "completed" ? new Date().toISOString() : null
-    };
-
+const patchGroceryList = (payload: Record<string, any>, successMessage: string, shouldCloseModal: boolean = false) => {
     loadingStore.start();
 
     axios.patch('/api/grocery-lists/' + props.groceryListData.id, payload)
         .then((response) => {
             const updatedGroceryList = response.data.data;
             emit('updatedGroceryList', updatedGroceryList);
-            toastStore.show('success', 'Grocery list updated successfully.');
-            closeModal();
+            toastStore.show('success', successMessage);
+            if (shouldCloseModal) {
+                closeModal();
+            }
         })
         .catch((error) => {
             console.error(error);
@@ -71,8 +85,23 @@ const updateGroceryList = () => {
         })
         .finally(() => {
             loadingStore.stop();
-        })
-}
+        });
+};
+
+const updateGroceryList = () => {
+    patchGroceryList({
+        name: formData.value.name,
+        notes: formData.value.notes || null,
+        image_url: formData.value.emoji || null,
+        completed_at: formData.value.status === "completed" ? new Date().toISOString() : null
+    }, 'Grocery list updated successfully.', true);
+};
+
+const toggleCompleted = () => {
+    patchGroceryList({
+        completed_at: props.groceryListData.completed_at ? null : new Date().toISOString(),
+    }, props.groceryListData.completed_at ? 'Shopping list reopened.' : 'Shopping list completed.');
+};
 
 const closeModal = () => {
     isModalOpen.value = false;
@@ -189,6 +218,71 @@ const formatDate = (dateString: string | null): string => {
                         {{ groceryListData.name || "Unnamed List" }}</h1>
                     <p v-if="groceryListData.notes" class="text-lg text-gray-600 leading-relaxed max-[450px]:text-base">
                         {{ groceryListData.notes }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 pt-1">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span
+                            :class="[
+                                'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold border',
+                                isCompleted
+                                    ? 'bg-green-50 text-green-700 border-green-200'
+                                    : 'bg-gray-50 text-gray-700 border-gray-200'
+                            ]"
+                        >
+                            <span
+                                :class="[
+                                    'inline-block w-2 h-2 rounded-full',
+                                    isCompleted ? 'bg-green-500' : 'bg-gray-400'
+                                ]"
+                            ></span>
+                            {{ isCompleted ? "Completed" : "Active" }}
+                        </span>
+
+                        <span
+                            v-if="totalItemsCount > 0"
+                            class="text-sm text-gray-500 tabular-nums"
+                        >
+                            {{ purchasedItemsCount }}/{{ totalItemsCount }} purchased
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="toggleCompleted"
+                        :class="[
+                            'inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold border-2 shadow-sm transition-all duration-200',
+                            isCompleted
+                                ? 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.99]'
+                                : (purchasedPercent === 100
+                                    ? 'bg-green-600 text-white border-green-700 hover:bg-green-700 active:scale-[0.99]'
+                                    : 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700 active:scale-[0.99]')
+                        ]"
+                        :aria-pressed="isCompleted"
+                    >
+                        <svg v-if="!isCompleted" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 14A8 8 0 006.34 8.34M4 10a8 8 0 0013.66 5.66"></path>
+                        </svg>
+                        {{ isCompleted ? "Reopen list" : "Finish shopping" }}
+                    </button>
+                </div>
+
+                <div v-if="totalItemsCount > 0" class="w-full">
+                    <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                        <div
+                            class="h-full rounded-full transition-all duration-300"
+                            :class="[isCompleted || purchasedPercent === 100 ? 'bg-green-600' : 'bg-blue-600']"
+                            :style="{ width: purchasedPercent + '%' }"
+                        ></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 tabular-nums">
+                        {{ purchasedPercent }}% purchased
                     </p>
                 </div>
             </div>
