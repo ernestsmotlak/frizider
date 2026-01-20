@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, watchEffect, onMounted, onUnmounted} from "vue";
+import {ref, watchEffect, onMounted, onUnmounted, computed} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
@@ -69,6 +69,10 @@ const sortedIngredients = (ingredients: RecipeIngredient[]): RecipeIngredient[] 
 }
 
 const draggableIngredients = ref<RecipeIngredient[]>([]);
+
+const numberOfSelectedDraggableIngredients = computed(() => {
+    return draggableIngredients.value.filter(ingredient => ingredient.completed).length;
+});
 
 watchEffect(() => {
     draggableIngredients.value = sortedIngredients(props.ingredients).map(ing => ({...ing}));
@@ -358,6 +362,12 @@ const addIngredient = () => {
                 </h2>
                 <p class="text-xs text-gray-500">
                     Drag to reorder • Tap to mark done
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    <span class="font-medium text-gray-700 tabular-nums">
+                        {{ numberOfSelectedDraggableIngredients }}/{{ draggableIngredients.length }}
+                    </span>
+                    checked
                 </p>
             </div>
         </div>
