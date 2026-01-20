@@ -421,12 +421,15 @@ const addItem = (addAnother: boolean = false) => {
                     ]">
                         {{ formatItem(item) }}
                     </span>
-                    <span
+                    <div
                         v-if="item.is_purchased"
-                        class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
+                        class="pointer-events-none absolute top-2 right-2 flex items-center justify-center w-6 h-6 rounded-full bg-green-100 border border-green-200"
+                        aria-hidden="true"
                     >
-                        Purchased
-                    </span>
+                        <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
                     <div class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
                         <button
                             @click="toggleDropdown(item.id)"
