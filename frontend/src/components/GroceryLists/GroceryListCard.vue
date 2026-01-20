@@ -26,7 +26,7 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
         @click="handleClick"
         :class="[
             'rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden border active:scale-[0.98] flex flex-row',
-            groceryList.completed_at ? 'border-green-200 bg-green-50/40' : 'border-gray-100'
+            groceryList.completed_at ? 'border-green-100 bg-green-50/70 ring-1 ring-green-200/60' : 'border-gray-100'
         ]"
     >
         <div
