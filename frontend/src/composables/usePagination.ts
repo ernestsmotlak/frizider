@@ -2,11 +2,14 @@ import {ref, onMounted, onUnmounted} from "vue";
 import {useToastStore} from "../stores/toast.ts";
 import {useLoadingStore} from "../stores/loading.ts";
 
+type PaginationPayload = Record<string, unknown> | (() => Record<string, unknown>);
+
 interface PaginationOptions {
     endpoint: string;
     errorMessage?: string;
     scrollThreshold?: number;
     debounceMs?: number;
+    payload?: PaginationPayload;
 }
 
 export function usePagination<T>(options: PaginationOptions) {
@@ -20,14 +23,22 @@ export function usePagination<T>(options: PaginationOptions) {
     const allRows = ref(0);
     let scrollTimeout: number | null = null;
 
+    const getPayload = (): Record<string, unknown> => {
+        if (!options.payload) {
+            return {};
+        }
+        return typeof options.payload === "function" ? options.payload() : options.payload;
+    };
+
     const fetchPage = (page: number = 1) => {
-        if (isLoading.value || !hasMore.value) return;
+        if (isLoading.value) return;
+        if (page !== 1 && !hasMore.value) return;
         if (page > 1 && page <= currentPage.value) return;
 
         isLoading.value = true;
         if (page === 1) loadingStore.start();
 
-        axios.post(options.endpoint, {page})
+        axios.post(options.endpoint, {...getPayload(), page})
             .then((response: any) => {
                 const paginator = response.data.data;
                 allRows.value = response.data.allRecipes ?? 0;
@@ -74,6 +85,11 @@ export function usePagination<T>(options: PaginationOptions) {
         if (scrollTimeout) clearTimeout(scrollTimeout);
     });
 
+    const refresh = () => {
+        hasMore.value = true;
+        fetchPage(1);
+    };
+
     return {
         items,
         currentPage,
@@ -81,7 +97,7 @@ export function usePagination<T>(options: PaginationOptions) {
         isLoading,
         fetchPage,
         allRows,
-        refresh: () => fetchPage(1),
+        refresh,
     };
 }
 

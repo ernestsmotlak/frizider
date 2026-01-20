@@ -25,14 +25,36 @@ class GroceryListController extends Controller
 
     public function paginateGroceryLists(Request $request)
     {
-        $perPage = $request->integer('per_page', 10);
+        $validated = $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'searchTerm' => 'nullable|string|max:100',
+        ]);
+
+        $perPage = (int) ($validated['per_page'] ?? 10);
+        $searchTerm = trim((string) ($validated['searchTerm'] ?? ''));
 
         $query = GroceryList::query()
             ->where('user_id', auth()->id())
+            ->when($searchTerm !== '', function ($q) use ($searchTerm) {
+                $escaped = addcslashes($searchTerm, "\\%_");
+                $like = "%{$escaped}%";
+
+                $q->where(function ($inner) use ($like) {
+                    $inner
+                        ->where('name', 'like', $like)
+                        ->orWhere('notes', 'like', $like)
+                        ->orWhereHas('groceryListItems', function ($itemsQuery) use ($like) {
+                            $itemsQuery
+                                ->where('name', 'like', $like)
+                                ->orWhere('notes', 'like', $like);
+                        });
+                });
+            })
             ->orderByDesc('created_at');
 
+        $countQuery = clone $query;
         $userLists = $query->simplePaginate($perPage);
-        $total = (clone $query)->count();
+        $total = $countQuery->count();
 
         return response()->json([
             'data' => $userLists,

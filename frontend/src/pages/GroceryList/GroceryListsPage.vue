@@ -4,6 +4,7 @@ import {usePagination} from "../../composables/usePagination.ts";
 import GroceryListCard from "../../components/GroceryLists/GroceryListCard.vue";
 import router from "../../router";
 import type {GroceryListItem} from "../../components/GroceryLists/GroceryListItemsCard.vue";
+import {onUnmounted, ref, watch} from "vue";
 
 export interface GroceryList {
     id: number;
@@ -18,6 +19,8 @@ export interface GroceryList {
     grocery_list_items: GroceryListItem[]
 }
 
+const searchTerm = ref("");
+
 const handleGroceryListClick = (grocery_list_id: number) => {
     if ((grocery_list_id < 1)) {
         return;
@@ -29,9 +32,28 @@ const handleAddGroceryList = () => {
     router.push('/new/grocery-list');
 }
 
-const {items: groceryLists, isLoading, hasMore, allRows} = usePagination<GroceryList>({
+const {items: groceryLists, isLoading, hasMore, allRows, refresh} = usePagination<GroceryList>({
     endpoint: '/api/get-grocery-lists',
     errorMessage: 'Could not fetch shopping lists.',
+    payload: () => ({
+        searchTerm: searchTerm.value,
+    }),
+});
+
+let searchTimeout: number | null = null;
+watch(searchTerm, () => {
+    if (searchTimeout) {
+        window.clearTimeout(searchTimeout);
+    }
+    searchTimeout = window.setTimeout(() => {
+        refresh();
+    }, 250);
+});
+
+onUnmounted(() => {
+    if (searchTimeout) {
+        window.clearTimeout(searchTimeout);
+    }
 });
 
 </script>
@@ -56,6 +78,46 @@ const {items: groceryLists, isLoading, hasMore, allRows} = usePagination<Grocery
                     <p v-if="allRows > 0" class="text-sm text-gray-600">
                         {{ allRows }} shopping list{{ allRows !== 1 ? 's' : '' }}
                     </p>
+
+                    <div class="mt-4">
+                        <label for="grocery-lists-search" class="sr-only">Search shopping lists</label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                                    />
+                                </svg>
+                            </div>
+                            <input
+                                id="grocery-lists-search"
+                                v-model="searchTerm"
+                                type="text"
+                                inputmode="search"
+                                enterkeyhint="search"
+                                role="searchbox"
+                                placeholder="Search shopping lists"
+                                autocomplete="off"
+                                class="relative z-0 w-full px-4 py-2.5 pl-10 pr-10 text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            />
+                            <button
+                                v-if="searchTerm"
+                                type="button"
+                                class="absolute inset-y-0 right-0 z-10 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                                @click="searchTerm = ''"
+                                aria-label="Clear search"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
                     <p v-if="hasMore && groceryLists.length > 0 && !isLoading" class="text-sm text-gray-500 mt-2">
                         Scroll down for more shopping lists
                     </p>
@@ -106,4 +168,3 @@ const {items: groceryLists, isLoading, hasMore, allRows} = usePagination<Grocery
         </div>
     </DashboardLayout>
 </template>
-
