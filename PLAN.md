@@ -89,6 +89,7 @@
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
 - Pages: List, Create/Edit, View with items
+- Add a status filter select (All / Completed / Not completed) next to the search bar on `frontend/src/pages/GroceryList/GroceryListsPage.vue`
 - Mark items as purchased
 - Convert to pantry items functionality
 
