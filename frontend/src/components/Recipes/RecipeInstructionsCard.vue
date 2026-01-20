@@ -331,7 +331,7 @@ onUnmounted(() => {
         </div>
         <div class="flex items-center gap-3 pb-4 mb-5 border-b border-gray-200">
             <div class="flex-1">
-                <h2 class="text-2xl sm:text-xl font-bold tracking-tight text-gray-900">
+                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900">
                     Instructions
                 </h2>
                 <p class="text-xs text-gray-500">
