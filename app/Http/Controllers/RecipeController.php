@@ -16,20 +16,44 @@ class RecipeController extends Controller
      */
     public function paginateRecipes(Request $request)
     {
+        $validated = $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'searchTerm' => 'nullable|string|max:100',
+        ]);
 
-        $allRecipes = Recipe::where('user_id', auth()->id())->count();
+        $perPage = (int) ($validated['per_page'] ?? 10);
+        $searchTerm = trim((string) ($validated['searchTerm'] ?? ''));
 
-        $userRecipes = Recipe::select([
+        $query = Recipe::select([
             'id',
             'name',
             'description',
             'image_url'
         ])
             ->where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->simplePaginate(
-                $request->integer('per_page', 10)
-            );
+            ->when($searchTerm !== '', function ($q) use ($searchTerm) {
+                $escaped = addcslashes($searchTerm, "\\%_");
+                $like = "%{$escaped}%";
+
+                $q->where(function ($inner) use ($like) {
+                    $inner
+                        ->where('name', 'like', $like)
+                        ->orWhere('description', 'like', $like)
+                        ->orWhereHas('recipeIngredients', function ($ingredientsQuery) use ($like) {
+                            $ingredientsQuery
+                                ->where('name', 'like', $like)
+                                ->orWhere('notes', 'like', $like);
+                        })
+                        ->orWhereHas('recipeInstructions', function ($instructionsQuery) use ($like) {
+                            $instructionsQuery->where('instruction', 'like', $like);
+                        });
+                });
+            })
+            ->orderBy('created_at', 'desc');
+
+        $countQuery = clone $query;
+        $userRecipes = $query->simplePaginate($perPage);
+        $allRecipes = $countQuery->count();
 
         return response()->json([
             'data' => $userRecipes,
