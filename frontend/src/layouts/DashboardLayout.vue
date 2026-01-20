@@ -53,7 +53,7 @@ const isIngredientsTab = computed(() => {
                 class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
                 :class="isIngredientsTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
             >
-                <span class="text-sm font-medium">Ingredients</span>
+                <span class="text-sm font-medium">Go shopping <br> Start cooking</span>
             </router-link>
             <router-link
                 to="/recipes"
