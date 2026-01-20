@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, watchEffect, onMounted, onUnmounted, watch, computed} from "vue";
+import {ref, watchEffect, onMounted, onUnmounted, computed} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
@@ -367,8 +367,11 @@ const addItem = (addAnother: boolean = false) => {
                 <p class="text-xs text-gray-500">
                     Drag to reorder • Tap to mark done
                 </p>
-                <p>
-                    {{ numberOfSelectedDraggableItems }}/{{ draggableItems.length }} checked
+                <p class="text-xs text-gray-500 mt-1">
+                    <span class="font-medium text-gray-700 tabular-nums">
+                        {{ numberOfSelectedDraggableItems }}/{{ draggableItems.length }}
+                    </span>
+                    checked
                 </p>
             </div>
         </div>
