@@ -92,6 +92,100 @@
 - Mark items as purchased
 - Convert to pantry items functionality
 
+##### Go shopping (Plan B: multi-list shopping session)
+
+**Goal**
+- Let the user pick **N shopping lists**, then shop them in one combined, in-store friendly view.
+- Keep it always clear **which list each item belongs to**, and ensure toggles/adds update the correct list.
+
+**User flow**
+- Entry points:
+  - From `Shopping Lists` page: add a primary action like "Start shopping" (new page).
+  - From inside a single list: "Add more lists" to start a session pre-filled with current list.
+- Step 1: Select lists
+  - Show a list picker with search (reuse existing list pagination endpoint).
+  - User selects 1..N lists, taps "Start".
+- Step 2: Shopping session view
+  - Combined view optimized for fast checking off items.
+  - Option to switch between different grouping modes (see UI ideas below).
+- Step 3: Finish / exit session
+  - Simple: leave session at any time (state persisted).
+  - Optional: provide "Finish shopping" (mark selected lists as completed) and/or "Checkout to pantry".
+
+**Screens**
+- `StartShoppingSessionPage.vue`
+  - Search + multi-select list cards
+  - Shows selected list chips at top
+  - "Start shopping" button enabled when at least one list selected
+- `ShoppingSessionPage.vue`
+  - Top bar:
+    - Selected list chips (removable)
+    - Session title like "Shopping session"
+    - Progress summary (overall + per list)
+  - Item list area:
+    - Big checkboxes, large tap targets, quick add
+    - Purchased items optionally collapsed into a "Purchased" section
+
+**UI idea 1 (recommended to start): grouped by list (matches your original idea)**
+- Render sections per list:
+  - Section header: list emoji/name + per-list progress like "3/12"
+  - Items underneath: checkbox, formatted quantity/unit/name/notes
+- Add a subtle list identity cue:
+  - Color-tint the section header or left border per list
+  - Also show a small list badge on each row for clarity when scrolling
+- Pros: simplest mental model, zero dedupe edge cases.
+
+**UI idea 2 (optional upgrade): grouped by item name (dedupe), with list provenance**
+- Merge items across selected lists by normalized name (and optionally unit):
+  - Single "Milk" row may represent items from multiple lists
+  - Under the row, show list badges like "Weekly", "Party"
+- Toggle behavior options:
+  - Tap checkbox toggles all underlying items
+  - Expand row to toggle per-list if needed
+- Pros: less scrolling, faster in-store; Cons: requires careful merge rules and UI for conflicts.
+
+**Adding items during a session**
+- Quick add input (always visible):
+  - Default target list: last used in session
+  - Allow changing target list via a dropdown next to the input
+- Submit creates a normal grocery list item via the existing API.
+
+**API usage (no backend changes required)**
+- List picker:
+  - `POST /api/get-grocery-lists` with `{ searchTerm, per_page }`
+- Load selected lists (session bootstrap):
+  - For each selected list id, call `GET /api/grocery-lists/{id}` to obtain `grocery_list_items`
+- Toggle purchased:
+  - `PATCH /api/grocery-list-items/{id}` with `{ is_purchased: boolean }`
+- Add item:
+  - `POST /api/grocery-list-items` with `{ grocery_list_id, name, quantity, unit, notes, sort_order, is_purchased }`
+
+**Frontend state strategy (important for multi-list)**
+- Maintain a local session state shaped like:
+  - `selected_list_ids: number[]`
+  - `lists_by_id: Record<number, GroceryList>`
+  - `items_by_list_id: Record<number, GroceryListItem[]>`
+- Updates:
+  - Prefer optimistic UI for `is_purchased` toggles (flip immediately, revert on error).
+  - When the API returns an updated list payload (current behavior), update only that list’s items in `lists_by_id[list_id]`.
+- Persistence:
+  - Save `selected_list_ids` (and optionally grouping mode) in `localStorage` so the session resumes.
+
+**Edge cases**
+- A selected list is deleted/forbidden mid-session:
+  - Remove it from the session and show a toast.
+- Conflicts in dedupe mode (UI idea 2):
+  - Different quantities/units/notes across lists: show per-list details on expand.
+- Performance:
+  - Limit max selected lists in the UI (e.g. 10) to avoid many parallel requests.
+
+**Optional backend improvements (later, not required for v1)**
+- Single endpoint to fetch multiple lists with items in one request (reduces N requests):
+  - e.g. `POST /api/shopping-session` with `{ grocery_list_ids: number[] }`
+- Bulk toggle endpoint for faster completion:
+  - e.g. `PATCH /api/grocery-list-items/bulk` with item ids + new state
+- "Checkout" endpoint to convert purchased grocery list items into pantry items in one transaction.
+
 ---
 
 ## Suggested File Structure
