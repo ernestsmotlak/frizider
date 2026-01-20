@@ -47,7 +47,7 @@ watch(searchTerm, () => {
     }
     searchTimeout = window.setTimeout(() => {
         refresh();
-    }, 250);
+    }, 400);
 });
 
 onUnmounted(() => {
