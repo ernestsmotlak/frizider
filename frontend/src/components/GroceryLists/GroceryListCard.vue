@@ -49,10 +49,11 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
                 </h3>
                 <span
                     v-if="groceryList.completed_at"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
+                    class="inline-flex gap-1.5 px-1 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
                 >
-                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-                    Completed
+                    <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
                 </span>
             </div>
             <p class="text-sm text-gray-600 line-clamp-1 leading-relaxed break-words min-h-[1.25rem]">
