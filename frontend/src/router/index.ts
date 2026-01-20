@@ -12,6 +12,7 @@ import RecipePage from "../pages/Recipe/RecipePage.vue";
 import NewRecipe from "../pages/NewRecipe.vue";
 import GroceryListPage from "../pages/GroceryList/GroceryListPage.vue";
 import NewGroceryList from "../pages/NewGroceryList.vue";
+import Shopping from "../pages/Shopping.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -77,10 +78,16 @@ const router = createRouter({
             meta: {requiresAuth: true}
         },
         {
+            path: '/shopping',
+            name: 'Shopping',
+            component: Shopping,
+            meta: {requiresAuth: true}
+        },
+        {
             path: "/error",
             name: 'Error',
             component: Error,
-            meta: {requiresAuth: false}
+            meta: {requiresAuth: true}
         },
         {
             path: '/register',
