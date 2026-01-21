@@ -19,7 +19,7 @@ const loadingStore = useLoadingStore();
 const isLongPressing = ref(false);
 const longPressTimer = ref<number | null>(null);
 const hasLongPressed = ref(false);
-const LONG_PRESS_DURATION = 500;
+const LONG_PRESS_DURATION = 1000;
 
 const handleClick = () => {
     if (!hasLongPressed.value) {
@@ -49,11 +49,11 @@ const cancelLongPress = () => {
 
 const toggleCompleted = () => {
     cancelLongPress();
-    
+
     loadingStore.start();
-    
+
     const newCompletedAt = props.groceryList.completed_at ? null : new Date().toISOString();
-    
+
     axios.patch('/api/grocery-lists/' + props.groceryList.id, {
         completed_at: newCompletedAt
     })
