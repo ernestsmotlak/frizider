@@ -72,7 +72,7 @@
                     :class="{ 'bg-gray-100': selectedValue === 'unfinished' }"
                 >
                     <svg
-                        class="w-5 h-5 text-orange-600"
+                        class="w-5 h-5 text-orange-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
