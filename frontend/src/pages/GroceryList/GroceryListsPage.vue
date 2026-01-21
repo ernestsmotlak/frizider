@@ -31,6 +31,13 @@ const handleGroceryListClick = (grocery_list_id: number) => {
     router.push('/grocery-list/' + grocery_list_id);
 }
 
+const handleGroceryListUpdated = (updatedGroceryList: GroceryList) => {
+    const index = groceryLists.value.findIndex(list => list.id === updatedGroceryList.id);
+    if (index !== -1) {
+        groceryLists.value[index] = updatedGroceryList;
+    }
+}
+
 const handleAddGroceryList = () => {
     router.push('/new/grocery-list');
 }
@@ -163,6 +170,7 @@ onUnmounted(() => {
                             :key="groceryList.id"
                             :grocery-list="groceryList"
                             @click="handleGroceryListClick"
+                            @updated="handleGroceryListUpdated"
                         />
                     </div>
 

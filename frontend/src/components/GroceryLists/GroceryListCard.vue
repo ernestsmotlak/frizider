@@ -1,17 +1,105 @@
 <script setup lang="ts">
+import {ref, onUnmounted} from 'vue';
 import type {GroceryList} from '../../pages/GroceryList/GroceryListsPage.vue';
+import {useToastStore} from '../../stores/toast.ts';
+import {useLoadingStore} from '../../stores/loading.ts';
 
 const props = defineProps<{
     groceryList: GroceryList
 }>();
 
 const emit = defineEmits<{
-    click: [id: number]
+    click: [id: number],
+    updated: [groceryList: GroceryList]
 }>();
 
+const toastStore = useToastStore();
+const loadingStore = useLoadingStore();
+
+const isLongPressing = ref(false);
+const longPressTimer = ref<number | null>(null);
+const hasLongPressed = ref(false);
+const LONG_PRESS_DURATION = 500;
+
 const handleClick = () => {
-    emit('click', props.groceryList.id);
+    if (!hasLongPressed.value) {
+        emit('click', props.groceryList.id);
+    }
+    hasLongPressed.value = false;
 }
+
+const startLongPress = () => {
+    hasLongPressed.value = false;
+    isLongPressing.value = true;
+    longPressTimer.value = window.setTimeout(() => {
+        if (isLongPressing.value) {
+            hasLongPressed.value = true;
+            toggleCompleted();
+        }
+    }, LONG_PRESS_DURATION);
+}
+
+const cancelLongPress = () => {
+    if (longPressTimer.value) {
+        window.clearTimeout(longPressTimer.value);
+        longPressTimer.value = null;
+    }
+    isLongPressing.value = false;
+}
+
+const toggleCompleted = () => {
+    cancelLongPress();
+    
+    loadingStore.start();
+    
+    const newCompletedAt = props.groceryList.completed_at ? null : new Date().toISOString();
+    
+    axios.patch('/api/grocery-lists/' + props.groceryList.id, {
+        completed_at: newCompletedAt
+    })
+        .then((response) => {
+            const updatedGroceryList = response.data.data;
+            emit('updated', updatedGroceryList);
+            toastStore.show('success', updatedGroceryList.completed_at ? 'Shopping list completed.' : 'Shopping list reopened.');
+        })
+        .catch((error) => {
+            console.error(error);
+            toastStore.show('error', 'Could not update grocery list.');
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+}
+
+const handleMouseDown = (event: MouseEvent) => {
+    if (event.button === 0) {
+        startLongPress();
+    }
+}
+
+const handleMouseUp = () => {
+    cancelLongPress();
+}
+
+const handleMouseLeave = () => {
+    cancelLongPress();
+}
+
+const handleTouchStart = () => {
+    startLongPress();
+}
+
+const handleTouchEnd = () => {
+    cancelLongPress();
+}
+
+const handleTouchCancel = () => {
+    cancelLongPress();
+}
+
+onUnmounted(() => {
+    cancelLongPress();
+});
 
 const truncateNotes = (text: string | null, maxLength: number = 100): string => {
     if (!text) return '';
@@ -24,9 +112,16 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
 <template>
     <div
         @click="handleClick"
+        @mousedown="handleMouseDown"
+        @mouseup="handleMouseUp"
+        @mouseleave="handleMouseLeave"
+        @touchstart="handleTouchStart"
+        @touchend="handleTouchEnd"
+        @touchcancel="handleTouchCancel"
         :class="[
-            'rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden border active:scale-[0.98] flex flex-row',
-            groceryList.completed_at ? 'border-green-100 bg-green-50/70 ring-1 ring-green-200/60' : 'border-gray-100'
+            'rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden border flex flex-row',
+            groceryList.completed_at ? 'border-green-100 bg-green-50/70 ring-1 ring-green-200/60' : 'border-gray-100',
+            isLongPressing ? 'scale-95 ring-2 ring-blue-400 bg-blue-50/50 shadow-xl' : 'active:scale-[0.98]'
         ]"
     >
         <div
