@@ -1,9 +1,12 @@
 <template>
-    <div ref="dropdownRef" class="relative w-full">
+    <div ref="dropdownRef" class="relative w-full h-full">
         <button
             type="button"
             @click="isOpen = !isOpen"
-            class="w-full min-w-full px-4 py-2.5 text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white hover:border-gray-400 transition-colors duration-200 flex items-center justify-between"
+            class="w-full h-full px-4 text-base text-gray-900 border border-gray-300 rounded-lg
+           focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none
+           bg-white hover:border-gray-400 transition-colors duration-200
+           flex items-center justify-between"
         >
             <svg
                 class="w-5 h-5 text-gray-500"
