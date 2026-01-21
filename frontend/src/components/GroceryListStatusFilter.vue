@@ -36,26 +36,50 @@
                 <button
                     type="button"
                     @click="selectOption('all')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-gray-100': selectedValue === 'all' }"
                 >
-                    All
+                    <svg
+                        class="w-5 h-5 text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    <span>All</span>
                 </button>
                 <button
                     type="button"
                     @click="selectOption('completed')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-gray-100': selectedValue === 'completed' }"
                 >
-                    Completed
+                    <svg
+                        class="w-5 h-5 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Completed</span>
                 </button>
                 <button
                     type="button"
                     @click="selectOption('unfinished')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-gray-100': selectedValue === 'unfinished' }"
                 >
-                    Unfinished
+                    <svg
+                        class="w-5 h-5 text-orange-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Unfinished</span>
                 </button>
             </div>
         </div>
