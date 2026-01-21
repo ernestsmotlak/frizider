@@ -49,13 +49,13 @@ const {items: groceryLists, isLoading, hasMore, allRows, refresh} = usePaginatio
         const payload: Record<string, unknown> = {
             searchTerm: searchTerm.value,
         };
-        
+
         if (statusFilter.value === "completed") {
             payload.status = "completed";
         } else if (statusFilter.value === "unfinished") {
             payload.status = "unfinished";
         }
-        
+
         return payload;
     },
 });
@@ -88,7 +88,18 @@ onUnmounted(() => {
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-4">
                     <div class="flex items-center justify-between mb-1">
-                        <h1 class="text-3xl font-bold text-gray-900">Shopping Lists</h1>
+                        <!--                        <h1 class="text-3xl font-bold text-gray-900">Shopping Lists</h1>-->
+                        <div class="flex items-center gap-3 pb-4 mb-1 border-b-2 border-gray-200">
+                            <div class="flex-1">
+                                <h2 class="text-3xl sm:text-3xl font-bold tracking-tight text-gray-900">
+                                    Grocery Lists
+                                </h2>
+                                <p class="text-xs text-gray-500">
+                                    Long press to change status
+                                </p>
+                            </div>
+                        </div>
+
                         <button
                             @click="handleAddGroceryList"
                             class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
@@ -107,7 +118,8 @@ onUnmounted(() => {
                         <label for="grocery-lists-search" class="sr-only">Search shopping lists</label>
                         <div class="relative w-[75%] h-full">
                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
@@ -141,7 +153,7 @@ onUnmounted(() => {
                             </button>
                         </div>
                         <div class="w-[25%] pl-3">
-                            <GroceryListStatusFilter v-model="statusFilter" />
+                            <GroceryListStatusFilter v-model="statusFilter"/>
                         </div>
                     </div>
 
