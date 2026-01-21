@@ -1,5 +1,5 @@
 <template>
-    <div class="relative w-full">
+    <div ref="dropdownRef" class="relative w-full">
         <button
             type="button"
             @click="isOpen = !isOpen"
@@ -54,9 +54,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 const isOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
+
+const handleClickOutside = (event: MouseEvent) => {
+    if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+        isOpen.value = false;
+    }
+};
+
+onMounted(() => {
+    document.addEventListener("click", handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener("click", handleClickOutside);
+});
 </script>
 
 <style scoped>
