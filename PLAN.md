@@ -86,6 +86,43 @@
 - Add emoji/image picker using emoji-mart-vue: https://serebrov.github.io/emoji-mart-vue/
 - - ❌ TODO: Fix the edit and delete buttons going under the components and having opacity not set to full
 
+##### Recipe Usage Tracking & Rating System
+**Goal:**
+- Track how many times a recipe has been cooked
+- Allow users to rate recipes (e.g., 1-5 stars)
+- Display usage count and rating on recipe cards and detail pages
+
+**Features:**
+- **Usage Counter:**
+  - Increment counter when user marks recipe as "cooked" or "completed"
+  - Display count on recipe cards (e.g., "Cooked 5 times")
+  - Show in recipe detail view
+  - Optional: Track last cooked date
+
+- **Rating System:**
+  - Star rating (1-5 stars) that users can set
+  - Display average rating on recipe cards
+  - Show rating in recipe detail view
+  - Allow users to update their rating
+  - Optional: Show rating distribution or reviews
+
+**Database Changes:**
+- Add `times_cooked` (integer, default 0) to `recipes` table
+- Add `rating` (decimal/float, nullable) to `recipes` table (or create separate `recipe_ratings` table if multi-user ratings needed)
+- Add `last_cooked_at` (timestamp, nullable) to `recipes` table (optional)
+
+**Backend API:**
+- `PATCH /api/recipes/{id}/mark-cooked` - Increment times_cooked, update last_cooked_at
+- `PATCH /api/recipes/{id}/rating` - Update recipe rating
+- Include `times_cooked`, `rating`, `last_cooked_at` in recipe responses
+
+**Frontend Implementation:**
+- Add "Mark as Cooked" button/action in recipe detail view
+- Add star rating component/selector
+- Display usage stats and rating on recipe cards
+- Filter/sort recipes by rating or times cooked
+- Show "Most Cooked" or "Top Rated" sections on recipes list page
+
 #### 10. GroceryList Management
 - Create store: `stores/groceryList.ts`
 - Pages: List, Create/Edit, View with items
