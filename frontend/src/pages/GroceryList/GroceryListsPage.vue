@@ -2,9 +2,10 @@
 import DashboardLayout from "../../layouts/DashboardLayout.vue";
 import {usePagination} from "../../composables/usePagination.ts";
 import GroceryListCard from "../../components/GroceryLists/GroceryListCard.vue";
+import GroceryListStatusFilter from "../../components/GroceryListStatusFilter.vue";
 import router from "../../router";
 import type {GroceryListItem} from "../../components/GroceryLists/GroceryListItemsCard.vue";
-import {onUnmounted, ref, watch} from "vue";
+import {computed, onUnmounted, ref, watch} from "vue";
 
 export interface GroceryList {
     id: number;
@@ -20,6 +21,8 @@ export interface GroceryList {
 }
 
 const searchTerm = ref("");
+type GroceryListStatusFilter = "all" | "completed" | "unfinished";
+const statusFilter = ref<GroceryListStatusFilter>("all");
 
 const handleGroceryListClick = (grocery_list_id: number) => {
     if ((grocery_list_id < 1)) {
@@ -38,6 +41,15 @@ const {items: groceryLists, isLoading, hasMore, allRows, refresh} = usePaginatio
     payload: () => ({
         searchTerm: searchTerm.value,
     }),
+});
+
+const filteredGroceryLists = computed(() => {
+    if (statusFilter.value === "all") {
+        return groceryLists.value;
+    }
+
+    const shouldBeCompleted = statusFilter.value === "completed";
+    return groceryLists.value.filter((groceryList) => (groceryList.completed_at !== null) === shouldBeCompleted);
 });
 
 let searchTimeout: number | null = null;
@@ -116,8 +128,9 @@ onUnmounted(() => {
                                 </svg>
                             </button>
                         </div>
-                        <div class="w-[25%] bg-red-200">hi!</div>
-<!--                        here comes a select of all, completed or not completed in a nice select-->
+                        <div class="w-[25%] pl-3">
+                            <GroceryListStatusFilter />
+                        </div>
                     </div>
 
                     <p v-if="hasMore && groceryLists.length > 0 && !isLoading" class="text-sm text-gray-500 mt-2">
@@ -141,7 +154,7 @@ onUnmounted(() => {
                         :class="{ 'mb-10': hasMore}"
                     >
                         <GroceryListCard
-                            v-for="groceryList in groceryLists"
+                            v-for="groceryList in filteredGroceryLists"
                             :key="groceryList.id"
                             :grocery-list="groceryList"
                             @click="handleGroceryListClick"
