@@ -5,7 +5,6 @@
             @click="isOpen = !isOpen"
             class="w-full px-4 py-2.5 text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white hover:border-gray-400 transition-colors duration-200 flex items-center justify-between"
         >
-            <span class="flex-1 text-left">Filter</span>
             <svg
                 class="w-5 h-5 text-gray-500 transition-transform duration-200"
                 :class="{ 'rotate-180': isOpen }"
@@ -16,7 +15,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
         </button>
-        
+
         <div
             v-if="isOpen"
             class="absolute z-50 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden"
