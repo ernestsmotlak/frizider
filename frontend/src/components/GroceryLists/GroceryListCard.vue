@@ -19,7 +19,9 @@ const loadingStore = useLoadingStore();
 const isLongPressing = ref(false);
 const longPressTimer = ref<number | null>(null);
 const hasLongPressed = ref(false);
-const LONG_PRESS_DURATION = 1000;
+const initialPosition = ref<{x: number, y: number} | null>(null);
+const LONG_PRESS_DURATION = 500;
+const MOVEMENT_THRESHOLD = 10;
 
 const handleClick = () => {
     if (!hasLongPressed.value) {
@@ -28,9 +30,10 @@ const handleClick = () => {
     hasLongPressed.value = false;
 }
 
-const startLongPress = () => {
+const startLongPress = (x: number, y: number) => {
     hasLongPressed.value = false;
     isLongPressing.value = true;
+    initialPosition.value = {x, y};
     longPressTimer.value = window.setTimeout(() => {
         if (isLongPressing.value) {
             hasLongPressed.value = true;
@@ -45,6 +48,14 @@ const cancelLongPress = () => {
         longPressTimer.value = null;
     }
     isLongPressing.value = false;
+    initialPosition.value = null;
+}
+
+const checkMovement = (x: number, y: number): boolean => {
+    if (!initialPosition.value) return false;
+    const deltaX = Math.abs(x - initialPosition.value.x);
+    const deltaY = Math.abs(y - initialPosition.value.y);
+    return deltaX > MOVEMENT_THRESHOLD || deltaY > MOVEMENT_THRESHOLD;
 }
 
 const toggleCompleted = () => {
@@ -73,7 +84,13 @@ const toggleCompleted = () => {
 
 const handleMouseDown = (event: MouseEvent) => {
     if (event.button === 0) {
-        startLongPress();
+        startLongPress(event.clientX, event.clientY);
+    }
+}
+
+const handleMouseMove = (event: MouseEvent) => {
+    if (isLongPressing.value && checkMovement(event.clientX, event.clientY)) {
+        cancelLongPress();
     }
 }
 
@@ -85,8 +102,20 @@ const handleMouseLeave = () => {
     cancelLongPress();
 }
 
-const handleTouchStart = () => {
-    startLongPress();
+const handleTouchStart = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    if (touch) {
+        startLongPress(touch.clientX, touch.clientY);
+    }
+}
+
+const handleTouchMove = (event: TouchEvent) => {
+    if (isLongPressing.value) {
+        const touch = event.touches[0];
+        if (touch && checkMovement(touch.clientX, touch.clientY)) {
+            cancelLongPress();
+        }
+    }
 }
 
 const handleTouchEnd = () => {
@@ -113,9 +142,11 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
     <div
         @click="handleClick"
         @mousedown="handleMouseDown"
+        @mousemove="handleMouseMove"
         @mouseup="handleMouseUp"
         @mouseleave="handleMouseLeave"
         @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
         @touchend="handleTouchEnd"
         @touchcancel="handleTouchCancel"
         :class="[
