@@ -35,19 +35,25 @@
             <div class="py-1">
                 <button
                     type="button"
+                    @click="selectOption('all')"
                     class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150"
+                    :class="{ 'bg-gray-100': selectedValue === 'all' }"
                 >
                     All
                 </button>
                 <button
                     type="button"
+                    @click="selectOption('completed')"
                     class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150"
+                    :class="{ 'bg-gray-100': selectedValue === 'completed' }"
                 >
                     Completed
                 </button>
                 <button
                     type="button"
+                    @click="selectOption('unfinished')"
                     class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150"
+                    :class="{ 'bg-gray-100': selectedValue === 'unfinished' }"
                 >
                     Unfinished
                 </button>
@@ -59,13 +65,30 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
 
+type FilterValue = "all" | "completed" | "unfinished";
+
+const props = defineProps<{
+    modelValue?: FilterValue;
+}>();
+
+const emit = defineEmits<{
+    "update:modelValue": [value: FilterValue];
+}>();
+
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+const selectedValue = ref<FilterValue>(props.modelValue ?? "all");
 
 const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
         isOpen.value = false;
     }
+};
+
+const selectOption = (value: FilterValue) => {
+    selectedValue.value = value;
+    emit("update:modelValue", value);
+    isOpen.value = false;
 };
 
 onMounted(() => {

@@ -5,7 +5,7 @@ import GroceryListCard from "../../components/GroceryLists/GroceryListCard.vue";
 import GroceryListStatusFilter from "../../components/GroceryListStatusFilter.vue";
 import router from "../../router";
 import type {GroceryListItem} from "../../components/GroceryLists/GroceryListItemsCard.vue";
-import {computed, onUnmounted, ref, watch} from "vue";
+import {onUnmounted, ref, watch} from "vue";
 
 export interface GroceryList {
     id: number;
@@ -38,18 +38,19 @@ const handleAddGroceryList = () => {
 const {items: groceryLists, isLoading, hasMore, allRows, refresh} = usePagination<GroceryList>({
     endpoint: '/api/get-grocery-lists',
     errorMessage: 'Could not fetch shopping lists.',
-    payload: () => ({
-        searchTerm: searchTerm.value,
-    }),
-});
-
-const filteredGroceryLists = computed(() => {
-    if (statusFilter.value === "all") {
-        return groceryLists.value;
-    }
-
-    const shouldBeCompleted = statusFilter.value === "completed";
-    return groceryLists.value.filter((groceryList) => (groceryList.completed_at !== null) === shouldBeCompleted);
+    payload: () => {
+        const payload: Record<string, unknown> = {
+            searchTerm: searchTerm.value,
+        };
+        
+        if (statusFilter.value === "completed") {
+            payload.status = "completed";
+        } else if (statusFilter.value === "unfinished") {
+            payload.status = "unfinished";
+        }
+        
+        return payload;
+    },
 });
 
 let searchTimeout: number | null = null;
@@ -60,6 +61,10 @@ watch(searchTerm, () => {
     searchTimeout = window.setTimeout(() => {
         refresh();
     }, 400);
+});
+
+watch(statusFilter, () => {
+    refresh();
 });
 
 onUnmounted(() => {
@@ -129,7 +134,7 @@ onUnmounted(() => {
                             </button>
                         </div>
                         <div class="w-[25%] pl-3">
-                            <GroceryListStatusFilter />
+                            <GroceryListStatusFilter v-model="statusFilter" />
                         </div>
                     </div>
 
@@ -154,7 +159,7 @@ onUnmounted(() => {
                         :class="{ 'mb-10': hasMore}"
                     >
                         <GroceryListCard
-                            v-for="groceryList in filteredGroceryLists"
+                            v-for="groceryList in groceryLists"
                             :key="groceryList.id"
                             :grocery-list="groceryList"
                             @click="handleGroceryListClick"

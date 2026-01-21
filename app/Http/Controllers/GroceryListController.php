@@ -28,10 +28,12 @@ class GroceryListController extends Controller
         $validated = $request->validate([
             'per_page' => 'nullable|integer|min:1|max:100',
             'searchTerm' => 'nullable|string|max:100',
+            'status' => 'nullable|string|in:completed,unfinished',
         ]);
 
         $perPage = (int) ($validated['per_page'] ?? 10);
         $searchTerm = trim((string) ($validated['searchTerm'] ?? ''));
+        $status = $validated['status'] ?? null;
 
         $query = GroceryList::query()
             ->where('user_id', auth()->id())
@@ -49,6 +51,12 @@ class GroceryListController extends Controller
                                 ->orWhere('notes', 'like', $like);
                         });
                 });
+            })
+            ->when($status === 'completed', function ($q) {
+                $q->whereNotNull('completed_at');
+            })
+            ->when($status === 'unfinished', function ($q) {
+                $q->whereNull('completed_at');
             })
             ->orderByDesc('created_at');
 
