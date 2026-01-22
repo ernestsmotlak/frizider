@@ -24,6 +24,8 @@ const searchTerm = ref("");
 type GroceryListStatusFilter = "all" | "completed" | "unfinished";
 const statusFilter = ref<GroceryListStatusFilter>("all");
 
+const selectMode = ref(false);
+
 const handleGroceryListClick = (grocery_list_id: number) => {
     if ((grocery_list_id < 1)) {
         return;
@@ -36,6 +38,10 @@ const handleGroceryListUpdated = (updatedGroceryList: GroceryList) => {
     if (index !== -1) {
         groceryLists.value[index] = updatedGroceryList;
     }
+}
+
+const handleSelectMode = () => {
+    selectMode.value = !selectMode.value;
 }
 
 const handleAddGroceryList = () => {
@@ -96,7 +102,9 @@ onUnmounted(() => {
                                 Long press to change status
                             </p>
                         </div>
-                        <button class="me-1 p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
+                        <button
+                            @click="handleSelectMode"
+                            class="me-1 p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
                             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                                  viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
