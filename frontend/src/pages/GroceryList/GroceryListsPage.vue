@@ -247,11 +247,11 @@ onUnmounted(() => {
 
         </div>
 
-        <div v-if="selectMode && selectedGroceryLists.length > 0" class="fixed bottom-16 left-0 right-0 z-50 px-5 pb-3">
+        <div v-if="selectMode && selectedGroceryLists.length > 0" class="fixed bottom-16 left-0 right-0 z-50 px-5 pb-4">
             <div class="max-w-sm mx-auto">
                 <button
                     @click="handleGoShopping"
-                    class="w-full flex items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-5 py-4 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-green-300 active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                    class="w-full flex items-center justify-center gap-3 rounded-xl border border-green-300 bg-gradient-to-b from-white to-green-50 px-5 py-4 shadow-lg ring-1 ring-green-200/50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-green-400 hover:ring-green-300/70 active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                 >
                     <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,10 +260,13 @@ onUnmounted(() => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                         </svg>
                     </div>
-                    <div class="flex flex-col items-start">
+                    <div class="flex flex-col items-start flex-1">
                         <div class="text-base font-bold text-gray-900">Go Shopping</div>
                         <div class="text-xs text-gray-500">With {{ selectedGroceryLists.length }} selected list{{ selectedGroceryLists.length !== 1 ? 's' : '' }}</div>
                     </div>
+                    <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
                 </button>
             </div>
         </div>
