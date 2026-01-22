@@ -31,8 +31,8 @@ class GroceryListController extends Controller
             'status' => 'nullable|string|in:completed,unfinished',
         ]);
 
-        $perPage = (int) ($validated['per_page'] ?? 10);
-        $searchTerm = trim((string) ($validated['searchTerm'] ?? ''));
+        $perPage = (int)($validated['per_page'] ?? 10);
+        $searchTerm = trim((string)($validated['searchTerm'] ?? ''));
         $status = $validated['status'] ?? null;
 
         $query = GroceryList::query()
@@ -235,6 +235,72 @@ class GroceryListController extends Controller
         return response()->json([
             'message' => 'Items order updated.',
             'data' => $groceryList->fresh()->load('groceryListItems'),
+        ]);
+    }
+
+    public function saveShoppingSession(Request $request)
+    {
+        $validated = $request->validate([
+            'grocery_list_ids' => 'required|array',
+            'grocery_list_ids.*' => 'required|integer|exists:grocery_lists,id',
+        ]);
+
+        $listIds = $validated['grocery_list_ids'];
+
+        // Verify all lists belong to the authenticated user
+        $userLists = GroceryList::where('user_id', auth()->id())
+            ->whereIn('id', $listIds)
+            ->pluck('id')
+            ->toArray();
+
+        if (count($userLists) !== count($listIds)) {
+            return response()->json([
+                'message' => 'Some lists do not belong to you or do not exist.',
+            ], 403);
+        }
+
+        // Save to session
+        session(['shopping_selected_lists' => $userLists]);
+
+        return response()->json([
+            'message' => 'Shopping session saved.',
+            'data' => ['grocery_list_ids' => $userLists],
+        ]);
+    }
+
+    public function getShoppingSession()
+    {
+        $listIds = session('shopping_selected_lists', []);
+
+        if (empty($listIds)) {
+            return response()->json([
+                'data' => [
+                    'grocery_list_ids' => [],
+                    'grocery_lists' => [],
+                ],
+            ]);
+        }
+
+        // Validate that all list IDs belong to the authenticated user
+        $userLists = GroceryList::where('user_id', auth()->id())
+            ->whereIn('id', $listIds)
+            ->pluck('id')
+            ->toArray();
+
+        // Only return lists that the user actually owns
+        $validListIds = array_values($userLists);
+
+        // Fetch full lists with items
+        $groceryLists = GroceryList::where('user_id', auth()->id())
+            ->whereIn('id', $validListIds)
+            ->with('groceryListItems')
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'grocery_list_ids' => $validListIds,
+                'grocery_lists' => $groceryLists,
+            ],
         ]);
     }
 }
