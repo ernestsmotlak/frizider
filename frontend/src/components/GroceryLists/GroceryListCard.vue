@@ -7,7 +7,8 @@ import GroceryListActionModal from '../GroceryListActionModal.vue';
 
 const props = defineProps<{
     groceryList: GroceryList,
-    selectMode: boolean
+    selectMode: boolean,
+    isSelected: boolean
 }>();
 
 const emit = defineEmits<{
@@ -101,6 +102,9 @@ const handleGoShopping = () => {
 }
 
 const handleMouseDown = (event: MouseEvent) => {
+    if (props.selectMode) {
+        return;
+    }
     if (event.button === 0) {
         startLongPress(event.clientX, event.clientY);
     }
@@ -121,6 +125,9 @@ const handleMouseLeave = () => {
 }
 
 const handleTouchStart = (event: TouchEvent) => {
+    if (props.selectMode) {
+        return;
+    }
     const touch = event.touches[0];
     if (touch) {
         startLongPress(touch.clientX, touch.clientY);
@@ -168,31 +175,59 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
         @touchend="handleTouchEnd"
         @touchcancel="handleTouchCancel"
         :class="[
-            'rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden border flex flex-row',
-            groceryList.completed_at ? 'border-green-100 bg-green-50/70 ring-1 ring-green-200/60' : 'border-gray-100',
-            isLongPressing ? 'scale-95 ring-2 ring-blue-400 bg-blue-50/50 shadow-xl' : 'active:scale-[0.98]'
+            'rounded-xl shadow-sm transition-all duration-200 overflow-hidden border flex flex-row relative',
+            props.selectMode 
+                ? (props.isSelected 
+                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-400 shadow-lg cursor-pointer' 
+                    : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer')
+                : 'hover:shadow-lg cursor-pointer border-gray-100',
+            !props.selectMode && (groceryList.completed_at ? 'border-green-100 bg-green-50/70 ring-1 ring-green-200/60' : ''),
+            !props.selectMode && (isLongPressing ? 'scale-95 ring-2 ring-blue-400 bg-blue-50/50 shadow-xl' : 'active:scale-[0.98]')
         ]"
     >
         <div
-            class="relative w-24 h-full flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden self-stretch">
+            :class="[
+                'relative w-24 h-full flex-shrink-0 overflow-hidden self-stretch',
+                props.selectMode && props.isSelected
+                    ? 'bg-gradient-to-br from-blue-100 to-blue-200'
+                    : 'bg-gradient-to-br from-gray-100 to-gray-200'
+            ]">
             <div class="w-full h-full flex items-center justify-center">
                 <div v-if="groceryList.image_url" class="text-5xl">
                     {{ groceryList.image_url }}
                 </div>
-                <svg v-else class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor"
+                <svg v-else :class="[
+                    'w-16 h-16',
+                    props.selectMode && props.isSelected ? 'text-blue-500' : 'text-gray-400'
+                ]" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                           d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
             </div>
+            <div v-if="props.selectMode" class="absolute top-2 right-2">
+                <div :class="[
+                    'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
+                    props.isSelected 
+                        ? 'bg-blue-500 border-blue-600' 
+                        : 'bg-white border-gray-300'
+                ]">
+                    <svg v-if="props.isSelected" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
         <div class="p-4 flex-1 min-w-0 flex flex-col justify-center">
             <div class="flex items-start justify-between gap-3">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 break-words">
+                <h3 :class="[
+                    'text-lg font-semibold mb-2 line-clamp-2 break-words',
+                    props.selectMode && props.isSelected ? 'text-blue-900' : 'text-gray-900'
+                ]">
                     {{ groceryList.name }}
                 </h3>
                 <span
-                    v-if="groceryList.completed_at"
+                    v-if="groceryList.completed_at && !props.selectMode"
                     class="inline-flex gap-1.5 px-1 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
                 >
                     <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3"
@@ -201,7 +236,10 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
                     </svg>
                 </span>
             </div>
-            <p class="text-sm text-gray-600 line-clamp-1 leading-relaxed break-words min-h-[1.25rem]">
+            <p :class="[
+                'text-sm line-clamp-1 leading-relaxed break-words min-h-[1.25rem]',
+                props.selectMode && props.isSelected ? 'text-blue-700' : 'text-gray-600'
+            ]">
                 <template v-if="groceryList.notes">{{ truncateNotes(groceryList.notes, 100) }}</template>
                 <!--                <template v-else>&nbsp;</template>-->
             </p>
