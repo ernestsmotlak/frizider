@@ -6,12 +6,14 @@ import {useLoadingStore} from '../../stores/loading.ts';
 import GroceryListActionModal from '../GroceryListActionModal.vue';
 
 const props = defineProps<{
-    groceryList: GroceryList
+    groceryList: GroceryList,
+    selectMode: boolean
 }>();
 
 const emit = defineEmits<{
     click: [id: number],
-    updated: [groceryList: GroceryList]
+    updated: [groceryList: GroceryList],
+    'emit-id': [id: number],
 }>();
 
 const toastStore = useToastStore();
@@ -20,13 +22,16 @@ const loadingStore = useLoadingStore();
 const isLongPressing = ref(false);
 const longPressTimer = ref<number | null>(null);
 const hasLongPressed = ref(false);
-const initialPosition = ref<{x: number, y: number} | null>(null);
+const initialPosition = ref<{ x: number, y: number } | null>(null);
 const isActionModalOpen = ref(false);
 const LONG_PRESS_DURATION = 500;
 const MOVEMENT_THRESHOLD = 10;
 
 const handleClick = () => {
-    if (!hasLongPressed.value) {
+    if (props.selectMode) {
+        emit('emit-id', props.groceryList.id);
+        return;
+    } else if (!hasLongPressed.value) {
         emit('click', props.groceryList.id);
     }
     hasLongPressed.value = false;
@@ -190,14 +195,15 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
                     v-if="groceryList.completed_at"
                     class="inline-flex gap-1.5 px-1 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
                 >
-                    <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3"
+                         viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </span>
             </div>
             <p class="text-sm text-gray-600 line-clamp-1 leading-relaxed break-words min-h-[1.25rem]">
                 <template v-if="groceryList.notes">{{ truncateNotes(groceryList.notes, 100) }}</template>
-<!--                <template v-else>&nbsp;</template>-->
+                <!--                <template v-else>&nbsp;</template>-->
             </p>
         </div>
     </div>

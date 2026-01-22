@@ -25,6 +25,7 @@ type GroceryListStatusFilter = "all" | "completed" | "unfinished";
 const statusFilter = ref<GroceryListStatusFilter>("all");
 
 const selectMode = ref(false);
+const selectedGroceryLists = ref<number[]>([]);
 
 const handleGroceryListClick = (grocery_list_id: number) => {
     if ((grocery_list_id < 1)) {
@@ -43,6 +44,15 @@ const handleGroceryListUpdated = (updatedGroceryList: GroceryList) => {
 const handleSelectMode = () => {
     selectMode.value = !selectMode.value;
 }
+
+const handleGLIdEmit = (id: number) => {
+    if (selectedGroceryLists.value.includes(id)) {
+        selectedGroceryLists.value.splice(selectedGroceryLists.value.indexOf(id), 1)
+    } else {
+        selectedGroceryLists.value.push(id);
+    }
+}
+
 
 const handleAddGroceryList = () => {
     router.push('/new/grocery-list');
@@ -90,6 +100,8 @@ onUnmounted(() => {
 
 <template>
     <DashboardLayout>
+        <pre class="bg-red-200 p-10 text-blue-600">{{ selectMode }}</pre>
+        <pre class="bg-orange-200 p-10 text-blue-600">{{ selectedGroceryLists }}</pre>
         <div class="pt-7 px-5">
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-4">
@@ -107,7 +119,8 @@ onUnmounted(() => {
                             class="me-1 p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
                             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                                  viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                             </svg>
                         </button>
                         <button
@@ -120,7 +133,7 @@ onUnmounted(() => {
                             </svg>
                         </button>
                     </div>
-                    <hr class="border-gray-300 my-3" />
+                    <hr class="border-gray-300 my-3"/>
                     <p v-if="allRows > 0" class="text-sm text-gray-600">
                         {{ allRows }} shopping list{{ allRows !== 1 ? 's' : '' }}
                     </p>
@@ -192,8 +205,10 @@ onUnmounted(() => {
                             v-for="groceryList in groceryLists"
                             :key="groceryList.id"
                             :grocery-list="groceryList"
+                            :select-mode="selectMode"
                             @click="handleGroceryListClick"
                             @updated="handleGroceryListUpdated"
+                            @emit-id="handleGLIdEmit"
                         />
                     </div>
 
