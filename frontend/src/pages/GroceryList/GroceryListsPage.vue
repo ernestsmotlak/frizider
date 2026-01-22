@@ -61,6 +61,12 @@ const handleAddGroceryList = () => {
     router.push('/new/grocery-list');
 }
 
+const handleGoShopping = () => {
+    if (selectedGroceryLists.value.length > 0) {
+        router.push('/shopping');
+    }
+}
+
 const {items: groceryLists, isLoading, hasMore, allRows, refresh} = usePagination<GroceryList>({
     endpoint: '/api/get-grocery-lists',
     errorMessage: 'Could not fetch shopping lists.',
@@ -119,8 +125,8 @@ onUnmounted(() => {
                             @click="handleSelectMode"
                             :class="[
                                 'me-1 p-2 border-2 rounded-lg shadow-md hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200',
-                                selectMode 
-                                    ? 'border-blue-600 bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:border-blue-700' 
+                                selectMode
+                                    ? 'border-blue-600 bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:border-blue-700'
                                     : 'border-gray-200 bg-white/90 backdrop-blur-sm hover:border-gray-300 hover:bg-white'
                             ]">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
@@ -239,6 +245,27 @@ onUnmounted(() => {
                 </div>
             </div>
 
+        </div>
+
+        <div v-if="selectMode && selectedGroceryLists.length > 0" class="fixed bottom-16 left-0 right-0 z-50 px-5 pb-3">
+            <div class="max-w-sm mx-auto">
+                <button
+                    @click="handleGoShopping"
+                    class="w-full flex items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-5 py-4 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-green-300 active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                >
+                    <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex flex-col items-start">
+                        <div class="text-base font-bold text-gray-900">Go Shopping</div>
+                        <div class="text-xs text-gray-500">With {{ selectedGroceryLists.length }} selected list{{ selectedGroceryLists.length !== 1 ? 's' : '' }}</div>
+                    </div>
+                </button>
+            </div>
         </div>
     </DashboardLayout>
 </template>
