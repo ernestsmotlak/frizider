@@ -248,12 +248,12 @@ onUnmounted(() => {
         </div>
 
         <div v-if="selectMode && selectedGroceryLists.length > 0" class="fixed bottom-16 left-0 right-0 z-50 px-5 pb-4">
-            <div class="max-w-sm mx-auto">
+            <div class="max-w-xs mx-auto">
                 <button
                     @click="handleGoShopping"
-                    class="w-full flex items-center justify-center gap-3 rounded-xl border border-green-300 bg-gradient-to-b from-white to-green-50 px-5 py-4 shadow-lg ring-1 ring-green-200/50 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-green-400 hover:ring-green-300/70 active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                    class="w-full flex items-center justify-center gap-3 rounded-xl border-2 border-green-300 bg-gradient-to-b from-white to-green-50 px-5 py-4 shadow-xl ring-1 ring-green-200/60 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl hover:border-green-400 hover:ring-green-300/80 active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                 >
-                    <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-md ring-1 ring-green-200 text-green-700 transition-all duration-200">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
