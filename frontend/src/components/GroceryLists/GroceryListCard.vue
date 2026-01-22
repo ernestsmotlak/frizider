@@ -3,6 +3,7 @@ import {ref, onUnmounted} from 'vue';
 import type {GroceryList} from '../../pages/GroceryList/GroceryListsPage.vue';
 import {useToastStore} from '../../stores/toast.ts';
 import {useLoadingStore} from '../../stores/loading.ts';
+import GroceryListActionModal from '../GroceryListActionModal.vue';
 
 const props = defineProps<{
     groceryList: GroceryList
@@ -20,6 +21,7 @@ const isLongPressing = ref(false);
 const longPressTimer = ref<number | null>(null);
 const hasLongPressed = ref(false);
 const initialPosition = ref<{x: number, y: number} | null>(null);
+const isActionModalOpen = ref(false);
 const LONG_PRESS_DURATION = 500;
 const MOVEMENT_THRESHOLD = 10;
 
@@ -37,7 +39,7 @@ const startLongPress = (x: number, y: number) => {
     longPressTimer.value = window.setTimeout(() => {
         if (isLongPressing.value) {
             hasLongPressed.value = true;
-            toggleCompleted();
+            openActionModal();
         }
     }, LONG_PRESS_DURATION);
 }
@@ -58,9 +60,16 @@ const checkMovement = (x: number, y: number): boolean => {
     return deltaX > MOVEMENT_THRESHOLD || deltaY > MOVEMENT_THRESHOLD;
 }
 
-const toggleCompleted = () => {
+const openActionModal = () => {
     cancelLongPress();
+    isActionModalOpen.value = true;
+}
 
+const closeActionModal = () => {
+    isActionModalOpen.value = false;
+}
+
+const handleComplete = () => {
     loadingStore.start();
 
     const newCompletedAt = props.groceryList.completed_at ? null : new Date().toISOString();
@@ -80,6 +89,10 @@ const toggleCompleted = () => {
         .finally(() => {
             loadingStore.stop();
         });
+}
+
+const handleGoShopping = () => {
+    // Navigation is handled in the modal component
 }
 
 const handleMouseDown = (event: MouseEvent) => {
@@ -188,6 +201,14 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
             </p>
         </div>
     </div>
+
+    <GroceryListActionModal
+        :is-open="isActionModalOpen"
+        :grocery-list="groceryList"
+        @close="closeActionModal"
+        @complete="handleComplete"
+        @go-shopping="handleGoShopping"
+    />
 </template>
 
 <style scoped>
