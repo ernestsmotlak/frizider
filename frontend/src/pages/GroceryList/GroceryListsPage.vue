@@ -6,6 +6,8 @@ import GroceryListStatusFilter from "../../components/GroceryListStatusFilter.vu
 import router from "../../router";
 import type {GroceryListItem} from "../../components/GroceryLists/GroceryListItemsCard.vue";
 import {onUnmounted, ref, watch} from "vue";
+import {useToastStore} from "../../stores/toast.ts";
+import {useLoadingStore} from "../../stores/loading.ts";
 
 export interface GroceryList {
     id: number;
@@ -26,6 +28,8 @@ const statusFilter = ref<GroceryListStatusFilter>("all");
 
 const selectMode = ref(false);
 const selectedGroceryLists = ref<number[]>([]);
+const toastStore = useToastStore();
+const loadingStore = useLoadingStore();
 
 const handleGroceryListClick = (grocery_list_id: number) => {
     if ((grocery_list_id < 1)) {
@@ -61,9 +65,23 @@ const handleAddGroceryList = () => {
     router.push('/new/grocery-list');
 }
 
-const handleGoShopping = () => {
-    if (selectedGroceryLists.value.length > 0) {
+const handleGoShopping = async () => {
+    if (selectedGroceryLists.value.length === 0) {
+        return;
+    }
+
+    loadingStore.start();
+    try {
+        await axios.post('/api/save-shopping-session', {
+            grocery_list_ids: selectedGroceryLists.value,
+        });
         router.push('/shopping');
+    } catch (error: any) {
+        console.error(error);
+        const message = error.response?.data?.message || 'Could not save shopping session.';
+        toastStore.show('error', message);
+    } finally {
+        loadingStore.stop();
     }
 }
 

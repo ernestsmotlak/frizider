@@ -240,6 +240,12 @@ class GroceryListController extends Controller
 
     public function saveShoppingSession(Request $request)
     {
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        }
+
         $validated = $request->validate([
             'grocery_list_ids' => 'required|array',
             'grocery_list_ids.*' => 'required|integer|exists:grocery_lists,id',
@@ -260,7 +266,8 @@ class GroceryListController extends Controller
         }
 
         // Save to session
-        session(['shopping_selected_lists' => $userLists]);
+        $request->session()->put('shopping_selected_lists', $userLists);
+        $request->session()->save();
 
         return response()->json([
             'message' => 'Shopping session saved.',
@@ -270,6 +277,12 @@ class GroceryListController extends Controller
 
     public function getShoppingSession()
     {
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        }
+
         $listIds = session('shopping_selected_lists', []);
 
         if (empty($listIds)) {

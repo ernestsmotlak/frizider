@@ -41,3 +41,8 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::apiResource('grocery-list-items', GroceryListItemController::class);
 });
 
+Route::middleware([\Illuminate\Session\Middleware\StartSession::class, 'jwt.cookie', 'auth:api'])->group(function () {
+    Route::post('save-shopping-session', [GroceryListController::class, 'saveShoppingSession']);
+    Route::get('get-shopping-session', [GroceryListController::class, 'getShoppingSession']);
+});
+
