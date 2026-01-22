@@ -55,7 +55,7 @@ const handleClose = () => {
                                 @click="handleClose"
                                 class="p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all duration-200"
                             >
-                                <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <svg class="w-7 h-7 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>
