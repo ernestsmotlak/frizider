@@ -61,31 +61,37 @@ const handleClose = () => {
                             </button>
                         </div>
                         <div class="p-4 sm:p-6">
-                            <div class="flex gap-3 sm:gap-4">
+                            <div class="grid grid-cols-2 gap-3">
                                 <button
                                     @click="handleComplete"
-                                    class="flex-1 group relative bg-white rounded-xl border border-green-100 hover:border-green-200 active:scale-[0.97] transition-all duration-200 shadow-sm hover:shadow-md p-4 sm:p-5 flex flex-col items-center text-center touch-manipulation min-w-0"
+                                    type="button"
+                                    class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 touch-manipulation"
+                                    :aria-label="isCompleted ? 'Reopen list' : 'Complete list'"
                                 >
-                                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-50 flex items-center justify-center mb-3 group-hover:bg-green-100 transition-colors flex-shrink-0">
-                                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-transform duration-200 group-hover:scale-105">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                     </div>
-                                    <div class="font-bold text-sm text-gray-900 mb-1">{{ isCompleted ? 'Reopen' : 'Complete' }}</div>
-                                    <div class="text-xs text-gray-500 leading-snug text-center">{{ isCompleted ? 'Mark as active' : 'Mark as completed' }}</div>
+                                    <div class="text-sm font-semibold text-gray-900">{{ isCompleted ? 'Reopen' : 'Complete' }}</div>
+                                    <div class="text-xs text-gray-500">{{ isCompleted ? 'Mark as active' : 'Mark as completed' }}</div>
                                 </button>
 
                                 <button
                                     @click="handleGoShopping"
-                                    class="flex-1 group relative bg-white rounded-xl border border-green-100 hover:border-green-200 active:scale-[0.97] transition-all duration-200 shadow-sm hover:shadow-md p-4 sm:p-5 flex flex-col items-center text-center touch-manipulation min-w-0"
+                                    type="button"
+                                    class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 touch-manipulation"
+                                    aria-label="Go shopping"
                                 >
-                                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-50 flex items-center justify-center mb-3 group-hover:bg-green-100 transition-colors flex-shrink-0">
-                                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"></path>
+                                    <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-transform duration-200 group-hover:scale-105">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                                         </svg>
                                     </div>
-                                    <div class="font-bold text-sm text-gray-900 mb-1">Shopping</div>
-                                    <div class="text-xs text-gray-500 leading-snug text-center">Check items and buy</div>
+                                    <div class="text-sm font-semibold text-gray-900">Shopping</div>
+                                    <div class="text-xs text-gray-500">Check items and buy</div>
                                 </button>
                             </div>
                         </div>
