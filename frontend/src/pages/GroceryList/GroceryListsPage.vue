@@ -145,7 +145,7 @@ onUnmounted(() => {
                         {{ selectMode ? `${selectedGroceryLists.length} of ${allRows} selected` : `${allRows} shopping list${allRows !== 1 ? 's' : ''}` }}
                     </p>
 
-                    <div v-if="!selectMode" class="mt-4 flex flex-row">
+                    <div class="mt-4 flex flex-row">
                         <label for="grocery-lists-search" class="sr-only">Search shopping lists</label>
                         <div class="relative w-[75%] h-full">
                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
