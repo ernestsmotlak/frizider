@@ -40,9 +40,7 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::post('grocery-lists/{groceryList}/items', [GroceryListController::class, 'updateItems']);
     Route::post('get-grocery-lists', [GroceryListController::class, 'paginateGroceryLists']);
     Route::apiResource('grocery-list-items', GroceryListItemController::class);
-});
 
-Route::middleware([StartSession::class, 'jwt.cookie', 'auth:api'])->group(function () {
     Route::post('save-shopping-session', [GroceryListController::class, 'saveShoppingSession']);
     Route::get('get-shopping-session', [GroceryListController::class, 'getShoppingSession']);
 });
