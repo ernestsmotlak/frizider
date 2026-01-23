@@ -244,9 +244,11 @@ onMounted(() => {
                                     Shopping
                                 </h2>
                             </div>
-                            <div class="flex-shrink-0">
-                                <img src="/fridge_icon.png" alt="Fridge" class="w-8 h-8" />
-                            </div>
+                            <button
+                                class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                            >
+                                <img src="/fridge_icon.png" alt="Fridge" class="w-5 h-5" />
+                            </button>
                         </div>
                         <p class="text-xs text-gray-500">
                             Tap items to mark as purchased
