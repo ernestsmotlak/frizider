@@ -10,7 +10,6 @@ class ShoppingItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'shopping_session_id',
         'grocery_list_item_id',
         'name',
