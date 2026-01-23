@@ -215,9 +215,15 @@ onMounted(() => {
         <div class="pt-7 px-5 pb-20">
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-5">
-                    <h2 class="text-3xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-4">
-                        Shopping
-                    </h2>
+                    <div class="flex-1 mb-4">
+                        <h2 class="text-3xl sm:text-3xl font-bold tracking-tight text-gray-900">
+                            Shopping
+                        </h2>
+                        <p class="text-xs text-gray-500">
+                            Tap items to mark as purchased • Drag to reorder
+                        </p>
+                    </div>
+                    <hr class="border-gray-300 my-3">
 
                     <div v-if="isLoading" class="flex items-center justify-center py-16">
                         <div class="inline-flex items-center gap-2 text-gray-600">
