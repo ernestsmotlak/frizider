@@ -5,6 +5,7 @@ use App\Http\Controllers\GroceryListItemController;
 use App\Http\Controllers\PantryItemController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RecipeIngredientController;
+use App\Http\Controllers\ShoppingItemController;
 use App\Http\Controllers\SpaceStorageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Session\Middleware\StartSession;
@@ -43,5 +44,8 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::post('save-shopping-session', [GroceryListController::class, 'saveShoppingSession']);
     Route::get('get-shopping-session', [GroceryListController::class, 'getShoppingSession']);
+
+    Route::patch('shopping-items/{shoppingItem}', [ShoppingItemController::class, 'update']);
+    Route::post('shopping-items/update-order', [ShoppingItemController::class, 'updateOrder']);
 });
 
