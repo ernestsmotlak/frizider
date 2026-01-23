@@ -18,6 +18,7 @@ const groceryLists = ref<GroceryListInfo[]>([]);
 const shoppingItems = ref<ShoppingItem[]>([]);
 const isLoading = ref(false);
 const selectedListId = ref<number | null>(null);
+const searchTerm = ref("");
 const isTogglingItem = ref(false);
 const isEditModalOpen = ref(false);
 const editingItem = ref<ShoppingItem | null>(null);
@@ -47,13 +48,29 @@ const getListName = (item: ShoppingItem): string => {
 
 const filteredItems = computed({
     get: () => {
-        const sorted = [...shoppingItems.value].sort((a, b) => a.sort_order - b.sort_order);
-        if (selectedListId.value === null) {
-            return sorted;
+        let sorted = [...shoppingItems.value].sort((a, b) => a.sort_order - b.sort_order);
+        
+        // Filter by selected list
+        if (selectedListId.value !== null) {
+            sorted = sorted.filter(item => {
+                return item.grocery_list_item?.grocery_list_id === selectedListId.value;
+            });
         }
-        return sorted.filter(item => {
-            return item.grocery_list_item?.grocery_list_id === selectedListId.value;
-        });
+        
+        // Filter by search term
+        if (searchTerm.value.trim()) {
+            const searchLower = searchTerm.value.toLowerCase().trim();
+            sorted = sorted.filter(item => {
+                const nameMatch = item.name.toLowerCase().includes(searchLower);
+                const quantityMatch = item.quantity?.toString().includes(searchLower);
+                const unitMatch = item.unit?.toLowerCase().includes(searchLower);
+                const notesMatch = item.notes?.toLowerCase().includes(searchLower);
+                const listNameMatch = getListName(item).toLowerCase().includes(searchLower);
+                return nameMatch || quantityMatch || unitMatch || notesMatch || listNameMatch;
+            });
+        }
+        
+        return sorted;
     },
     set: (newItems: ShoppingItem[]) => {
         newItems.forEach((item, index) => {
@@ -252,6 +269,46 @@ onMounted(() => {
                     </template>
 
                     <template v-else>
+                        <div class="mb-4">
+                            <label for="shopping-items-search" class="sr-only">Search items</label>
+                            <div class="relative">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                                        />
+                                    </svg>
+                                </div>
+                                <input
+                                    id="shopping-items-search"
+                                    v-model="searchTerm"
+                                    type="text"
+                                    inputmode="search"
+                                    enterkeyhint="search"
+                                    role="searchbox"
+                                    placeholder="Search items..."
+                                    autocomplete="off"
+                                    class="relative z-0 w-full px-4 py-2.5 pl-10 pr-10 text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                />
+                                <button
+                                    v-if="searchTerm"
+                                    type="button"
+                                    class="absolute inset-y-0 right-0 z-10 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                                    @click="searchTerm = ''"
+                                    aria-label="Clear search"
+                                >
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
                         <ShoppingProgressBar
                             :purchased="purchasedCount"
                             :total="totalCount"
@@ -268,7 +325,7 @@ onMounted(() => {
                             @end="onDragEnd"
                             tag="div"
                             class="space-y-3"
-                            :disabled="selectedListId !== null"
+                            :disabled="selectedListId !== null || searchTerm.trim() !== ''"
                         >
                             <ShoppingItemCard
                                 v-for="item in filteredItems"
@@ -282,9 +339,10 @@ onMounted(() => {
                             />
                         </VueDraggable>
 
-                        <div v-if="filteredItems.length === 0 && selectedListId !== null"
+                        <div v-if="filteredItems.length === 0 && (selectedListId !== null || searchTerm.trim() !== '')"
                              class="text-center py-8 text-gray-500">
-                            No items in this list
+                            <p v-if="searchTerm.trim()">No items found matching "{{ searchTerm }}"</p>
+                            <p v-else>No items in this list</p>
                         </div>
                     </template>
                 </div>
