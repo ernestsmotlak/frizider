@@ -26,7 +26,7 @@ const handleSelect = (listId: number | null) => {
             :class="[
                 'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
                 selectedListId === null
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-gray-700 text-white'
                     : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
             ]"
         >
@@ -39,7 +39,7 @@ const handleSelect = (listId: number | null) => {
             :class="[
                 'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2',
                 selectedListId === list.id
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-gray-700 text-white'
                     : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
             ]"
         >
