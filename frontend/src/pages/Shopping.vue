@@ -23,7 +23,7 @@ const isEditModalOpen = ref(false);
 const editingItem = ref<ShoppingItem | null>(null);
 
 const listColors = [
-    "#22c55e",
+    "#fb7185",
     "#3b82f6",
     "#f59e0b",
     "#ef4444",
@@ -214,7 +214,7 @@ onMounted(() => {
     <DashboardLayout>
         <div class="pt-7 px-5 pb-20">
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
-                <div class="px-4 pt-6 pb-4">
+                <div class="px-4 pt-6 pb-5">
                     <h2 class="text-3xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-4">
                         Shopping
                     </h2>
