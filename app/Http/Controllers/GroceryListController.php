@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
+use App\Models\ShoppingItem;
+use App\Models\ShoppingSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -248,12 +250,11 @@ class GroceryListController extends Controller
 
         $validated = $request->validate([
             'grocery_list_ids' => 'required|array',
-            'grocery_list_ids.*' => 'required|integer|exists:grocery_lists,id',
+            'grocery_list_ids.*' => 'required|integer|exists:grocery_lists,id'
         ]);
 
         $listIds = $validated['grocery_list_ids'];
 
-        // Verify all lists belong to the authenticated user
         $userLists = GroceryList::where('user_id', auth()->id())
             ->whereIn('id', $listIds)
             ->pluck('id')
@@ -265,13 +266,37 @@ class GroceryListController extends Controller
             ], 403);
         }
 
-        // Save to session
-        $request->session()->put('shopping_selected_lists', $userLists);
-        $request->session()->save();
+        DB::transaction(function () use ($userLists) {
+            ShoppingSession::where('user_id', auth()->id())->delete();
+
+            $session = ShoppingSession::create([
+                'user_id' => auth()->id(),
+                'grocery_list_ids' => $userLists
+            ]);
+
+            $allListsItems = GroceryListItem::whereIn('grocery_list_id', $userLists)
+                ->orderBy('grocery_list_id')
+                ->orderBy('sort_order')
+                ->get();
+
+            $sortOrder = 0;
+            foreach ($allListsItems as $item) {
+                ShoppingItem::create([
+                    'shopping_session_id' => $session->id,
+                    'grocery_list_item_id' => $item->id,
+                    'name' => $item->name,
+                    'quantity' => $item->quantity,
+                    'unit' => $item->unit,
+                    'notes' => $item->notes,
+                    'sort_order' => $sortOrder,
+                    'is_purchased' => $item->is_purchased,
+                ]);
+                $sortOrder += 1;
+            }
+        });
 
         return response()->json([
             'message' => 'Shopping session saved.',
-            'data' => ['grocery_list_ids' => $userLists],
         ]);
     }
 
@@ -283,36 +308,29 @@ class GroceryListController extends Controller
             ], 401);
         }
 
-        $listIds = session('shopping_selected_lists', []);
+        $shoppingSession = ShoppingSession::where('user_id', auth()->id())->first();
 
-        if (empty($listIds)) {
+        if (!$shoppingSession) {
             return response()->json([
-                'data' => [
-                    'grocery_list_ids' => [],
-                    'grocery_lists' => [],
-                ],
+                'message' => 'No shopping session found!'
             ]);
         }
 
-        // Validate that all list IDs belong to the authenticated user
-        $userLists = GroceryList::where('user_id', auth()->id())
-            ->whereIn('id', $listIds)
-            ->pluck('id')
-            ->toArray();
-
-        // Only return lists that the user actually owns
-        $validListIds = array_values($userLists);
-
-        // Fetch full lists with items
+        $listIds = $shoppingSession->grocery_list_ids ?? [];
         $groceryLists = GroceryList::where('user_id', auth()->id())
-            ->whereIn('id', $validListIds)
-            ->with('groceryListItems')
+            ->whereIn('id', $listIds)
+            ->get(['id', 'name']);
+
+        $sessionItems = ShoppingItem::where('shopping_session_id', $shoppingSession->id)
+            ->with('groceryListItem.groceryList')
+            ->orderBy('sort_order')
             ->get();
 
         return response()->json([
             'data' => [
-                'grocery_list_ids' => $validListIds,
+                'grocery_list_ids' => $listIds,
                 'grocery_lists' => $groceryLists,
+                'items' => $sessionItems,
             ],
         ]);
     }

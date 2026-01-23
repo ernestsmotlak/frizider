@@ -16,8 +16,9 @@ return new class extends Migration
             $table->foreignId('grocery_list_item_id')->constrained()->onDelete('cascade');
             $table->foreignId('shopping_session_id')->constrained()->onDelete('cascade');
             $table->string('name')->nullable();
-            $table->string('quantity')->nullable();
+            $table->decimal('quantity', 10, 2)->nullable();
             $table->string('notes')->nullable();
+            $table->string('unit')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_purchased')->default(false);
             $table->timestamps();

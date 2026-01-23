@@ -16,6 +16,7 @@ class ShoppingItem extends Model
         'name',
         'quantity',
         'notes',
+        'unit',
         'sort_order',
         'is_purchased',
     ];
@@ -23,6 +24,7 @@ class ShoppingItem extends Model
     protected $casts = [
         'sort_order' => 'integer',
         'is_purchased' => 'boolean',
+        'quantity' => 'decimal:2',
     ];
 
     public function shoppingSession()
