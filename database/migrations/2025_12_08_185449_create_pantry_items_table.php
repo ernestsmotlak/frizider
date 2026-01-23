@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->string('name');
             $table->decimal('quantity', 10, 2)->nullable();
-            $table->string('unit', 50)->nullable();
+            $table->string('unit', 10)->nullable();
             $table->date('expiry_date')->nullable();
             $table->date('purchase_date')->nullable();
             $table->text('notes')->nullable();

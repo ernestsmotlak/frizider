@@ -16,7 +16,7 @@ return new class extends Migration {
 
             $table->string('name', 255);
             $table->decimal('quantity', 10, 2)->nullable();
-            $table->string('unit', 50)->nullable();
+            $table->string('unit', 10)->nullable();
             $table->string('notes', 500)->nullable();
             $table->unsignedInteger('sort_order')->default(0);
 

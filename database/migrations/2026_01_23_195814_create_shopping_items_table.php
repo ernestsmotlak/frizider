@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->decimal('quantity', 10, 2)->nullable();
             $table->string('notes')->nullable();
-            $table->string('unit')->nullable();
+            $table->string('unit', 10)->nullable();
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_purchased')->default(false);
             $table->timestamps();

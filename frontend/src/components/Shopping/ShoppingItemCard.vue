@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed} from "vue";
+import {computed, onUnmounted, ref} from "vue";
 
 export interface ShoppingItem {
     id: number;
@@ -35,6 +35,8 @@ const emit = defineEmits<{
     edit: [item: ShoppingItem];
 }>();
 
+const showNotesTooltip = ref(false);
+
 const quantityDisplay = computed(() => {
     const parts: string[] = [];
     if (props.item.quantity !== null) {
@@ -56,6 +58,28 @@ const handleEdit = (event: Event) => {
     event.stopPropagation();
     emit("edit", props.item);
 };
+
+const handleInfoClick = (event: Event) => {
+    event.stopPropagation();
+    showNotesTooltip.value = !showNotesTooltip.value;
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.notes-tooltip-container')) {
+        showNotesTooltip.value = false;
+    }
+};
+
+if (typeof window !== 'undefined') {
+    document.addEventListener('click', handleClickOutside);
+}
+
+onUnmounted(() => {
+    if (typeof window !== 'undefined') {
+        document.removeEventListener('click', handleClickOutside);
+    }
+});
 </script>
 
 <template>
@@ -99,14 +123,45 @@ const handleEdit = (event: Event) => {
             <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex-1">
-                        <h3
-                            :class="[
-                                'text-base font-semibold leading-tight',
-                                item.is_purchased ? 'text-gray-500 line-through' : 'text-gray-900'
-                            ]"
-                        >
-                            {{ item.name }}
-                        </h3>
+                        <div class="flex items-center gap-2">
+                            <h3
+                                :class="[
+                                    'text-base font-semibold leading-tight',
+                                    item.is_purchased ? 'text-gray-500 line-through' : 'text-gray-900'
+                                ]"
+                            >
+                                {{ item.name }}
+                            </h3>
+                            <div class="relative notes-tooltip-container" v-if="item.notes">
+                                <button
+                                    @click="handleInfoClick"
+                                    class="p-0.5 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors flex-shrink-0"
+                                    title="Show notes"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </button>
+                                <Transition name="tooltip">
+                                    <div
+                                        v-if="showNotesTooltip"
+                                        class="absolute left-1/2 top-full mt-2 z-50 w-64 p-3 bg-white rounded-lg shadow-lg border border-gray-200 -translate-x-1/2"
+                                    >
+                                        <div class="flex items-start justify-between gap-2">
+                                            <p class="text-sm text-gray-700 leading-relaxed flex-1">{{ item.notes }}</p>
+                                            <button
+                                                @click.stop="showNotesTooltip = false"
+                                                class="p-0.5 text-gray-400 hover:text-gray-600 flex-shrink-0"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Transition>
+                            </div>
+                        </div>
                         <p
                             v-if="quantityDisplay"
                             :class="[
@@ -115,15 +170,6 @@ const handleEdit = (event: Event) => {
                             ]"
                         >
                             {{ quantityDisplay }}
-                        </p>
-                        <p
-                            v-if="item.notes"
-                            :class="[
-                                'text-xs mt-1 italic',
-                                item.is_purchased ? 'text-gray-400' : 'text-gray-400'
-                            ]"
-                        >
-                            {{ item.notes }}
                         </p>
                     </div>
 
@@ -158,3 +204,23 @@ const handleEdit = (event: Event) => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.tooltip-enter-active {
+    transition: all 0.2s ease-out;
+}
+
+.tooltip-leave-active {
+    transition: all 0.15s ease-in;
+}
+
+.tooltip-enter-from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+}
+
+.tooltip-leave-to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+}
+</style>
