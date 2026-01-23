@@ -162,33 +162,33 @@ onUnmounted(() => {
                                 </Transition>
                             </div>
                         </div>
-                        <p
-                            v-if="quantityDisplay"
-                            :class="[
-                                'text-sm mt-0.5',
-                                item.is_purchased ? 'text-gray-400' : 'text-gray-500'
-                            ]"
-                        >
-                            {{ quantityDisplay }}
-                        </p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <p
+                                v-if="quantityDisplay"
+                                :class="[
+                                    'text-sm',
+                                    item.is_purchased ? 'text-gray-400' : 'text-gray-500'
+                                ]"
+                            >
+                                {{ quantityDisplay }}
+                            </p>
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium"
+                                :style="{
+                                    backgroundColor: `${listColor}10`,
+                                    color: listColor
+                                }"
+                            >
+                                <span
+                                    class="w-1.5 h-1.5 rounded-full"
+                                    :style="{ backgroundColor: listColor }"
+                                ></span>
+                                {{ listName }}
+                            </span>
+                        </div>
                     </div>
 
                     <div class="flex items-center gap-2 flex-shrink-0">
-                        <span
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
-                            :style="{
-                                backgroundColor: `${listColor}15`,
-                                borderColor: `${listColor}40`,
-                                color: listColor
-                            }"
-                        >
-                            <span
-                                class="w-1.5 h-1.5 rounded-full"
-                                :style="{ backgroundColor: listColor }"
-                            ></span>
-                            {{ listName }}
-                        </span>
-
                         <button
                             @click="handleEdit"
                             class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
