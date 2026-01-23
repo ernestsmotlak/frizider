@@ -49,14 +49,14 @@ const getListName = (item: ShoppingItem): string => {
 const filteredItems = computed({
     get: () => {
         let sorted = [...shoppingItems.value].sort((a, b) => a.sort_order - b.sort_order);
-        
+
         // Filter by selected list
         if (selectedListId.value !== null) {
             sorted = sorted.filter(item => {
                 return item.grocery_list_item?.grocery_list_id === selectedListId.value;
             });
         }
-        
+
         // Filter by search term
         if (searchTerm.value.trim()) {
             const searchLower = searchTerm.value.toLowerCase().trim();
@@ -69,7 +69,7 @@ const filteredItems = computed({
                 return nameMatch || quantityMatch || unitMatch || notesMatch || listNameMatch;
             });
         }
-        
+
         return sorted;
     },
     set: (newItems: ShoppingItem[]) => {
@@ -237,7 +237,7 @@ onMounted(() => {
                             Shopping
                         </h2>
                         <p class="text-xs text-gray-500">
-                            Tap items to mark as purchased • Drag to reorder
+                            Tap items to mark as purchased
                         </p>
                     </div>
                     <hr class="border-gray-300 my-3">
