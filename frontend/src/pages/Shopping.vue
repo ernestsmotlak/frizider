@@ -239,7 +239,7 @@ const handleFinishShopping = async () => {
         await axios.post("/api/finish-shopping-session");
         toastStore.show("success", "Shopping completed. Original lists updated.");
         closeFridgeModal();
-        await fetchShoppingSession();
+        router.push("/grocery-lists");
     } catch (error: any) {
         console.error(error);
         const errorMessage = error?.response?.data?.message || "Could not finish shopping session.";
