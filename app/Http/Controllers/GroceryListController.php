@@ -334,4 +334,67 @@ class GroceryListController extends Controller
             ],
         ]);
     }
+
+    public function finishShoppingSession()
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        }
+
+        $shoppingSession = ShoppingSession::where('user_id', auth()->id())->first();
+
+        if (!$shoppingSession) {
+            return response()->json([
+                'message' => 'No shopping session found!'
+            ], 404);
+        }
+
+        DB::transaction(function () use ($shoppingSession) {
+            $purchasedItems = ShoppingItem::where('shopping_session_id', $shoppingSession->id)
+                ->where('is_purchased', true)
+                ->with('groceryListItem')
+                ->get();
+
+            foreach ($purchasedItems as $shoppingItem) {
+                if ($shoppingItem->groceryListItem) {
+                    $shoppingItem->groceryListItem->update([
+                        'completed' => true,
+                        'is_purchased' => true,
+                    ]);
+                }
+            }
+        });
+
+        return response()->json([
+            'message' => 'Shopping session finished. Original lists updated.',
+        ]);
+    }
+
+    public function deleteShoppingSession()
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        }
+
+        $shoppingSession = ShoppingSession::where('user_id', auth()->id())->first();
+
+        if (!$shoppingSession) {
+            return response()->json([
+                'message' => 'No shopping session found!'
+            ], 404);
+        }
+
+        DB::transaction(function () use ($shoppingSession) {
+            ShoppingItem::where('shopping_session_id', $shoppingSession->id)->delete();
+            $shoppingSession->delete();
+        });
+
+        return response()->json([
+            'message' => 'Shopping session deleted.',
+        ]);
+    }
 }

@@ -44,6 +44,8 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::post('save-shopping-session', [GroceryListController::class, 'saveShoppingSession']);
     Route::get('get-shopping-session', [GroceryListController::class, 'getShoppingSession']);
+    Route::post('finish-shopping-session', [GroceryListController::class, 'finishShoppingSession']);
+    Route::delete('delete-shopping-session', [GroceryListController::class, 'deleteShoppingSession']);
 
     Route::patch('shopping-items/{shoppingItem}', [ShoppingItemController::class, 'update']);
     Route::post('shopping-items/update-order', [ShoppingItemController::class, 'updateOrder']);

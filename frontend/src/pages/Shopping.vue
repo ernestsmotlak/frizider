@@ -22,6 +22,7 @@ const searchTerm = ref("");
 const isTogglingItem = ref(false);
 const isEditModalOpen = ref(false);
 const editingItem = ref<ShoppingItem | null>(null);
+const isFridgeModalOpen = ref(false);
 
 const listColors = [
     "#fb7185",
@@ -222,6 +223,47 @@ const onDragEnd = async () => {
     }
 };
 
+const toggleFridgeModal = () => {
+    isFridgeModalOpen.value = !isFridgeModalOpen.value;
+};
+
+const closeFridgeModal = () => {
+    isFridgeModalOpen.value = false;
+};
+
+const handleFinishShopping = async () => {
+    loadingStore.start();
+    try {
+        await axios.post("/api/finish-shopping-session");
+        toastStore.show("success", "Shopping completed. Original lists updated.");
+        closeFridgeModal();
+        await fetchShoppingSession();
+    } catch (error: any) {
+        console.error(error);
+        const errorMessage = error?.response?.data?.message || "Could not finish shopping session.";
+        toastStore.show("error", errorMessage);
+    } finally {
+        loadingStore.stop();
+    }
+};
+
+const handleDeleteShoppingSession = async () => {
+    loadingStore.start();
+    try {
+        await axios.delete("/api/delete-shopping-session");
+        toastStore.show("success", "Shopping session deleted.");
+        closeFridgeModal();
+        groceryLists.value = [];
+        shoppingItems.value = [];
+    } catch (error: any) {
+        console.error(error);
+        const errorMessage = error?.response?.data?.message || "Could not delete shopping session.";
+        toastStore.show("error", errorMessage);
+    } finally {
+        loadingStore.stop();
+    }
+};
+
 onMounted(() => {
     fetchShoppingSession();
 });
@@ -245,6 +287,7 @@ onMounted(() => {
                                 </h2>
                             </div>
                             <button
+                                @click="toggleFridgeModal"
                                 class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
                             >
                                 <img src="/fridge_icon.png" alt="Fridge" class="w-5 h-5" />
@@ -369,6 +412,57 @@ onMounted(() => {
             @close="handleCloseEditModal"
             @save="handleSaveItem"
         />
+
+        <Transition name="action-picker-backdrop">
+            <div
+                v-if="isFridgeModalOpen"
+                class="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px]"
+                @click="closeFridgeModal"
+            ></div>
+        </Transition>
+
+        <Transition name="action-picker-panel">
+            <div
+                v-if="isFridgeModalOpen"
+                class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
+            >
+                <div class="mx-auto max-w-md">
+                    <div class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 p-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                @click="handleFinishShopping"
+                                class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                                aria-label="Finish shopping and update original lists"
+                            >
+                                <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-green-300 group-hover:shadow-md">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="text-sm font-semibold text-gray-900">Finish shopping</div>
+                                <div class="text-xs text-gray-500">Update original lists</div>
+                            </button>
+
+                            <button
+                                type="button"
+                                @click="handleDeleteShoppingSession"
+                                class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-red-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-red-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                                aria-label="Close shopping and delete shopping data"
+                            >
+                                <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-red-200 text-red-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-red-300 group-hover:shadow-md">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </div>
+                                <div class="text-sm font-semibold text-gray-900">Finish shopping</div>
+                                <div class="text-xs text-gray-500">Close shopping mode</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </DashboardLayout>
 </template>
 
@@ -381,5 +475,29 @@ onMounted(() => {
 
 :deep(.sortable-ghost) {
     opacity: 0.4;
+}
+
+.action-picker-backdrop-enter-active,
+.action-picker-backdrop-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.action-picker-backdrop-enter-from,
+.action-picker-backdrop-leave-to {
+    opacity: 0;
+}
+
+.action-picker-panel-enter-active {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+}
+
+.action-picker-panel-leave-active {
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.action-picker-panel-enter-from,
+.action-picker-panel-leave-to {
+    opacity: 0;
+    transform: translateY(14px);
 }
 </style>
