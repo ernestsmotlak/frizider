@@ -355,9 +355,13 @@ onUnmounted(() => {
                 >
                     <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
                         <!--                        animate-pulse-icon -> add this back for pulsating effect-->
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M4 8h16M4 16h16"></path>
+                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="6" cy="9" r="1.5"/>
+                            <circle cx="12" cy="9" r="1.5"/>
+                            <circle cx="18" cy="9" r="1.5"/>
+                            <circle cx="6" cy="15" r="1.5"/>
+                            <circle cx="12" cy="15" r="1.5"/>
+                            <circle cx="18" cy="15" r="1.5"/>
                         </svg>
                     </div>
                     <input
