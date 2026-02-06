@@ -101,7 +101,7 @@ const fetchShoppingSession = async () => {
         const response = await axios.get("/api/get-shopping-session");
 
         if (response.data.message === "No shopping session found!") {
-            toastStore.show("info", "No shopping lists selected. Please select lists from the grocery lists page.");
+            toastStore.show("info", "No shopping lists selected. Please select lists to start shopping.");
             groceryLists.value = [];
             shoppingItems.value = [];
             return;
