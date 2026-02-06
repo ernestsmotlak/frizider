@@ -306,7 +306,7 @@ onMounted(() => {
                     </div>
                     <hr class="border-gray-300 my-3">
 
-                    <div v-if="isLoading" class="flex items-center justify-center py-16">
+                    <div v-if="isLoading" class="flex items-center justify-center py-10">
                         <div class="inline-flex items-center gap-2 text-gray-600">
                             <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                  viewBox="0 0 24 24">
@@ -331,7 +331,7 @@ onMounted(() => {
                                 shopping</p>
                         </div>
 
-                        <div class="flex flex-col items-center justify-center pt-2">
+                        <div class="flex flex-col items-center justify-center pt-2 pb-3">
                             <button
                                 type="button"
                                 @click="reRouteToGroceryLists"
