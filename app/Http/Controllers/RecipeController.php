@@ -280,9 +280,14 @@ class RecipeController extends Controller
         $instructionModel->completed = !$instructionModel->completed;
         $instructionModel->save();
 
+        $updatedRecipe = Recipe::where('user_id', auth()->id())
+            ->where('id', $recipe)
+            ->with(['recipeInstructions', 'recipeIngredients'])
+            ->firstOrFail();
+
         return response()->json([
             'message' => 'Instruction status updated.',
-            'data' => $recipeModel->fresh()->load(['recipeInstructions', 'recipeIngredients']),
+            'data' => $updatedRecipe,
         ]);
     }
 

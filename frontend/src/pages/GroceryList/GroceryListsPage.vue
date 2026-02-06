@@ -147,10 +147,14 @@ onUnmounted(() => {
                                     ? 'border-blue-600 bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:border-blue-700'
                                     : 'border-gray-200 bg-white/90 backdrop-blur-sm hover:border-gray-300 hover:bg-white'
                             ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                            <svg v-if="!selectMode" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                                  viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                         <button
