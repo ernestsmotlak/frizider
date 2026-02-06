@@ -97,10 +97,6 @@ const handleComplete = () => {
         });
 }
 
-const handleGoShopping = () => {
-    // Navigation is handled in the modal component
-}
-
 const handleMouseDown = (event: MouseEvent) => {
     if (props.selectMode) {
         return;
@@ -252,7 +248,6 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
         :grocery-list="groceryList"
         @close="closeActionModal"
         @complete="handleComplete"
-        @go-shopping="handleGoShopping"
     />
 </template>
 

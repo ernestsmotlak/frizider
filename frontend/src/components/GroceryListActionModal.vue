@@ -24,7 +24,6 @@ const handleComplete = () => {
 };
 
 const handleGoShopping = () => {
-    emit('goShopping');
     router.push('/shopping');
     emit('close');
 };
