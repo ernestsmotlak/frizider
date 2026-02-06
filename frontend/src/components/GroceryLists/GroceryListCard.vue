@@ -176,12 +176,13 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
         @touchcancel="handleTouchCancel"
         :class="[
             'rounded-xl shadow-sm transition-all duration-200 overflow-hidden border flex flex-row relative',
-            props.selectMode 
-                ? (props.isSelected 
-                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-400 shadow-lg cursor-pointer' 
+            props.selectMode
+                ? (props.isSelected
+                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-400 shadow-lg cursor-pointer'
                     : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer')
                 : 'hover:shadow-lg cursor-pointer border-gray-100',
             !props.selectMode && (groceryList.completed_at ? 'border-green-100 bg-green-50/70 ring-1 ring-green-200/60' : ''),
+            props.selectMode && groceryList.completed_at && '',
             !props.selectMode && (isLongPressing ? 'scale-95 ring-2 ring-blue-400 bg-blue-50/50 shadow-xl' : 'active:scale-[0.98]')
         ]"
     >
@@ -208,8 +209,8 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
             <div v-if="props.selectMode" class="absolute top-2 right-2">
                 <div :class="[
                     'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
-                    props.isSelected 
-                        ? 'bg-blue-500 border-blue-600' 
+                    props.isSelected
+                        ? 'bg-blue-500 border-blue-600'
                         : 'bg-white border-gray-300'
                 ]">
                     <svg v-if="props.isSelected" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -227,7 +228,7 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
                     {{ groceryList.name }}
                 </h3>
                 <span
-                    v-if="groceryList.completed_at && !props.selectMode"
+                    v-if="groceryList.completed_at"
                     class="inline-flex gap-1.5 px-1 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
                 >
                     <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3"
