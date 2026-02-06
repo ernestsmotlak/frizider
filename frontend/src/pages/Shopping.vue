@@ -295,6 +295,7 @@ onMounted(() => {
                             <button
                                 @click="toggleFridgeModal"
                                 class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                                :class="{'go-to-lists-pulse': shoppingItems.length > 0}"
                             >
                                 <img src="/fridge_icon.png" alt="Fridge" class="w-5 h-5" />
                             </button>
@@ -328,6 +329,20 @@ onMounted(() => {
                             <p class="text-gray-500 text-center text-lg font-medium mb-1">No shopping lists selected</p>
                             <p class="text-gray-400 text-center text-sm">Go to grocery lists to select lists for
                                 shopping</p>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-center pt-2">
+                            <button
+                                type="button"
+                                @click="reRouteToGroceryLists"
+                                class="go-to-lists-pulse inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                aria-label="Go to shopping lists"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                </svg>
+                                Go to shopping lists
+                            </button>
                         </div>
                     </template>
 
@@ -524,5 +539,20 @@ onMounted(() => {
 .action-picker-panel-leave-to {
     opacity: 0;
     transform: translateY(14px);
+}
+
+@keyframes go-to-lists-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(107, 114, 128, 0);
+        transform: scale(1.03);
+    }
+}
+
+.go-to-lists-pulse {
+    animation: go-to-lists-pulse 1.8s ease-in-out infinite;
 }
 </style>
