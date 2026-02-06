@@ -452,6 +452,7 @@ onMounted(() => {
 
                             <div class="grid grid-cols-2 gap-3">
                                 <button
+                                    v-if="shoppingItems.length > 0"
                                     type="button"
                                     @click="handleFinishShopping"
                                     class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
@@ -467,6 +468,7 @@ onMounted(() => {
                                 </button>
 
                                 <button
+                                    v-if="shoppingItems.length > 0"
                                     type="button"
                                     @click="handleDeleteShoppingSession"
                                     class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-red-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-red-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
