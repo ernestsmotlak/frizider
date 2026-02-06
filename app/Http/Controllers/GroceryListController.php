@@ -365,6 +365,9 @@ class GroceryListController extends Controller
                     ]);
                 }
             }
+
+            ShoppingItem::where('shopping_session_id', $shoppingSession->id)->delete();
+            $shoppingSession->delete();
         });
 
         return response()->json([

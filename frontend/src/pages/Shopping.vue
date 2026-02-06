@@ -266,20 +266,8 @@ const handleDeleteShoppingSession = async () => {
     }
 };
 
-const handleFinishShoppingAndRoute = async () => {
-    loadingStore.start();
-    try {
-        await axios.post("/api/finish-shopping-session");
-        toastStore.show("success", "Shopping completed.");
-        closeFridgeModal();
-        router.push("/grocery-lists");
-    } catch (error: any) {
-        console.error(error);
-        const errorMessage = error?.response?.data?.message || "Could not finish shopping session.";
-        toastStore.show("error", errorMessage);
-    } finally {
-        loadingStore.stop();
-    }
+const reRouteToGroceryLists = () => {
+    router.push("/grocery-lists");
 };
 
 onMounted(() => {
@@ -449,16 +437,16 @@ onMounted(() => {
                         <div class="flex flex-col gap-3">
                             <button
                                 type="button"
-                                @click="handleFinishShoppingAndRoute"
+                                @click="reRouteToGroceryLists"
                                 class="w-[50%] mx-auto group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-blue-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-blue-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                 aria-label="Finish shopping and go to shopping lists"
                             >
                                 <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-blue-200 text-blue-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-blue-300 group-hover:shadow-md">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                                     </svg>
                                 </div>
-                                <div class="text-sm font-semibold text-gray-900">Finish shopping</div>
+                                <div class="text-sm font-semibold text-gray-900">Go back</div>
                                 <div class="text-xs text-gray-500">Go to shopping lists</div>
                             </button>
 
