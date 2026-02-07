@@ -30,17 +30,7 @@ class CookingSessionController extends Controller
 
     public function getCookingSession(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
-        ]);
-
-        if ($validated['user_id'] !== auth()->id()) {
-            return response()->json([
-                'message' => 'You do not have permission to access this cooking session.',
-            ], 403);
-        }
-
-        $cookingSession = CookingSession::where('user_id', $validated['user_id'])->firstOrFail();
+        $cookingSession = CookingSession::where('user_id', auth()->id())->firstOrFail();
 
         $recipe = Recipe::with(['recipeIngredients', 'recipeInstructions'])
             ->findOrFail($cookingSession->recipe_id);

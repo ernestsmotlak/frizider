@@ -8,7 +8,7 @@ import {onMounted, ref} from "vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 
-interface RecipeIngredient {
+export interface RecipeIngredient {
     id: number;
     recipe_id: number;
     name: string;
@@ -18,7 +18,7 @@ interface RecipeIngredient {
     sort_order: number;
 }
 
-interface RecipeInstruction {
+export interface RecipeInstruction {
     id: number;
     recipe_id: number;
     instruction: string;
@@ -26,7 +26,7 @@ interface RecipeInstruction {
     completed: boolean;
 }
 
-interface Recipe {
+export interface Recipe {
     id: number;
     name: string;
     description: string | null;

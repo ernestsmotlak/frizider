@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CookingSessionController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -49,5 +50,7 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::patch('shopping-items/{shoppingItem}', [ShoppingItemController::class, 'update']);
     Route::post('shopping-items/update-order', [ShoppingItemController::class, 'updateOrder']);
-});
 
+    Route::post('create-cooking-session', [CookingSessionController::class, 'createCookingSession']);
+    Route::get('get-cooking-session', [CookingSessionController::class, 'getCookingSession']);
+});
