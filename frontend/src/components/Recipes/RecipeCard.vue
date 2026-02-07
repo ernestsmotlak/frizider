@@ -1,30 +1,139 @@
 <script setup lang="ts">
-import type {Recipe} from '../../pages/Recipe/RecipesPage.vue';
+import {ref, onUnmounted} from "vue";
+import type {Recipe} from "../../pages/Recipe/RecipesPage.vue";
+import RecipeCookingModal from "./RecipeCookingModal.vue";
 
 const props = defineProps<{
-    recipe: Recipe
+    recipe: Recipe;
 }>();
 
 const emit = defineEmits<{
-    click: [id: number]
+    click: [id: number];
 }>();
 
+const isLongPressing = ref(false);
+const longPressTimer = ref<number | null>(null);
+const hasLongPressed = ref(false);
+const initialPosition = ref<{ x: number; y: number } | null>(null);
+const isActionModalOpen = ref(false);
+const LONG_PRESS_DURATION = 500;
+const MOVEMENT_THRESHOLD = 10;
+
 const handleClick = () => {
-    emit('click', props.recipe.id);
-}
+    if (!hasLongPressed.value) {
+        emit("click", props.recipe.id);
+    }
+    hasLongPressed.value = false;
+};
+
+const startLongPress = (x: number, y: number) => {
+    hasLongPressed.value = false;
+    isLongPressing.value = true;
+    initialPosition.value = { x, y };
+    longPressTimer.value = window.setTimeout(() => {
+        if (isLongPressing.value) {
+            hasLongPressed.value = true;
+            openActionModal();
+        }
+    }, LONG_PRESS_DURATION);
+};
+
+const cancelLongPress = () => {
+    if (longPressTimer.value) {
+        window.clearTimeout(longPressTimer.value);
+        longPressTimer.value = null;
+    }
+    isLongPressing.value = false;
+    initialPosition.value = null;
+};
+
+const checkMovement = (x: number, y: number): boolean => {
+    if (!initialPosition.value) return false;
+    const deltaX = Math.abs(x - initialPosition.value.x);
+    const deltaY = Math.abs(y - initialPosition.value.y);
+    return deltaX > MOVEMENT_THRESHOLD || deltaY > MOVEMENT_THRESHOLD;
+};
+
+const openActionModal = () => {
+    cancelLongPress();
+    isActionModalOpen.value = true;
+};
+
+const closeActionModal = () => {
+    isActionModalOpen.value = false;
+};
+
+const handleMouseDown = (event: MouseEvent) => {
+    if (event.button === 0) {
+        startLongPress(event.clientX, event.clientY);
+    }
+};
+
+const handleMouseMove = (event: MouseEvent) => {
+    if (isLongPressing.value && checkMovement(event.clientX, event.clientY)) {
+        cancelLongPress();
+    }
+};
+
+const handleMouseUp = () => {
+    cancelLongPress();
+};
+
+const handleMouseLeave = () => {
+    cancelLongPress();
+};
+
+const handleTouchStart = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    if (touch) {
+        startLongPress(touch.clientX, touch.clientY);
+    }
+};
+
+const handleTouchMove = (event: TouchEvent) => {
+    if (isLongPressing.value) {
+        const touch = event.touches[0];
+        if (touch && checkMovement(touch.clientX, touch.clientY)) {
+            cancelLongPress();
+        }
+    }
+};
+
+const handleTouchEnd = () => {
+    cancelLongPress();
+};
+
+const handleTouchCancel = () => {
+    cancelLongPress();
+};
+
+onUnmounted(() => {
+    cancelLongPress();
+});
 
 const truncateDescription = (text: string | null, maxLength: number = 100): string => {
-    if (!text) return '';
+    if (!text) return "";
     if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength).trim() + '...';
-}
-
+    return text.substring(0, maxLength).trim() + "...";
+};
 </script>
 
 <template>
     <div
         @click="handleClick"
-        class="rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden border border-gray-100 active:scale-[0.98] flex flex-row"
+        @mousedown="handleMouseDown"
+        @mousemove="handleMouseMove"
+        @mouseup="handleMouseUp"
+        @mouseleave="handleMouseLeave"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
+        @touchcancel="handleTouchCancel"
+        :class="[
+            'rounded-xl shadow-sm transition-all duration-200 cursor-pointer overflow-hidden border flex flex-row',
+            'border-gray-100 hover:shadow-lg',
+            isLongPressing ? 'scale-95 ring-2 ring-amber-400 bg-amber-50/50 shadow-xl' : 'active:scale-[0.98]'
+        ]"
     >
         <div
             class="relative w-24 h-full flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden self-stretch">
@@ -52,6 +161,13 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
             </p>
         </div>
     </div>
+
+    <RecipeCookingModal
+        :is-open="isActionModalOpen"
+        :recipe="recipe"
+        @close="closeActionModal"
+        @go-cooking="closeActionModal"
+    />
 </template>
 
 <style scoped>
