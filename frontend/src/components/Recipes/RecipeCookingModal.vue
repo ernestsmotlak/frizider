@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {useRouter} from "vue-router";
+import { useToastStore } from "../../stores/toast";
+import { useLoadingStore } from "../../stores/loading";
 
 export interface RecipeCookingModalRecipe {
     id: number;
@@ -13,15 +15,36 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     close: [];
-    "go-cooking": [];
 }>();
 
+const toasterStore = useToastStore();
+const loadingStore = useLoadingStore();
 const router = useRouter();
 
 const handleGoCooking = () => {
-    emit("go-cooking");
-    emit("close");
-    router.push("/cooking");
+    if (!props.recipe.id) {
+        toasterStore.show('error', "Error occured when creating cooking session.");
+    }
+
+    loadingStore.start();
+
+    const url = '/api/create-cooking-session';
+    const payload = {
+        recipe_id: props.recipe.id
+    };
+
+    axios
+        .post(url, payload)
+        .then((result) => {
+            toasterStore.show("success", "Cooking session created.");
+                router.push("/cooking");
+        })
+        .catch((error) => {
+            toasterStore.show('error', "A problem occured when creating a cooking session.");
+        })
+        .finally(() => {
+            loadingStore.stop();
+        })
 };
 
 const handleClose = () => {

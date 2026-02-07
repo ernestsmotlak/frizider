@@ -166,7 +166,6 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
         :is-open="isActionModalOpen"
         :recipe="recipe"
         @close="closeActionModal"
-        @go-cooking="closeActionModal"
     />
 </template>
 
