@@ -2,6 +2,8 @@
 import {computed} from 'vue';
 import {useRouter} from 'vue-router';
 import type {GroceryList} from '../pages/GroceryList/GroceryListsPage.vue';
+import {useToastStore} from '../stores/toast.ts';
+import {useLoadingStore} from '../stores/loading.ts';
 
 const props = defineProps<{
     isOpen: boolean;
@@ -15,6 +17,8 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const toastStore = useToastStore();
+const loadingStore = useLoadingStore();
 
 const isCompleted = computed(() => !!props.groceryList.completed_at);
 
@@ -23,9 +27,20 @@ const handleComplete = () => {
     emit('close');
 };
 
-const handleGoShopping = () => {
-    router.push('/shopping');
-    emit('close');
+const handleGoShopping = async () => {
+    loadingStore.start();
+    try {
+        await axios.post('/api/save-shopping-session', {
+            grocery_list_ids: [props.groceryList.id],
+        });
+        emit('close');
+        router.push('/shopping');
+    } catch (error: any) {
+        const message = error.response?.data?.message ?? 'Could not save shopping session.';
+        toastStore.show('error', message);
+    } finally {
+        loadingStore.stop();
+    }
 };
 
 const handleClose = () => {
