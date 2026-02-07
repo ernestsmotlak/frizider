@@ -226,6 +226,15 @@
 
 ---
 
+### Cooking mode
+
+- **Wizard-style cards per recipe part:** Present the recipe as a step-by-step wizard: one card per “part” of the recipe (e.g. title/overview, ingredients, then each instruction or grouped instructions). User advances through cards (Next/Back) so it feels like a guided cooking flow.
+- **Cards in a wizard by recipe:** Structure the cooking view as a wizard where each step is a card; cards follow the recipe structure (intro → ingredients → instruction 1 → instruction 2 → …).
+- **Darker theme (optional):** Use a darker theme for the cooking view so it’s visually distinct from the normal recipe page and easier in the kitchen (e.g. reduced glare, “cooking time” feel).
+- **Edit ingredients/instructions:** When the user wants to edit instructions or ingredients from the cooking view, switch to a view that is “almost normal recipe page” (same edit/add behavior as RecipePage) so they can make changes, then return to the wizard/cooking flow. Keeps full edit capability without mixing it into the main wizard cards.
+
+---
+
 ## Suggested File Structure
 
 ```
