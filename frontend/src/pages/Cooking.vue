@@ -139,38 +139,51 @@ onMounted(() => {
     <DashboardLayout>
         <div class="cooking-page">
             <div v-if="recipe" class="cooking-card">
-                <header class="cooking-title">
-                    <div v-if="recipe.image_url" class="cooking-emoji" aria-hidden="true">
-                        {{ recipe.image_url }}
+                <p class="cooking-mode-label" aria-label="Cooking mode">Cooking mode</p>
+                <header
+                class="cooking-title"
+                :class="{ 'mt-2': !recipe.image_url }"
+                >
+                    <div class="cooking-title-inner">
+                        <div v-if="recipe.image_url" class="cooking-emoji" aria-hidden="true">
+                            {{ recipe.image_url }}
+                        </div>
+                        <h1 class="cooking-name">{{ recipe.name }}</h1>
+                        <div v-if="recipe.servings || hasTime" class="cooking-meta-row">
+                            <span v-if="recipe.servings" class="cooking-meta-item">
+                                <svg class="cooking-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+                                    <line x1="6" y1="1" x2="6" y2="4" />
+                                    <line x1="10" y1="1" x2="10" y2="4" />
+                                    <line x1="14" y1="1" x2="14" y2="4" />
+                                </svg>
+                                <span>{{ recipe.servings }}</span>
+                            </span>
+                            <span v-if="recipe.servings && hasTime" class="cooking-meta-sep" aria-hidden="true">·</span>
+                            <span v-if="recipe.prep_time != null && recipe.prep_time > 0" class="cooking-meta-item">
+                                <svg class="cooking-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                                <span>{{ formatTime(recipe.prep_time) }}</span>
+                            </span>
+                            <span v-if="(recipe.prep_time != null && recipe.prep_time > 0) && (recipe.cook_time != null && recipe.cook_time > 0)" class="cooking-meta-sep" aria-hidden="true">·</span>
+                            <span v-if="recipe.cook_time != null && recipe.cook_time > 0" class="cooking-meta-item">
+                                <svg class="cooking-meta-icon cooking-meta-icon-cook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                                </svg>
+                                <span>{{ formatTime(recipe.cook_time) }}</span>
+                            </span>
+                        </div>
                     </div>
-                    <h1 class="cooking-name">{{ recipe.name }}</h1>
-                    <div v-if="recipe.servings || hasTime" class="cooking-meta-row">
-                        <span v-if="recipe.servings" class="cooking-meta-item">
-                            <svg class="cooking-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-                                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-                                <line x1="6" y1="1" x2="6" y2="4" />
-                                <line x1="10" y1="1" x2="10" y2="4" />
-                                <line x1="14" y1="1" x2="14" y2="4" />
-                            </svg>
-                            <span>{{ recipe.servings }}</span>
-                        </span>
-                        <span v-if="recipe.servings && hasTime" class="cooking-meta-sep" aria-hidden="true">·</span>
-                        <span v-if="recipe.prep_time != null && recipe.prep_time > 0" class="cooking-meta-item">
-                            <svg class="cooking-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12 6 12 12 16 14" />
-                            </svg>
-                            <span>{{ formatTime(recipe.prep_time) }}</span>
-                        </span>
-                        <span v-if="(recipe.prep_time != null && recipe.prep_time > 0) && (recipe.cook_time != null && recipe.cook_time > 0)" class="cooking-meta-sep" aria-hidden="true">·</span>
-                        <span v-if="recipe.cook_time != null && recipe.cook_time > 0" class="cooking-meta-item">
-                            <svg class="cooking-meta-icon cooking-meta-icon-cook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-                            </svg>
-                            <span>{{ formatTime(recipe.cook_time) }}</span>
-                        </span>
-                    </div>
+                    <button
+                        type="button"
+                        class="cooking-title-icon"
+                        aria-label="Fridge"
+                    >
+                        <img src="/fridge_icon.png" alt="Fridge" class="cooking-title-icon-img" />
+                    </button>
                 </header>
 
                 <div class="page-divider"></div>
@@ -268,14 +281,69 @@ onMounted(() => {
     background: var(--card-bg, #fff);
     border-radius: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    border: 2px solid var(--divider-border, #d1d5db)
+    overflow: visible;
+    border: 2px solid var(--card-border, #e5e7eb);
 }
 
 .cooking-title {
-    padding: 1.25rem 1rem;
-    /*border-bottom: 1px solid var(--border-color, #eee);*/
+    position: relative;
+    padding: 1.25rem 3.5rem 1.25rem 1rem;
     text-align: center;
+}
+
+.cooking-mode-label {
+    display: block;
+    width: fit-content;
+    margin: auto;
+    padding: 0.4rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cooking-mode-color, #64748b);
+    background: var(--card-bg, #fff);
+    border: 2px solid var(--card-border, #e5e7eb);
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.cooking-title-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.cooking-title-icon {
+    position: absolute;
+    top: 1.25rem;
+    right: 1rem;
+    padding: 0.5rem;
+    border: 2px solid var(--card-border, #e5e7eb);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cooking-title-icon:hover {
+    border-color: #d1d5db;
+    background: #fff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
+}
+
+.cooking-title-icon:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cooking-title-icon-img {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: block;
 }
 
 .cooking-emoji {
