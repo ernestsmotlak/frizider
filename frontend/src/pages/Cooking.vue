@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watchEffect } from "vue";
+import { useRouter } from "vue-router";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
 import { useLoadingStore } from "../stores/loading";
 import { useToastStore } from "../stores/toast";
@@ -7,12 +8,15 @@ import { formatTime } from "../utils/formatTime";
 import { VueDraggable } from "vue-draggable-plus";
 import type { Recipe, RecipeIngredient, RecipeInstruction } from "./Recipe/RecipePage.vue";
 
+const router = useRouter();
+
 type CookingIngredient = RecipeIngredient & { completed?: boolean };
 
 const loadingStore = useLoadingStore();
 const toasterStore = useToastStore();
 
 const recipe = ref<Recipe | null>(null);
+const isLoading = ref(true);
 const currentStepIndex = ref(0);
 const draggableIngredients = ref<CookingIngredient[]>([]);
 
@@ -115,19 +119,26 @@ function nextStep(): void {
 }
 
 const fetchCookingSession = () => {
+    isLoading.value = true;
     loadingStore.start();
     axios
         .get("/api/get-cooking-session")
         .then((result) => {
-            recipe.value = result.data.data as Recipe;
+            recipe.value = (result.data.data ?? null) as Recipe | null;
             currentStepIndex.value = 0;
         })
         .catch(() => {
+            recipe.value = null;
             toasterStore.show("error", "Error fetching cooking session data.");
         })
         .finally(() => {
+            isLoading.value = false;
             loadingStore.stop();
         });
+};
+
+const goToRecipes = () => {
+    router.push("/recipes");
 };
 
 onMounted(() => {
@@ -138,7 +149,17 @@ onMounted(() => {
 <template>
     <DashboardLayout>
         <div class="cooking-page">
-            <div v-if="recipe" class="cooking-card">
+            <div class="cooking-card">
+                <template v-if="isLoading">
+                    <div class="cooking-loading">
+                        <svg class="cooking-loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span class="cooking-loading-text">Loading recipe…</span>
+                    </div>
+                </template>
+                <template v-else-if="recipe">
                 <p class="cooking-mode-label" aria-label="Cooking mode">Cooking mode</p>
                 <header
                 class="cooking-title"
@@ -263,9 +284,29 @@ onMounted(() => {
                     </div>
                     <p v-else class="instructions-empty">No instructions.</p>
                 </section>
+                </template>
+                <template v-else>
+                <p class="cooking-mode-label" aria-label="Cooking mode">Cooking mode</p>
+                    <div class="cooking-empty">
+                        <svg class="cooking-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <p class="cooking-empty-title">No active cooking session</p>
+                        <p class="cooking-empty-subtitle">Choose a recipe to start cooking</p>
+                        <button
+                            type="button"
+                            class="cooking-empty-btn"
+                            aria-label="Choose a recipe to cook"
+                            @click="goToRecipes"
+                        >
+                            <svg class="cooking-empty-btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Choose a recipe to cook
+                        </button>
+                    </div>
+                </template>
             </div>
-
-            <div v-else class="cooking-loading">Loading recipe…</div>
         </div>
     </DashboardLayout>
 </template>
@@ -648,8 +689,99 @@ onMounted(() => {
 }
 
 .cooking-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2.5rem 1rem;
+    color: #4b5563;
+}
+
+.cooking-loading-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    animation: cooking-spin 1s linear infinite;
+}
+
+.cooking-loading-spinner .opacity-25 {
+    opacity: 0.25;
+}
+
+.cooking-loading-spinner .opacity-75 {
+    opacity: 0.75;
+}
+
+@keyframes cooking-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.cooking-loading-text {
+    font-size: 0.875rem;
+}
+
+.cooking-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 1rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.cooking-empty-icon {
+    width: 5rem;
+    height: 5rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+.cooking-empty-title {
+    color: #6b7280;
     text-align: center;
-    padding: 2rem;
-    color: var(--text-muted, #666);
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin: 0 0 0.25rem 0;
+}
+
+.cooking-empty-subtitle {
+    color: #9ca3af;
+    text-align: center;
+    font-size: 0.875rem;
+    margin: 0 0 1rem 0;
+}
+
+.cooking-empty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cooking-empty-btn:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+}
+
+.cooking-empty-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #3b82f6;
+}
+
+.cooking-empty-btn-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
 }
 </style>
