@@ -422,4 +422,3 @@ frontend/src/
 
 **RecipePage Component:**
 - ❌ TODO: Fix smaller screen alignment for `frontend/src/pages/Recipe/RecipePage.vue`
-
