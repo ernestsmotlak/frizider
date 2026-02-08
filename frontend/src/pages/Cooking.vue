@@ -37,6 +37,12 @@ const currentInstruction = computed(() => {
     return list[idx];
 });
 
+const stepProgressPercent = computed(() => {
+    const total = sortedInstructions.value.length;
+    if (total === 0) return 0;
+    return Math.round(((currentStepIndex.value + 1) / total) * 100);
+});
+
 const hasTime = computed(() => {
     const r = recipe.value;
     return (r?.prep_time != null && r.prep_time > 0) || (r?.cook_time != null && r.cook_time > 0);
@@ -205,12 +211,19 @@ onMounted(() => {
                 </section>
 
                 <section class="cooking-instructions">
-                    <h2 class="cooking-section-heading">Instructions</h2>
+                    <h2 class="cooking-instructions-heading">Instructions</h2>
                     <div v-if="currentInstruction" class="step-wizard">
-                        <p class="step-indicator">
+                        <div class="step-badge">
                             Step {{ currentStepIndex + 1 }} of {{ sortedInstructions.length }}
-                        </p>
-                        <p class="step-text">{{ currentInstruction.instruction }}</p>
+                        </div>
+                        <div class="step-progress" role="progressbar" :aria-valuenow="currentStepIndex + 1" :aria-valuemin="1" :aria-valuemax="sortedInstructions.length" :aria-label="`Step ${currentStepIndex + 1} of ${sortedInstructions.length}`">
+                            <div class="step-progress-track">
+                                <div class="step-progress-fill" :style="{ width: stepProgressPercent + '%' }"></div>
+                            </div>
+                        </div>
+                        <div class="step-content">
+                            <p class="step-text">{{ currentInstruction.instruction }}</p>
+                        </div>
                         <div class="step-nav">
                             <button
                                 type="button"
@@ -230,7 +243,7 @@ onMounted(() => {
                             </button>
                         </div>
                     </div>
-                    <p v-else class="empty-hint">No instructions.</p>
+                    <p v-else class="instructions-empty">No instructions.</p>
                 </section>
             </div>
 
@@ -418,8 +431,117 @@ onMounted(() => {
 }
 
 .cooking-instructions {
-    padding: 1rem;
-    border-top: 1px solid var(--border-color, #eee);
+    padding: 1.25rem 1rem;
+    background: var(--instructions-bg, #f8fafc);
+    border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+.cooking-instructions-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--instructions-heading-color, #334155);
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.02em;
+}
+
+.step-wizard {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--instruction-border, #e2e8f0);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.step-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--step-badge-color, #64748b);
+    background: var(--step-badge-bg, #f1f5f9);
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    margin-bottom: 1rem;
+}
+
+.step-content {
+    margin-bottom: 1.25rem;
+}
+
+.step-text {
+    font-size: 1.1875rem;
+    line-height: 1.6;
+    color: var(--instruction-text-color, #1e293b);
+    margin: 0;
+}
+
+.step-nav {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.step-btn {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.step-prev {
+    border: 1px solid var(--instruction-btn-border, #cbd5e1);
+    background: var(--card-bg, #fff);
+    color: var(--instruction-btn-text, #475569);
+}
+
+.step-prev:not(:disabled):hover {
+    background: var(--hover-bg, #f1f5f9);
+    border-color: var(--instruction-btn-border-hover, #94a3b8);
+}
+
+.step-next {
+    border: none;
+    background: var(--instruction-next-bg, #0d9488);
+    color: #fff;
+}
+
+.step-next:not(:disabled):hover {
+    background: var(--instruction-next-bg-hover, #0f766e);
+}
+
+.step-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.step-progress {
+    margin-top: 0.0rem;
+    margin-bottom: 1rem;
+}
+
+.step-progress-track {
+    height: 0.625rem;
+    width: 100%;
+    background: var(--progress-track-bg, #e2e8f0);
+    border-radius: 9999px;
+    overflow: hidden;
+    border: 1px solid var(--progress-track-border, #e5e7eb);
+}
+
+.step-progress-fill {
+    height: 100%;
+    background: var(--progress-fill-bg, #0d9488);
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+}
+
+.instructions-empty {
+    font-size: 0.875rem;
+    color: var(--text-muted, #64748b);
+    margin: 0;
 }
 
 .cooking-section-heading {
@@ -435,50 +557,6 @@ onMounted(() => {
     font-size: 0.875rem;
     color: var(--text-muted, #666);
     margin: 0;
-}
-
-.step-wizard {
-    padding: 0.25rem 0;
-}
-
-.step-indicator {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted, #666);
-    margin: 0 0 0.5rem 0;
-}
-
-.step-text {
-    font-size: 1.125rem;
-    line-height: 1.5;
-    margin: 0 0 1.25rem 0;
-}
-
-.step-nav {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.step-btn {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border-color, #ddd);
-    background: var(--card-bg, #fff);
-    cursor: pointer;
-}
-
-.step-btn:not(:disabled):hover {
-    background: var(--hover-bg, #f5f5f5);
-}
-
-.step-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .cooking-loading {
