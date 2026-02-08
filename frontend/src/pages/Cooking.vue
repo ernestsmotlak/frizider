@@ -226,8 +226,8 @@ onMounted(() => {
 }
 
 .cooking-meta-icon {
-    width: 1rem;
-    height: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
     flex-shrink: 0;
     color: var(--text-muted, #888);
 }
