@@ -170,6 +170,7 @@ onMounted(() => {
                             {{ recipe.image_url }}
                         </div>
                         <h1 class="cooking-name">{{ recipe.name }}</h1>
+                        <p v-if="recipe.description" class="cooking-description">{{ recipe.description }}</p>
                         <div v-if="recipe.servings || hasTime" class="cooking-meta-row">
                             <span v-if="recipe.servings" class="cooking-meta-item">
                                 <svg class="cooking-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -399,6 +400,14 @@ onMounted(() => {
     font-weight: 700;
     margin: 0 0 0.5rem 0;
     line-height: 1.2;
+}
+
+.cooking-description {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text-muted, #6b7280);
+    margin: 0 0 0.5rem 0;
+    text-align: center;
 }
 
 .cooking-meta-row {
