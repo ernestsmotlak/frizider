@@ -508,7 +508,7 @@ onMounted(() => {
     </DashboardLayout>
 </template>
 
-<style scoped>
+<style>
 .shopping-card {
     overflow: visible;
 }

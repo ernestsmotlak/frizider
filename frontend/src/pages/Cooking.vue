@@ -180,6 +180,7 @@ onMounted(() => {
                     <button
                         type="button"
                         class="cooking-title-icon"
+                        :class="{'go-to-lists-pulse': recipe.id}"
                         aria-label="Fridge"
                     >
                         <img src="/fridge_icon.png" alt="Fridge" class="cooking-title-icon-img" />
