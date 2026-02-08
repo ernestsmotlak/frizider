@@ -1,22 +1,29 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watchEffect } from "vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
 import { useLoadingStore } from "../stores/loading";
 import { useToastStore } from "../stores/toast";
 import { formatTime } from "../utils/formatTime";
+import { VueDraggable } from "vue-draggable-plus";
 import type { Recipe, RecipeIngredient, RecipeInstruction } from "./Recipe/RecipePage.vue";
+
+type CookingIngredient = RecipeIngredient & { completed?: boolean };
 
 const loadingStore = useLoadingStore();
 const toasterStore = useToastStore();
 
 const recipe = ref<Recipe | null>(null);
 const currentStepIndex = ref(0);
-const selectedIngredientIds = ref<Set<number>>(new Set());
+const draggableIngredients = ref<CookingIngredient[]>([]);
 
-const sortedIngredients = computed((): RecipeIngredient[] => {
+watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
-    return [...list].sort((a, b) => a.sort_order - b.sort_order);
+    draggableIngredients.value = [...list]
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((ing) => ({ ...ing, completed: (ing as CookingIngredient).completed ?? false }));
 });
+
+const sortedIngredients = computed((): CookingIngredient[] => draggableIngredients.value);
 
 const sortedInstructions = computed((): RecipeInstruction[] => {
     const list = recipe.value?.recipe_instructions ?? [];
@@ -44,11 +51,52 @@ function formatIngredient(ing: RecipeIngredient): string {
     return parts.join(" ");
 }
 
-function toggleIngredient(id: number): void {
-    const next = new Set(selectedIngredientIds.value);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    selectedIngredientIds.value = next;
+function toggleIngredient(ingredient: CookingIngredient): void {
+    if (!ingredient.id || !recipe.value) return;
+    const recipeId = recipe.value.id;
+    const ingredientId = ingredient.id;
+    axios
+        .post(`/api/recipe/${recipeId}/ingredient/${ingredientId}/toggle-completed`)
+        .then((response) => {
+            recipe.value = response.data.data as Recipe;
+        })
+        .catch(() => {
+            toasterStore.show("error", "Could not update ingredient status.");
+        });
+}
+
+function onDragEnd(): void {
+    draggableIngredients.value.forEach((ing, index) => {
+        ing.sort_order = index;
+    });
+    if (!recipe.value) return;
+    const recipeId = recipe.value.id;
+    const payload = {
+        ingredients: draggableIngredients.value.map((ing) => ({
+            id: ing.id,
+            name: ing.name,
+            quantity: ing.quantity ?? null,
+            unit: ing.unit ?? null,
+            notes: ing.notes ?? null,
+            sort_order: ing.sort_order,
+            completed: ing.completed ?? false,
+        })),
+    };
+    loadingStore.start();
+    axios
+        .post(`/api/recipes/${recipeId}/ingredients`, payload)
+        .then((response) => {
+            recipe.value = response.data.data as Recipe;
+        })
+        .catch(() => {
+            toasterStore.show("error", "Could not update ingredient order.");
+            draggableIngredients.value = [...(recipe.value?.recipe_ingredients ?? [])]
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .map((ing) => ({ ...ing, completed: (ing as CookingIngredient).completed ?? false }));
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
 }
 
 function prevStep(): void {
@@ -67,7 +115,6 @@ const fetchCookingSession = () => {
         .then((result) => {
             recipe.value = result.data.data as Recipe;
             currentStepIndex.value = 0;
-            selectedIngredientIds.value = new Set();
         })
         .catch(() => {
             toasterStore.show("error", "Error fetching cooking session data.");
@@ -121,23 +168,40 @@ onMounted(() => {
                 </header>
 
                 <section class="cooking-ingredients">
-                    <h2 class="cooking-section-heading">Ingredients</h2>
-                    <ul class="ingredient-list">
+                    <h2 class="cooking-ingredients-heading">Ingredients</h2>
+                    <VueDraggable
+                        v-if="draggableIngredients.length > 0"
+                        v-model="draggableIngredients"
+                        tag="ul"
+                        class="ingredient-list"
+                        handle=".ingredient-drag-handle"
+                        @end="onDragEnd"
+                    >
                         <li
-                            v-for="ing in sortedIngredients"
-                            :key="ing.id"
+                            v-for="(ing, index) in draggableIngredients"
+                            :key="ing.id ?? `tmp-${index}`"
                             class="ingredient-row"
-                            :class="{ selected: selectedIngredientIds.has(ing.id) }"
-                            @click="toggleIngredient(ing.id)"
+                            :class="{ selected: ing.completed }"
+                            @click="toggleIngredient(ing)"
                         >
+                            <span class="ingredient-drag-handle" aria-hidden="true" @click.stop>
+                                <svg class="ingredient-drag-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <circle cx="6" cy="9" r="1.5"/>
+                                    <circle cx="12" cy="9" r="1.5"/>
+                                    <circle cx="18" cy="9" r="1.5"/>
+                                    <circle cx="6" cy="15" r="1.5"/>
+                                    <circle cx="12" cy="15" r="1.5"/>
+                                    <circle cx="18" cy="15" r="1.5"/>
+                                </svg>
+                            </span>
                             <span class="ingredient-check" aria-hidden="true">
-                                <span v-if="selectedIngredientIds.has(ing.id)" class="check-mark">✓</span>
-                                <span v-else class="check-empty">○</span>
+                                <span v-if="ing.completed" class="check-mark">✓</span>
+                                <span v-else class="check-empty"></span>
                             </span>
                             <span class="ingredient-text">{{ formatIngredient(ing) }}</span>
                         </li>
-                    </ul>
-                    <p v-if="sortedIngredients.length === 0" class="empty-hint">No ingredients.</p>
+                    </VueDraggable>
+                    <p v-else class="ingredient-empty">No ingredients.</p>
                 </section>
 
                 <section class="cooking-instructions">
@@ -241,9 +305,121 @@ onMounted(() => {
     user-select: none;
 }
 
-.cooking-ingredients,
+.cooking-ingredients {
+    padding: 1.25rem 1rem;
+    background: var(--ingredients-bg, #f8fafc);
+}
+
+.cooking-ingredients-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ingredients-heading-color, #334155);
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.02em;
+}
+
+.ingredient-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ingredient-drag-handle {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ingredient-drag-handle:active {
+    cursor: grabbing;
+}
+
+.ingredient-drag-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--text-muted, #94a3b8);
+}
+
+.ingredient-row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 0.75rem;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--ingredient-border, #e2e8f0);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ingredient-row:hover {
+    border-color: var(--ingredient-border-hover, #cbd5e1);
+}
+
+.ingredient-row.selected {
+    background: var(--ingredient-selected-bg, #f1f5f9);
+    border-color: var(--ingredient-selected-border, #cbd5e1);
+}
+
+.ingredient-row.selected .ingredient-text {
+    color: var(--text-muted, #64748b);
+    text-decoration: line-through;
+}
+
+.ingredient-check {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    border: 2px solid var(--ingredient-check-border, #94a3b8);
+    background: var(--card-bg, #fff);
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.ingredient-row.selected .ingredient-check {
+    border-color: var(--ingredient-check-selected, #0d9488);
+    background: var(--ingredient-check-selected, #0d9488);
+}
+
+.check-mark {
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.check-empty {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.ingredient-text {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--ingredient-text-color, #1e293b);
+}
+
+.ingredient-empty {
+    font-size: 0.875rem;
+    color: var(--text-muted, #64748b);
+    margin: 0;
+}
+
 .cooking-instructions {
     padding: 1rem;
+    border-top: 1px solid var(--border-color, #eee);
 }
 
 .cooking-section-heading {
@@ -255,63 +431,10 @@ onMounted(() => {
     margin: 0 0 0.75rem 0;
 }
 
-.ingredient-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.ingredient-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    border-radius: 0.5rem;
-}
-
-.ingredient-row:hover {
-    background: var(--hover-bg, #f5f5f5);
-}
-
-.ingredient-row.selected .ingredient-text {
-    color: var(--text-muted, #666);
-    text-decoration: line-through;
-}
-
-.ingredient-check {
-    flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-}
-
-.check-mark {
-    color: var(--success-color, #0a0);
-}
-
-.check-empty {
-    color: var(--text-muted, #999);
-}
-
-.ingredient-text {
-    flex: 1;
-    font-size: 1rem;
-    line-height: 1.4;
-}
-
 .empty-hint {
     font-size: 0.875rem;
     color: var(--text-muted, #666);
     margin: 0;
-}
-
-.cooking-instructions {
-    border-top: 1px solid var(--border-color, #eee);
 }
 
 .step-wizard {
