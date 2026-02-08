@@ -269,6 +269,7 @@ onMounted(() => {
     border-radius: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     overflow: hidden;
+    border: 2px solid var(--divider-border, #d1d5db)
 }
 
 .cooking-title {
@@ -330,9 +331,9 @@ onMounted(() => {
 .cooking-ingredients-heading {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--ingredients-heading-color, #334155);
+    letter-spacing: -0.025em;
+    color: var(--ingredients-heading-color, #111827);
     margin: 0 0 1rem 0;
-    letter-spacing: -0.02em;
 }
 
 .ingredient-list {
@@ -448,11 +449,11 @@ onMounted(() => {
 }
 
 .cooking-instructions-heading {
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--instructions-heading-color, #334155);
+    letter-spacing: -0.025em;
+    color: var(--instructions-heading-color, #111827);
     margin: 0 0 1rem 0;
-    letter-spacing: -0.02em;
 }
 
 .step-wizard {
