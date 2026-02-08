@@ -220,6 +220,7 @@ onMounted(() => {
                             <div class="step-progress-track">
                                 <div class="step-progress-fill" :style="{ width: stepProgressPercent + '%' }"></div>
                             </div>
+                            <p class="step-progress-label">{{ stepProgressPercent }}% complete</p>
                         </div>
                         <div class="step-content">
                             <p class="step-text">{{ currentInstruction.instruction }}</p>
@@ -536,6 +537,13 @@ onMounted(() => {
     background: var(--progress-fill-bg, #0d9488);
     border-radius: 9999px;
     transition: width 0.3s ease;
+}
+
+.step-progress-label {
+    font-size: 0.75rem;
+    color: var(--text-muted, #6b7280);
+    margin: 0.25rem 0 0 0;
+    font-variant-numeric: tabular-nums;
 }
 
 .instructions-empty {
