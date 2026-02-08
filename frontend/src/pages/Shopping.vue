@@ -277,9 +277,9 @@ onMounted(() => {
 
 <template>
     <DashboardLayout>
-        <div class="pt-7 px-5 pb-20">
-            <div class="shopping-card bg-gray-50 rounded-2xl border-2 border-gray-200">
-                <p class="shopping-mode-label" aria-label="Shopping">Shopping</p>
+        <div class="pt-4 px-5 pb-20">
+            <div class="shopping-card bg-white rounded-2xl border-2 border-gray-200">
+                <p class="shopping-mode-label" aria-label="Shopping">Shopping mode</p>
                 <div class="px-4 pt-6 pb-5">
                     <div class="flex-1 mb-4">
                         <div class="flex items-center justify-between mb-1">
@@ -523,7 +523,7 @@ onMounted(() => {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #64748b;
-    background: #f9fafb;
+    background: white;
     border: 2px solid #e5e7eb;
     border-top: none;
     border-radius: 0 0 0.5rem 0.5rem;
