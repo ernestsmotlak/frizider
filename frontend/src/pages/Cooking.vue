@@ -288,7 +288,7 @@ onMounted(() => {
 
 .cooking-title {
     position: relative;
-    padding: 1.25rem 3.5rem 1.25rem 1rem;
+    padding: 1.25rem 1rem;
     text-align: center;
 }
 
