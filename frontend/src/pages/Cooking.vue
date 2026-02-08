@@ -328,7 +328,7 @@ onMounted(() => {
 }
 
 .cooking-ingredients-heading {
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--ingredients-heading-color, #334155);
     margin: 0 0 1rem 0;
