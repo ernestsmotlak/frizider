@@ -185,7 +185,7 @@ class RecipeController extends Controller
 
         return response()->json([
             'message' => 'Ingredients updated.',
-            'data' => $recipe->fresh()->load('recipeIngredients'),
+            'data' => $recipe->fresh()->load(['recipeIngredients', 'recipeInstructions']),
         ]);
     }
 
