@@ -173,6 +173,7 @@ onMounted(() => {
                     </div>
                 </header>
 
+                <div class="page-divider"></div>
                 <section class="cooking-ingredients">
                     <h2 class="cooking-ingredients-heading">Ingredients</h2>
                     <VueDraggable
@@ -209,6 +210,8 @@ onMounted(() => {
                     </VueDraggable>
                     <p v-else class="ingredient-empty">No ingredients.</p>
                 </section>
+
+                <hr class="page-divider" />
 
                 <section class="cooking-instructions">
                     <h2 class="cooking-instructions-heading">Instructions</h2>
@@ -270,7 +273,7 @@ onMounted(() => {
 
 .cooking-title {
     padding: 1.25rem 1rem;
-    border-bottom: 1px solid var(--border-color, #eee);
+    /*border-bottom: 1px solid var(--border-color, #eee);*/
     text-align: center;
 }
 
@@ -321,7 +324,7 @@ onMounted(() => {
 
 .cooking-ingredients {
     padding: 1.25rem 1rem;
-    background: var(--ingredients-bg, #f8fafc);
+    /*background: var(--ingredients-bg, #f8fafc);*/
 }
 
 .cooking-ingredients-heading {
@@ -431,10 +434,17 @@ onMounted(() => {
     margin: 0;
 }
 
+.page-divider {
+    width: 90%;
+    margin: 0 auto;
+    border: none;
+    border-top: 2px solid var(--border-color, #cbd5e1);
+}
+
 .cooking-instructions {
     padding: 1.25rem 1rem;
-    background: var(--instructions-bg, #f8fafc);
-    border-top: 1px solid var(--border-color, #e2e8f0);
+    /*background: var(--instructions-bg, #f8fafc);*/
+    /*border-top: 1px solid var(--border-color, #e2e8f0);*/
 }
 
 .cooking-instructions-heading {
