@@ -41,10 +41,14 @@ const currentInstruction = computed(() => {
     return list[idx];
 });
 
+const completedInstructionsCount = computed(() => {
+    return sortedInstructions.value.filter((i) => i.completed).length;
+});
+
 const stepProgressPercent = computed(() => {
     const total = sortedInstructions.value.length;
     if (total === 0) return 0;
-    return Math.round(((currentStepIndex.value + 1) / total) * 100);
+    return Math.round((completedInstructionsCount.value / total) * 100);
 });
 
 const hasTime = computed(() => {
@@ -116,6 +120,20 @@ function prevStep(): void {
 function nextStep(): void {
     const max = sortedInstructions.value.length - 1;
     if (currentStepIndex.value < max) currentStepIndex.value++;
+}
+
+function toggleInstruction(instruction: RecipeInstruction): void {
+    if (!instruction.id || !recipe.value) return;
+    const recipeId = recipe.value.id;
+    const instructionId = instruction.id;
+    axios
+        .post(`/api/recipe/${recipeId}/instruction/${instructionId}/toggle-completed`)
+        .then((response) => {
+            recipe.value = response.data.data as Recipe;
+        })
+        .catch(() => {
+            toasterStore.show("error", "Could not update step status.");
+        });
 }
 
 const fetchCookingSession = () => {
@@ -251,38 +269,35 @@ onMounted(() => {
 
                 <section class="cooking-instructions">
                     <h2 class="cooking-instructions-heading">Instructions</h2>
-                    <div v-if="currentInstruction" class="step-wizard">
-                        <div class="step-badge">
-                            Step {{ currentStepIndex + 1 }} of {{ sortedInstructions.length }}
-                        </div>
-                        <div class="step-progress" role="progressbar" :aria-valuenow="currentStepIndex + 1" :aria-valuemin="1" :aria-valuemax="sortedInstructions.length" :aria-label="`Step ${currentStepIndex + 1} of ${sortedInstructions.length}`">
-                            <div class="step-progress-track">
-                                <div class="step-progress-fill" :style="{ width: stepProgressPercent + '%' }"></div>
+                    <template v-if="sortedInstructions.length > 0">
+                        <div class="step-wizard">
+                            <div class="step-badge">
+                                {{ completedInstructionsCount }} of {{ sortedInstructions.length }} complete
                             </div>
-                            <p class="step-progress-label">{{ stepProgressPercent }}% complete</p>
+                            <div class="step-progress" role="progressbar" :aria-valuenow="completedInstructionsCount" :aria-valuemin="0" :aria-valuemax="sortedInstructions.length" :aria-label="`${completedInstructionsCount} of ${sortedInstructions.length} steps complete`">
+                                <div class="step-progress-track">
+                                    <div class="step-progress-fill" :style="{ width: stepProgressPercent + '%' }"></div>
+                                </div>
+                                <p class="step-progress-label">{{ stepProgressPercent }}% complete</p>
+                            </div>
                         </div>
-                        <div class="step-content">
-                            <p class="step-text">{{ currentInstruction.instruction }}</p>
-                        </div>
-                        <div class="step-nav">
-                            <button
-                                type="button"
-                                class="step-btn step-prev"
-                                :disabled="currentStepIndex === 0"
-                                @click="prevStep"
+                        <ul class="instruction-list">
+                            <li
+                                v-for="(step, index) in sortedInstructions"
+                                :key="step.id ?? index"
+                                class="instruction-row"
+                                :class="{ completed: step.completed }"
+                                @click="toggleInstruction(step)"
                             >
-                                Previous
-                            </button>
-                            <button
-                                type="button"
-                                class="step-btn step-next"
-                                :disabled="currentStepIndex === sortedInstructions.length - 1"
-                                @click="nextStep"
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                                <span class="instruction-check" aria-hidden="true">
+                                    <span v-if="step.completed" class="check-mark">✓</span>
+                                    <span v-else class="check-empty"></span>
+                                </span>
+                                <span class="instruction-number">{{ index + 1 }}.</span>
+                                <span class="instruction-text">{{ step.instruction }}</span>
+                            </li>
+                        </ul>
+                    </template>
                     <p v-else class="instructions-empty">No instructions.</p>
                 </section>
                 </template>
@@ -674,6 +689,74 @@ onMounted(() => {
     color: var(--text-muted, #6b7280);
     margin: 0.25rem 0 0 0;
     font-variant-numeric: tabular-nums;
+}
+
+.instruction-list {
+    list-style: none;
+    margin: 1rem 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.instruction-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 0.75rem;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--instruction-border, #e2e8f0);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.instruction-row:hover {
+    border-color: var(--ingredient-border-hover, #cbd5e1);
+}
+
+.instruction-row.completed {
+    background: var(--ingredient-selected-bg, #f1f5f9);
+    border-color: var(--ingredient-selected-border, #cbd5e1);
+}
+
+.instruction-row.completed .instruction-text {
+    color: var(--text-muted, #64748b);
+    text-decoration: line-through;
+}
+
+.instruction-check {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    border: 2px solid var(--ingredient-check-border, #94a3b8);
+    background: var(--card-bg, #fff);
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.instruction-row.completed .instruction-check {
+    border-color: var(--ingredient-check-selected, #0d9488);
+    background: var(--ingredient-check-selected, #0d9488);
+}
+
+.instruction-number {
+    flex-shrink: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-muted, #64748b);
+}
+
+.instruction-text {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--instruction-text-color, #1e293b);
 }
 
 .instructions-empty {

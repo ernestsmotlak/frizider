@@ -57,7 +57,12 @@ onUnmounted(() => {
             <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
                 <div class="px-4 pt-6 pb-4">
                     <div class="flex items-center justify-between mb-1">
-                        <h1 class="text-3xl font-bold text-gray-900">Recipes</h1>
+                        <div class="flex-1">
+                            <h2 class="text-3xl font-bold text-gray-900">Recipes</h2>
+                            <p class="text-xs text-gray-500">
+                                Long press recipe to go cooking
+                            </p>
+                        </div>
                         <button
                             @click="handleAddRecipe"
                             class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
@@ -68,6 +73,7 @@ onUnmounted(() => {
                             </svg>
                         </button>
                     </div>
+                    <hr class="border-gray-300 my-3"/>
                     <p v-if="allRows > 0" class="text-sm text-gray-600">
                         {{ allRows }} recipe{{ allRows !== 1 ? 's' : '' }}
                     </p>
