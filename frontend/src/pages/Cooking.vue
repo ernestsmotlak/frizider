@@ -272,13 +272,14 @@ onMounted(() => {
                 </header>
 
                 <div class="page-divider"></div>
-                <section class="cooking-ingredients">
+                <section class="cooking-ingredients mt-6">
                     <h2 class="cooking-ingredients-heading">Ingredients</h2>
                     <VueDraggable
                         v-if="draggableIngredients.length > 0"
                         v-model="draggableIngredients"
                         tag="ul"
                         class="ingredient-list"
+                        style="margin-bottom: 23px"
                         handle=".ingredient-drag-handle"
                         @end="onDragEnd"
                     >
@@ -311,7 +312,7 @@ onMounted(() => {
 
                 <hr class="page-divider" />
 
-                <div class="flex flex-row justify-between w-[90%] mx-auto mt-5">
+                <div class="flex flex-row justify-between w-[90%] mx-auto mt-7">
                      <h2 class="cooking-instructions-heading">Instructions</h2>
                       <div class="">
                          <button
@@ -542,7 +543,7 @@ onMounted(() => {
 }
 
 .cooking-ingredients {
-    padding: 1.25rem 1rem;
+    padding: 0rem 1rem;
     /*background: var(--ingredients-bg, #f8fafc);*/
 }
 
@@ -661,7 +662,7 @@ onMounted(() => {
 }
 
 .cooking-instructions {
-    padding: 1.25rem 1.25rem;
+    padding: 0.3rem 1.25rem;
     /*background: var(--instructions-bg, #f8fafc);*/
     /*border-top: 1px solid var(--border-color, #e2e8f0);*/
 }
