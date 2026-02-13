@@ -159,11 +159,11 @@ function nextStep(): void {
     if (currentStepIndex.value < max) currentStepIndex.value++;
 }
 
-function toggleInstruction(instruction: RecipeInstruction): void {
+function toggleInstruction(instruction: RecipeInstruction): Promise<void> | void {
     if (!instruction.id || !recipe.value) return;
     const recipeId = recipe.value.id;
     const instructionId = instruction.id;
-    axios
+    return axios
         .post(`/api/recipe/${recipeId}/instruction/${instructionId}/toggle-completed`)
         .then((response) => {
             recipe.value = response.data.data as Recipe;
@@ -171,6 +171,13 @@ function toggleInstruction(instruction: RecipeInstruction): void {
         .catch(() => {
             toasterStore.show("error", "Could not update step status.");
         });
+}
+
+async function onWizardReset(): Promise<void> {
+    const toReset = sortedInstructions.value.filter((i) => i.completed);
+    for (const inst of toReset) {
+        await toggleInstruction(inst);
+    }
 }
 
 const fetchCookingSession = () => {
@@ -362,7 +369,11 @@ onMounted(() => {
                 </section>
 
                 <section v-else>
-                    <InstructionWizard/>
+                    <InstructionWizard
+                        :instructions="sortedInstructions"
+                        @toggle-instruction="toggleInstruction"
+                        @reset="onWizardReset"
+                    />
                 </section>
 
 
