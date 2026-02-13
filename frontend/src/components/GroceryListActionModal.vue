@@ -63,7 +63,7 @@ const handleClose = () => {
                         class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col"
                         style="box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(34, 197, 94, 0.1);"
                     >
-                        <div class="px-6 py-5 flex items-center justify-between border-b border-gray-100">
+                        <div class="px-6 py-5 flex items-center justify-between border-b border-gray-300">
                             <h2 class="text-lg font-semibold text-gray-900">Choose an action</h2>
                             <button
                                 @click="handleClose"

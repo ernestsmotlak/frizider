@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watchEffect } from "vue";
 import { useRouter } from "vue-router";
+import CookingModal from "../components/CookingModal.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
 import InstructionWizard from "./Cooking/InstructionWizard.vue";
 import { useLoadingStore } from "../stores/loading";
@@ -26,6 +27,7 @@ const currentStepIndex = ref(0);
 const draggableIngredients = ref<CookingIngredient[]>([]);
 const draggableInstructions = ref<RecipeInstruction[]>([]);
 const normalCookingMode = ref(false);
+const cookingModalOpen = ref(false);
 
 watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
@@ -265,6 +267,10 @@ onMounted(() => {
 
 <template>
     <DashboardLayout>
+        <CookingModal
+            :is-open="cookingModalOpen"
+            @close="cookingModalOpen = false"
+        />
         <div class="cooking-page">
             <div class="cooking-card">
                 <template v-if="isLoading">
@@ -419,6 +425,7 @@ onMounted(() => {
                             class="cooking-title-icon"
                             :class="{ 'go-to-lists-pulse': recipe.id }"
                             aria-label="Fridge"
+                            @click="cookingModalOpen = true"
                         >
                             <img
                                 src="/fridge_icon.png"

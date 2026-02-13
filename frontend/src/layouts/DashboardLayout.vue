@@ -237,4 +237,3 @@ watch(() => route.path, () => {
     }
 }
 </style>
-
