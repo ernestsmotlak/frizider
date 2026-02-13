@@ -327,7 +327,7 @@ onMounted(() => {
                      </div>
                 </div>
 
-                <section v-if="normalCookingMode" class="cooking-instructions">
+                <section v-if="normalCookingMode" class="cooking-instructions mb-6">
                     <template v-if="sortedInstructions.length > 0">
                         <div class="step-wizard">
                             <div class="step-badge">

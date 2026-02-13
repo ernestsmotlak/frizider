@@ -19,11 +19,11 @@ watch(
         if (currentStep.value >= len && len > 0) {
             currentStep.value = Math.max(0, len - 1);
         }
-    }
+    },
 );
 
-const completedCount = computed(() =>
-    props.instructions.filter((s) => s.completed).length
+const completedCount = computed(
+    () => props.instructions.filter((s) => s.completed).length,
 );
 const progressPercent = computed(() => {
     const total = props.instructions.length;
@@ -40,7 +40,7 @@ const isFirst = computed(() => currentStep.value === 0);
 const isLast = computed(
     () =>
         props.instructions.length === 0 ||
-        currentStep.value === props.instructions.length - 1
+        currentStep.value === props.instructions.length - 1,
 );
 
 function goToStep(i: number): void {
@@ -86,7 +86,7 @@ const cardProgressPercent = computed(() => {
 </script>
 
 <template>
-    <section class="wizard" aria-label="Cooking instructions wizard">
+    <section class="wizard mb-5" aria-label="Cooking instructions wizard">
         <div v-if="instructions.length > 0" class="wizard-progress-wrap">
             <div class="wizard-progress-header">
                 <span class="wizard-progress-text">
@@ -94,7 +94,14 @@ const cardProgressPercent = computed(() => {
                 </span>
                 <span class="wizard-progress-pct">{{ progressPercent }}%</span>
             </div>
-            <div class="wizard-progress-track" role="progressbar" :aria-valuenow="completedCount" :aria-valuemin="0" :aria-valuemax="instructions.length" :aria-label="`${completedCount} of ${instructions.length} steps complete`">
+            <div
+                class="wizard-progress-track"
+                role="progressbar"
+                :aria-valuenow="completedCount"
+                :aria-valuemin="0"
+                :aria-valuemax="instructions.length"
+                :aria-label="`${completedCount} of ${instructions.length} steps complete`"
+            >
                 <div
                     class="wizard-progress-fill"
                     :style="{ width: progressPercent + '%' }"
@@ -116,7 +123,16 @@ const cardProgressPercent = computed(() => {
                 @click="goToStep(i)"
             >
                 <template v-if="step.completed">
-                    <svg class="wizard-dot-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg
+                        class="wizard-dot-check"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
                         <polyline points="20 6 9 17 4 12" />
                     </svg>
                 </template>
@@ -134,15 +150,27 @@ const cardProgressPercent = computed(() => {
             <div class="wizard-card-inner">
                 <div class="wizard-card-content" :key="currentStep">
                     <div class="wizard-step-header">
-                        <span class="wizard-step-badge">{{ currentStep + 1 }}</span>
+                        <span class="wizard-step-badge">{{
+                            currentStep + 1
+                        }}</span>
                         <span class="wizard-step-label">
-                            Step {{ currentStep + 1 }} of {{ instructions.length }}
+                            Step {{ currentStep + 1 }} of
+                            {{ instructions.length }}
                         </span>
                     </div>
                     <p class="wizard-step-text">{{ current.instruction }}</p>
                 </div>
                 <div v-if="current.completed" class="wizard-done-badge">
-                    <svg class="wizard-done-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg
+                        class="wizard-done-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
                         <polyline points="20 6 9 17 4 12" />
                     </svg>
                     Done
@@ -155,7 +183,16 @@ const cardProgressPercent = computed(() => {
                     :disabled="isFirst"
                     @click="goPrev"
                 >
-                    <svg class="wizard-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg
+                        class="wizard-nav-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
                         <polyline points="15 18 9 12 15 6" />
                     </svg>
                     Previous
@@ -164,9 +201,17 @@ const cardProgressPercent = computed(() => {
                     type="button"
                     class="wizard-nav-primary"
                     :class="{ 'wizard-nav-primary--undo': current.completed }"
-                    @click="current.completed ? toggleCurrent() : markDoneAndNext()"
+                    @click="
+                        current.completed ? toggleCurrent() : markDoneAndNext()
+                    "
                 >
-                    {{ current.completed ? "Undo" : isLast ? "Complete" : "Done — Next" }}
+                    {{
+                        current.completed
+                            ? "Undo"
+                            : isLast
+                              ? "Complete"
+                              : "Done — Next"
+                    }}
                 </button>
                 <button
                     type="button"
@@ -175,7 +220,16 @@ const cardProgressPercent = computed(() => {
                     @click="goNext"
                 >
                     Next
-                    <svg class="wizard-nav-icon wizard-nav-icon--right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg
+                        class="wizard-nav-icon wizard-nav-icon--right"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
                         <polyline points="9 18 15 12 9 6" />
                     </svg>
                 </button>
@@ -184,10 +238,24 @@ const cardProgressPercent = computed(() => {
 
         <p v-else class="wizard-empty">No instructions.</p>
 
-        <div v-if="completedCount > 0 && instructions.length > 0" class="wizard-reset-wrap">
+        <div
+            v-if="completedCount > 0 && instructions.length > 0"
+            class="wizard-reset-wrap"
+        >
             <button type="button" class="wizard-reset" @click="resetAll">
-                <svg class="wizard-reset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <svg
+                    class="wizard-reset-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                    />
                     <path d="M3 3v5h5" />
                 </svg>
                 Reset all steps
@@ -271,7 +339,12 @@ const cardProgressPercent = computed(() => {
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s, color 0.2s;
+    transition:
+        transform 0.2s,
+        s box-shadow 0.2s,
+        background 0.2s,
+        border-color 0.2s,
+        color 0.2s;
     background: var(--progress-track-bg, #e2e8f0);
     color: var(--text-muted, #64748b);
 }
@@ -304,7 +377,9 @@ const cardProgressPercent = computed(() => {
     border-radius: 0.75rem;
     border: 1px solid var(--instruction-border, #e2e8f0);
     background: var(--card-bg, #fff);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.08),
+        0 2px 4px -2px rgba(0, 0, 0, 0.06);
     overflow: hidden;
 }
 
@@ -446,7 +521,9 @@ const cardProgressPercent = computed(() => {
     font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: opacity 0.2s, background 0.2s;
+    transition:
+        opacity 0.2s,
+        background 0.2s;
     background: var(--instruction-next-bg, #0d9488);
     color: #fff;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
