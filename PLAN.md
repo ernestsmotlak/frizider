@@ -422,3 +422,16 @@ frontend/src/
 
 **RecipePage Component:**
 - ❌ TODO: Fix smaller screen alignment for `frontend/src/pages/Recipe/RecipePage.vue`
+
+
+#### Timer feature (FAB + sheet, draggable)
+
+- **Pattern:** Floating Action Button (FAB) that opens a timer bottom sheet. When at least one timer is active, show a circle icon (FAB) on screen.
+- **Placement (default):** Bottom-right, floating **above** the sticky bottom nav bar (e.g. `bottom: calc(navbar-height + 12px)`). Add bottom padding to the main scroll area so content is not hidden behind the FAB.
+- **Draggable FAB:** User can **long-press** the FAB then **drag** it anywhere on the screen.
+  - **Short tap** → open timer sheet.
+  - **Long-press** (~300–400 ms) → enter "move" mode, then drag; release to drop. Optional: light haptic on long-press.
+  - **Persistence:** Store FAB position (e.g. `{ x, y }` as % of viewport or px) in the same place as timer state (composable or Pinia) so it survives navigation within the session.
+  - **Bounds:** Clamp position so the FAB stays fully visible and does not sit under the sticky nav or in system safe areas (e.g. allow dragging only in the content rectangle from below header to above nav bar).
+  - **Default:** First time (or no saved position): bottom-right above nav; after first drag, use saved position.
+- **Discoverability / a11y:** Expose a "Move timer button" hint (e.g. long-press hint in label or short instructions) so users know they can reposition the FAB.
