@@ -311,12 +311,17 @@ onMounted(() => {
 
                 <hr class="page-divider" />
 
-                <button
-                    @click="normalCookingMode = !normalCookingMode"
-                    class="cooking-empty-btn"
-                >
-                    Change to wizard and back
-                </button>
+                <div class="cooking-mode-toggle-wrap">
+                    <button
+                        type="button"
+                        @click="normalCookingMode = !normalCookingMode"
+                        class="cooking-mode-toggle"
+                        :aria-pressed="normalCookingMode"
+                        aria-label="Toggle list or wizard view"
+                    >
+                        {{ normalCookingMode ? "Wizard view" : "List view" }}
+                    </button>
+                </div>
 
                 <section v-if="normalCookingMode" class="cooking-instructions">
                     <h2 class="cooking-instructions-heading">Instructions</h2>
@@ -654,7 +659,7 @@ onMounted(() => {
 }
 
 .cooking-instructions {
-    padding: 1.25rem 1rem;
+    padding: 1.25rem 1.25rem;
     /*background: var(--instructions-bg, #f8fafc);*/
     /*border-top: 1px solid var(--border-color, #e2e8f0);*/
 }
@@ -939,6 +944,36 @@ onMounted(() => {
     text-align: center;
     font-size: 0.875rem;
     margin: 0 0 1rem 0;
+}
+
+.cooking-mode-toggle-wrap {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cooking-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--instruction-btn-text, #475569);
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--instruction-btn-border, #cbd5e1);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.cooking-mode-toggle:hover {
+    color: var(--instruction-text-color, #1e293b);
+    border-color: var(--instruction-btn-border-hover, #94a3b8);
+    background: var(--hover-bg, #f1f5f9);
+}
+
+.cooking-mode-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--card-bg, #fff), 0 0 0 4px var(--instruction-next-bg, #0d9488);
 }
 
 .cooking-empty-btn {
