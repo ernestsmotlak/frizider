@@ -19,6 +19,7 @@ const recipe = ref<Recipe | null>(null);
 const isLoading = ref(true);
 const currentStepIndex = ref(0);
 const draggableIngredients = ref<CookingIngredient[]>([]);
+const draggableInstructions = ref<RecipeInstruction[]>([]);
 
 watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
@@ -27,12 +28,16 @@ watchEffect(() => {
         .map((ing) => ({ ...ing, completed: (ing as CookingIngredient).completed ?? false }));
 });
 
+watchEffect(() => {
+    const list = recipe.value?.recipe_instructions ?? [];
+    draggableInstructions.value = [...list]
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((inst) => ({ ...inst }));
+});
+
 const sortedIngredients = computed((): CookingIngredient[] => draggableIngredients.value);
 
-const sortedInstructions = computed((): RecipeInstruction[] => {
-    const list = recipe.value?.recipe_instructions ?? [];
-    return [...list].sort((a, b) => a.sort_order - b.sort_order);
-});
+const sortedInstructions = computed((): RecipeInstruction[] => draggableInstructions.value);
 
 const currentInstruction = computed(() => {
     const list = sortedInstructions.value;
@@ -107,6 +112,36 @@ function onDragEnd(): void {
             draggableIngredients.value = [...(recipe.value?.recipe_ingredients ?? [])]
                 .sort((a, b) => a.sort_order - b.sort_order)
                 .map((ing) => ({ ...ing, completed: (ing as CookingIngredient).completed ?? false }));
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+}
+
+function onInstructionDragEnd(): void {
+    draggableInstructions.value.forEach((inst, index) => {
+        inst.sort_order = index;
+    });
+    if (!recipe.value) return;
+    const recipeId = recipe.value.id;
+    const payload = {
+        instructions: draggableInstructions.value.map((inst) => ({
+            id: inst.id,
+            instruction: inst.instruction,
+            sort_order: inst.sort_order,
+            completed: inst.completed ?? false,
+        })),
+    };
+    loadingStore.start();
+    axios
+        .post(`/api/recipes/${recipeId}/instructions`, payload)
+        .then((response) => {
+            recipe.value = response.data.data as Recipe;
+        })
+        .catch(() => {
+            toasterStore.show("error", "Could not update instruction order.");
+            const list = recipe.value?.recipe_instructions ?? [];
+            draggableInstructions.value = [...list].sort((a, b) => a.sort_order - b.sort_order).map((inst) => ({ ...inst }));
         })
         .finally(() => {
             loadingStore.stop();
@@ -281,14 +316,30 @@ onMounted(() => {
                                 <p class="step-progress-label">{{ stepProgressPercent }}% complete</p>
                             </div>
                         </div>
-                        <ul class="instruction-list">
+                        <VueDraggable
+                            v-model="draggableInstructions"
+                            tag="ul"
+                            class="instruction-list"
+                            handle=".instruction-drag-handle"
+                            @end="onInstructionDragEnd"
+                        >
                             <li
-                                v-for="(step, index) in sortedInstructions"
+                                v-for="(step, index) in draggableInstructions"
                                 :key="step.id ?? index"
                                 class="instruction-row"
                                 :class="{ completed: step.completed }"
                                 @click="toggleInstruction(step)"
                             >
+                                <span class="instruction-drag-handle" aria-hidden="true" @click.stop>
+                                    <svg class="instruction-drag-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <circle cx="6" cy="9" r="1.5"/>
+                                        <circle cx="12" cy="9" r="1.5"/>
+                                        <circle cx="18" cy="9" r="1.5"/>
+                                        <circle cx="6" cy="15" r="1.5"/>
+                                        <circle cx="12" cy="15" r="1.5"/>
+                                        <circle cx="18" cy="15" r="1.5"/>
+                                    </svg>
+                                </span>
                                 <span class="instruction-check" aria-hidden="true">
                                     <span v-if="step.completed" class="check-mark">✓</span>
                                     <span v-else class="check-empty"></span>
@@ -296,7 +347,7 @@ onMounted(() => {
                                 <span class="instruction-number">{{ index + 1 }}.</span>
                                 <span class="instruction-text">{{ step.instruction }}</span>
                             </li>
-                        </ul>
+                        </VueDraggable>
                     </template>
                     <p v-else class="instructions-empty">No instructions.</p>
                 </section>
@@ -698,6 +749,25 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+}
+
+.instruction-drag-handle {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.instruction-drag-handle:active {
+    cursor: grabbing;
+}
+
+.instruction-drag-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--text-muted, #94a3b8);
 }
 
 .instruction-row {
