@@ -87,8 +87,6 @@ const cardProgressPercent = computed(() => {
 
 <template>
     <section class="wizard" aria-label="Cooking instructions wizard">
-        <h2 class="wizard-heading">Instructions</h2>
-
         <div v-if="instructions.length > 0" class="wizard-progress-wrap">
             <div class="wizard-progress-header">
                 <span class="wizard-progress-text">

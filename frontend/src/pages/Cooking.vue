@@ -311,20 +311,22 @@ onMounted(() => {
 
                 <hr class="page-divider" />
 
-                <div class="cooking-mode-toggle-wrap">
-                    <button
-                        type="button"
-                        @click="normalCookingMode = !normalCookingMode"
-                        class="cooking-mode-toggle"
-                        :aria-pressed="normalCookingMode"
-                        aria-label="Toggle list or wizard view"
-                    >
-                        {{ normalCookingMode ? "Wizard view" : "List view" }}
-                    </button>
+                <div class="flex flex-row justify-between w-[90%] mx-auto mt-5">
+                     <h2 class="cooking-instructions-heading">Instructions</h2>
+                      <div class="">
+                         <button
+                             type="button"
+                             @click="normalCookingMode = !normalCookingMode"
+                             class="cooking-mode-toggle"
+                             :aria-pressed="normalCookingMode"
+                             aria-label="Toggle list or wizard view"
+                         >
+                             {{ normalCookingMode ? "Wizard view" : "List view" }}
+                         </button>
+                     </div>
                 </div>
 
                 <section v-if="normalCookingMode" class="cooking-instructions">
-                    <h2 class="cooking-instructions-heading">Instructions</h2>
                     <template v-if="sortedInstructions.length > 0">
                         <div class="step-wizard">
                             <div class="step-badge">
