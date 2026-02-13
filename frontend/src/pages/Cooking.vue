@@ -750,7 +750,7 @@ onMounted(() => {
 
 .step-progress {
     margin-top: 0.0rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0rem;
 }
 
 .step-progress-track {
