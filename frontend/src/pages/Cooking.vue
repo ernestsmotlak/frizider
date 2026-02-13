@@ -7,7 +7,11 @@ import { useLoadingStore } from "../stores/loading";
 import { useToastStore } from "../stores/toast";
 import { formatTime } from "../utils/formatTime";
 import { VueDraggable } from "vue-draggable-plus";
-import type { Recipe, RecipeIngredient, RecipeInstruction } from "./Recipe/RecipePage.vue";
+import type {
+    Recipe,
+    RecipeIngredient,
+    RecipeInstruction,
+} from "./Recipe/RecipePage.vue";
 
 const router = useRouter();
 
@@ -27,7 +31,10 @@ watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
     draggableIngredients.value = [...list]
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map((ing) => ({ ...ing, completed: (ing as CookingIngredient).completed ?? false }));
+        .map((ing) => ({
+            ...ing,
+            completed: (ing as CookingIngredient).completed ?? false,
+        }));
 });
 
 watchEffect(() => {
@@ -37,9 +44,13 @@ watchEffect(() => {
         .map((inst) => ({ ...inst }));
 });
 
-const sortedIngredients = computed((): CookingIngredient[] => draggableIngredients.value);
+const sortedIngredients = computed(
+    (): CookingIngredient[] => draggableIngredients.value,
+);
 
-const sortedInstructions = computed((): RecipeInstruction[] => draggableInstructions.value);
+const sortedInstructions = computed(
+    (): RecipeInstruction[] => draggableInstructions.value,
+);
 
 const currentInstruction = computed(() => {
     const list = sortedInstructions.value;
@@ -60,7 +71,10 @@ const stepProgressPercent = computed(() => {
 
 const hasTime = computed(() => {
     const r = recipe.value;
-    return (r?.prep_time != null && r.prep_time > 0) || (r?.cook_time != null && r.cook_time > 0);
+    return (
+        (r?.prep_time != null && r.prep_time > 0) ||
+        (r?.cook_time != null && r.cook_time > 0)
+    );
 });
 
 function formatIngredient(ing: RecipeIngredient): string {
@@ -77,7 +91,9 @@ function toggleIngredient(ingredient: CookingIngredient): void {
     const recipeId = recipe.value.id;
     const ingredientId = ingredient.id;
     axios
-        .post(`/api/recipe/${recipeId}/ingredient/${ingredientId}/toggle-completed`)
+        .post(
+            `/api/recipe/${recipeId}/ingredient/${ingredientId}/toggle-completed`,
+        )
         .then((response) => {
             recipe.value = response.data.data as Recipe;
         })
@@ -111,9 +127,14 @@ function onDragEnd(): void {
         })
         .catch(() => {
             toasterStore.show("error", "Could not update ingredient order.");
-            draggableIngredients.value = [...(recipe.value?.recipe_ingredients ?? [])]
+            draggableIngredients.value = [
+                ...(recipe.value?.recipe_ingredients ?? []),
+            ]
                 .sort((a, b) => a.sort_order - b.sort_order)
-                .map((ing) => ({ ...ing, completed: (ing as CookingIngredient).completed ?? false }));
+                .map((ing) => ({
+                    ...ing,
+                    completed: (ing as CookingIngredient).completed ?? false,
+                }));
         })
         .finally(() => {
             loadingStore.stop();
@@ -143,7 +164,9 @@ function onInstructionDragEnd(): void {
         .catch(() => {
             toasterStore.show("error", "Could not update instruction order.");
             const list = recipe.value?.recipe_instructions ?? [];
-            draggableInstructions.value = [...list].sort((a, b) => a.sort_order - b.sort_order).map((inst) => ({ ...inst }));
+            draggableInstructions.value = [...list]
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .map((inst) => ({ ...inst }));
         })
         .finally(() => {
             loadingStore.stop();
@@ -159,12 +182,16 @@ function nextStep(): void {
     if (currentStepIndex.value < max) currentStepIndex.value++;
 }
 
-function toggleInstruction(instruction: RecipeInstruction): Promise<void> | void {
+function toggleInstruction(
+    instruction: RecipeInstruction,
+): Promise<void> | void {
     if (!instruction.id || !recipe.value) return;
     const recipeId = recipe.value.id;
     const instructionId = instruction.id;
     return axios
-        .post(`/api/recipe/${recipeId}/instruction/${instructionId}/toggle-completed`)
+        .post(
+            `/api/recipe/${recipeId}/instruction/${instructionId}/toggle-completed`,
+        )
         .then((response) => {
             recipe.value = response.data.data as Recipe;
         })
@@ -174,10 +201,38 @@ function toggleInstruction(instruction: RecipeInstruction): Promise<void> | void
 }
 
 async function onWizardReset(): Promise<void> {
-    const toReset = sortedInstructions.value.filter((i) => i.completed);
-    for (const inst of toReset) {
-        await toggleInstruction(inst);
+    // const toReset = sortedInstructions.value.filter((i) => i.completed);
+    // for (const inst of toReset) {
+    //     await toggleInstruction(inst);
+    // }
+
+    if (!recipe.value.id) {
+        toasterStore.show("error", "There was a problem resetting steps.");
+        return;
     }
+
+    loadingStore.start();
+
+    const url = "/api/reset-all-recipe-steps/";
+    const payload = {
+        recipe_id: recipe.value.id,
+    };
+
+    axios
+        .post(url, payload)
+        .then((result) => {
+            recipe.value = (result.data.data ?? null) as Recipe | null;
+            currentStepIndex.value = 0;
+        })
+        .catch((error) => {
+            toasterStore.show(
+                "error",
+                "There was a problem resetting all recipe steps.",
+            );
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
 }
 
 const fetchCookingSession = () => {
@@ -214,194 +269,390 @@ onMounted(() => {
             <div class="cooking-card">
                 <template v-if="isLoading">
                     <div class="cooking-loading">
-                        <svg class="cooking-loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        <svg
+                            class="cooking-loading-spinner"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            />
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
                         </svg>
-                        <span class="cooking-loading-text">Loading recipe…</span>
+                        <span class="cooking-loading-text"
+                            >Loading recipe…</span
+                        >
                     </div>
                 </template>
                 <template v-else-if="recipe">
-                <p class="cooking-mode-label" aria-label="Cooking mode">Cooking mode</p>
-                <header
-                class="cooking-title"
-                :class="{ 'mt-2': !recipe.image_url }"
-                >
-                    <div class="cooking-title-inner">
-                        <div v-if="recipe.image_url" class="cooking-emoji" aria-hidden="true">
-                            {{ recipe.image_url }}
-                        </div>
-                        <h1 class="cooking-name">{{ recipe.name }}</h1>
-                        <p v-if="recipe.description" class="cooking-description">{{ recipe.description }}</p>
-                        <div v-if="recipe.servings || hasTime" class="cooking-meta-row">
-                            <span v-if="recipe.servings" class="cooking-meta-item">
-                                <svg class="cooking-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-                                    <line x1="6" y1="1" x2="6" y2="4" />
-                                    <line x1="10" y1="1" x2="10" y2="4" />
-                                    <line x1="14" y1="1" x2="14" y2="4" />
-                                </svg>
-                                <span>{{ recipe.servings }}</span>
-                            </span>
-                            <span v-if="recipe.servings && hasTime" class="cooking-meta-sep" aria-hidden="true">·</span>
-                            <span v-if="recipe.prep_time != null && recipe.prep_time > 0" class="cooking-meta-item">
-                                <svg class="cooking-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12 6 12 12 16 14" />
-                                </svg>
-                                <span>{{ formatTime(recipe.prep_time) }}</span>
-                            </span>
-                            <span v-if="(recipe.prep_time != null && recipe.prep_time > 0) && (recipe.cook_time != null && recipe.cook_time > 0)" class="cooking-meta-sep" aria-hidden="true">·</span>
-                            <span v-if="recipe.cook_time != null && recipe.cook_time > 0" class="cooking-meta-item">
-                                <svg class="cooking-meta-icon cooking-meta-icon-cook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-                                </svg>
-                                <span>{{ formatTime(recipe.cook_time) }}</span>
-                            </span>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        class="cooking-title-icon"
-                        :class="{'go-to-lists-pulse': recipe.id}"
-                        aria-label="Fridge"
+                    <p class="cooking-mode-label" aria-label="Cooking mode">
+                        Cooking mode
+                    </p>
+                    <header
+                        class="cooking-title"
+                        :class="{ 'mt-2': !recipe.image_url }"
                     >
-                        <img src="/fridge_icon.png" alt="Fridge" class="cooking-title-icon-img" />
-                    </button>
-                </header>
-
-                <div class="page-divider"></div>
-                <section class="cooking-ingredients mt-6">
-                    <h2 class="cooking-ingredients-heading">Ingredients</h2>
-                    <VueDraggable
-                        v-if="draggableIngredients.length > 0"
-                        v-model="draggableIngredients"
-                        tag="ul"
-                        class="ingredient-list"
-                        style="margin-bottom: 23px"
-                        handle=".ingredient-drag-handle"
-                        @end="onDragEnd"
-                    >
-                        <li
-                            v-for="(ing, index) in draggableIngredients"
-                            :key="ing.id ?? `tmp-${index}`"
-                            class="ingredient-row"
-                            :class="{ selected: ing.completed }"
-                            @click="toggleIngredient(ing)"
+                        <div class="cooking-title-inner">
+                            <div
+                                v-if="recipe.image_url"
+                                class="cooking-emoji"
+                                aria-hidden="true"
+                            >
+                                {{ recipe.image_url }}
+                            </div>
+                            <h1 class="cooking-name">{{ recipe.name }}</h1>
+                            <p
+                                v-if="recipe.description"
+                                class="cooking-description"
+                            >
+                                {{ recipe.description }}
+                            </p>
+                            <div
+                                v-if="recipe.servings || hasTime"
+                                class="cooking-meta-row"
+                            >
+                                <span
+                                    v-if="recipe.servings"
+                                    class="cooking-meta-item"
+                                >
+                                    <svg
+                                        class="cooking-meta-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+                                        <path
+                                            d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"
+                                        />
+                                        <line x1="6" y1="1" x2="6" y2="4" />
+                                        <line x1="10" y1="1" x2="10" y2="4" />
+                                        <line x1="14" y1="1" x2="14" y2="4" />
+                                    </svg>
+                                    <span>{{ recipe.servings }}</span>
+                                </span>
+                                <span
+                                    v-if="recipe.servings && hasTime"
+                                    class="cooking-meta-sep"
+                                    aria-hidden="true"
+                                    >·</span
+                                >
+                                <span
+                                    v-if="
+                                        recipe.prep_time != null &&
+                                        recipe.prep_time > 0
+                                    "
+                                    class="cooking-meta-item"
+                                >
+                                    <svg
+                                        class="cooking-meta-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                    <span>{{
+                                        formatTime(recipe.prep_time)
+                                    }}</span>
+                                </span>
+                                <span
+                                    v-if="
+                                        recipe.prep_time != null &&
+                                        recipe.prep_time > 0 &&
+                                        recipe.cook_time != null &&
+                                        recipe.cook_time > 0
+                                    "
+                                    class="cooking-meta-sep"
+                                    aria-hidden="true"
+                                    >·</span
+                                >
+                                <span
+                                    v-if="
+                                        recipe.cook_time != null &&
+                                        recipe.cook_time > 0
+                                    "
+                                    class="cooking-meta-item"
+                                >
+                                    <svg
+                                        class="cooking-meta-icon cooking-meta-icon-cook"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+                                        />
+                                    </svg>
+                                    <span>{{
+                                        formatTime(recipe.cook_time)
+                                    }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            class="cooking-title-icon"
+                            :class="{ 'go-to-lists-pulse': recipe.id }"
+                            aria-label="Fridge"
                         >
-                            <span class="ingredient-drag-handle" aria-hidden="true" @click.stop>
-                                <svg class="ingredient-drag-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <circle cx="6" cy="9" r="1.5"/>
-                                    <circle cx="12" cy="9" r="1.5"/>
-                                    <circle cx="18" cy="9" r="1.5"/>
-                                    <circle cx="6" cy="15" r="1.5"/>
-                                    <circle cx="12" cy="15" r="1.5"/>
-                                    <circle cx="18" cy="15" r="1.5"/>
-                                </svg>
-                            </span>
-                            <span class="ingredient-check" aria-hidden="true">
-                                <span v-if="ing.completed" class="check-mark">✓</span>
-                                <span v-else class="check-empty"></span>
-                            </span>
-                            <span class="ingredient-text">{{ formatIngredient(ing) }}</span>
-                        </li>
-                    </VueDraggable>
-                    <p v-else class="ingredient-empty">No ingredients.</p>
-                </section>
+                            <img
+                                src="/fridge_icon.png"
+                                alt="Fridge"
+                                class="cooking-title-icon-img"
+                            />
+                        </button>
+                    </header>
 
-                <hr class="page-divider" />
-
-                <div class="flex flex-row justify-between w-[90%] mx-auto mt-7">
-                     <h2 class="cooking-instructions-heading">Instructions</h2>
-                      <div class="">
-                         <button
-                             type="button"
-                             @click="normalCookingMode = !normalCookingMode"
-                             class="cooking-mode-toggle"
-                             :aria-pressed="normalCookingMode"
-                             aria-label="Toggle list or wizard view"
-                         >
-                             {{ normalCookingMode ? "Wizard view" : "List view" }}
-                         </button>
-                     </div>
-                </div>
-
-                <section v-if="normalCookingMode" class="cooking-instructions mb-6">
-                    <template v-if="sortedInstructions.length > 0">
-                        <div class="step-wizard">
-                            <div class="step-badge">
-                                {{ completedInstructionsCount }} of {{ sortedInstructions.length }} complete
-                            </div>
-                            <div class="step-progress" role="progressbar" :aria-valuenow="completedInstructionsCount" :aria-valuemin="0" :aria-valuemax="sortedInstructions.length" :aria-label="`${completedInstructionsCount} of ${sortedInstructions.length} steps complete`">
-                                <div class="step-progress-track">
-                                    <div class="step-progress-fill" :style="{ width: stepProgressPercent + '%' }"></div>
-                                </div>
-                                <p class="step-progress-label">{{ stepProgressPercent }}% complete</p>
-                            </div>
-                        </div>
+                    <div class="page-divider"></div>
+                    <section class="cooking-ingredients mt-6">
+                        <h2 class="cooking-ingredients-heading">Ingredients</h2>
                         <VueDraggable
-                            v-model="draggableInstructions"
+                            v-if="draggableIngredients.length > 0"
+                            v-model="draggableIngredients"
                             tag="ul"
-                            class="instruction-list"
-                            handle=".instruction-drag-handle"
-                            @end="onInstructionDragEnd"
+                            class="ingredient-list"
+                            style="margin-bottom: 23px"
+                            handle=".ingredient-drag-handle"
+                            @end="onDragEnd"
                         >
                             <li
-                                v-for="(step, index) in draggableInstructions"
-                                :key="step.id ?? index"
-                                class="instruction-row"
-                                :class="{ completed: step.completed }"
-                                @click="toggleInstruction(step)"
+                                v-for="(ing, index) in draggableIngredients"
+                                :key="ing.id ?? `tmp-${index}`"
+                                class="ingredient-row"
+                                :class="{ selected: ing.completed }"
+                                @click="toggleIngredient(ing)"
                             >
-                                <span class="instruction-drag-handle" aria-hidden="true" @click.stop>
-                                    <svg class="instruction-drag-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <circle cx="6" cy="9" r="1.5"/>
-                                        <circle cx="12" cy="9" r="1.5"/>
-                                        <circle cx="18" cy="9" r="1.5"/>
-                                        <circle cx="6" cy="15" r="1.5"/>
-                                        <circle cx="12" cy="15" r="1.5"/>
-                                        <circle cx="18" cy="15" r="1.5"/>
+                                <span
+                                    class="ingredient-drag-handle"
+                                    aria-hidden="true"
+                                    @click.stop
+                                >
+                                    <svg
+                                        class="ingredient-drag-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        aria-hidden="true"
+                                    >
+                                        <circle cx="6" cy="9" r="1.5" />
+                                        <circle cx="12" cy="9" r="1.5" />
+                                        <circle cx="18" cy="9" r="1.5" />
+                                        <circle cx="6" cy="15" r="1.5" />
+                                        <circle cx="12" cy="15" r="1.5" />
+                                        <circle cx="18" cy="15" r="1.5" />
                                     </svg>
                                 </span>
-                                <span class="instruction-check" aria-hidden="true">
-                                    <span v-if="step.completed" class="check-mark">✓</span>
+                                <span
+                                    class="ingredient-check"
+                                    aria-hidden="true"
+                                >
+                                    <span
+                                        v-if="ing.completed"
+                                        class="check-mark"
+                                        >✓</span
+                                    >
                                     <span v-else class="check-empty"></span>
                                 </span>
-                                <span class="instruction-number">{{ index + 1 }}.</span>
-                                <span class="instruction-text">{{ step.instruction }}</span>
+                                <span class="ingredient-text">{{
+                                    formatIngredient(ing)
+                                }}</span>
                             </li>
                         </VueDraggable>
-                    </template>
-                    <p v-else class="instructions-empty">No instructions.</p>
-                </section>
+                        <p v-else class="ingredient-empty">No ingredients.</p>
+                    </section>
 
-                <section v-else>
-                    <InstructionWizard
-                        :instructions="sortedInstructions"
-                        @toggle-instruction="toggleInstruction"
-                        @reset="onWizardReset"
-                    />
-                </section>
+                    <hr class="page-divider" />
 
+                    <div
+                        class="flex flex-row justify-between w-[90%] mx-auto mt-7"
+                    >
+                        <h2 class="cooking-instructions-heading">
+                            Instructions
+                        </h2>
+                        <div class="">
+                            <button
+                                type="button"
+                                @click="normalCookingMode = !normalCookingMode"
+                                class="cooking-mode-toggle"
+                                :aria-pressed="normalCookingMode"
+                                aria-label="Toggle list or wizard view"
+                            >
+                                {{
+                                    normalCookingMode
+                                        ? "Wizard view"
+                                        : "List view"
+                                }}
+                            </button>
+                        </div>
+                    </div>
 
+                    <section
+                        v-if="normalCookingMode"
+                        class="cooking-instructions mb-6"
+                    >
+                        <template v-if="sortedInstructions.length > 0">
+                            <div class="step-wizard">
+                                <div class="step-badge">
+                                    {{ completedInstructionsCount }} of
+                                    {{ sortedInstructions.length }} complete
+                                </div>
+                                <div
+                                    class="step-progress"
+                                    role="progressbar"
+                                    :aria-valuenow="completedInstructionsCount"
+                                    :aria-valuemin="0"
+                                    :aria-valuemax="sortedInstructions.length"
+                                    :aria-label="`${completedInstructionsCount} of ${sortedInstructions.length} steps complete`"
+                                >
+                                    <div class="step-progress-track">
+                                        <div
+                                            class="step-progress-fill"
+                                            :style="{
+                                                width:
+                                                    stepProgressPercent + '%',
+                                            }"
+                                        ></div>
+                                    </div>
+                                    <p class="step-progress-label">
+                                        {{ stepProgressPercent }}% complete
+                                    </p>
+                                </div>
+                            </div>
+                            <VueDraggable
+                                v-model="draggableInstructions"
+                                tag="ul"
+                                class="instruction-list"
+                                handle=".instruction-drag-handle"
+                                @end="onInstructionDragEnd"
+                            >
+                                <li
+                                    v-for="(
+                                        step, index
+                                    ) in draggableInstructions"
+                                    :key="step.id ?? index"
+                                    class="instruction-row"
+                                    :class="{ completed: step.completed }"
+                                    @click="toggleInstruction(step)"
+                                >
+                                    <span
+                                        class="instruction-drag-handle"
+                                        aria-hidden="true"
+                                        @click.stop
+                                    >
+                                        <svg
+                                            class="instruction-drag-icon"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                            aria-hidden="true"
+                                        >
+                                            <circle cx="6" cy="9" r="1.5" />
+                                            <circle cx="12" cy="9" r="1.5" />
+                                            <circle cx="18" cy="9" r="1.5" />
+                                            <circle cx="6" cy="15" r="1.5" />
+                                            <circle cx="12" cy="15" r="1.5" />
+                                            <circle cx="18" cy="15" r="1.5" />
+                                        </svg>
+                                    </span>
+                                    <span
+                                        class="instruction-check"
+                                        aria-hidden="true"
+                                    >
+                                        <span
+                                            v-if="step.completed"
+                                            class="check-mark"
+                                            >✓</span
+                                        >
+                                        <span v-else class="check-empty"></span>
+                                    </span>
+                                    <span class="instruction-number"
+                                        >{{ index + 1 }}.</span
+                                    >
+                                    <span class="instruction-text">{{
+                                        step.instruction
+                                    }}</span>
+                                </li>
+                            </VueDraggable>
+                        </template>
+                        <p v-else class="instructions-empty">
+                            No instructions.
+                        </p>
+                    </section>
+
+                    <section v-else>
+                        <InstructionWizard
+                            :instructions="sortedInstructions"
+                            @toggle-instruction="toggleInstruction"
+                            @reset="onWizardReset"
+                        />
+                    </section>
                 </template>
                 <template v-else>
-                <p class="cooking-mode-label" aria-label="Cooking mode">Cooking mode</p>
+                    <p class="cooking-mode-label" aria-label="Cooking mode">
+                        Cooking mode
+                    </p>
                     <div class="cooking-empty">
-                        <svg class="cooking-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        <svg
+                            class="cooking-empty-icon"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                            />
                         </svg>
-                        <p class="cooking-empty-title">No active cooking session</p>
-                        <p class="cooking-empty-subtitle">Choose a recipe to start cooking</p>
+                        <p class="cooking-empty-title">
+                            No active cooking session
+                        </p>
+                        <p class="cooking-empty-subtitle">
+                            Choose a recipe to start cooking
+                        </p>
                         <button
                             type="button"
                             class="cooking-empty-btn"
                             aria-label="Choose a recipe to cook"
                             @click="goToRecipes"
                         >
-                            <svg class="cooking-empty-btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <svg
+                                class="cooking-empty-btn-icon"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
                             </svg>
                             Choose a recipe to cook
                         </button>
@@ -468,13 +719,19 @@ onMounted(() => {
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
 }
 
 .cooking-title-icon:hover {
     border-color: #d1d5db;
     background: #fff;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transform: scale(1.1);
 }
 
@@ -593,7 +850,9 @@ onMounted(() => {
     border-radius: 0.75rem;
     background: var(--card-bg, #fff);
     border: 1px solid var(--ingredient-border, #e2e8f0);
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
 }
 
 .ingredient-row:hover {
@@ -620,7 +879,10 @@ onMounted(() => {
     border-radius: 0.375rem;
     border: 2px solid var(--ingredient-check-border, #94a3b8);
     background: var(--card-bg, #fff);
-    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
 }
 
 .ingredient-row.selected .ingredient-check {
@@ -719,7 +981,10 @@ onMounted(() => {
     font-weight: 600;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease;
 }
 
 .step-prev {
@@ -749,7 +1014,7 @@ onMounted(() => {
 }
 
 .step-progress {
-    margin-top: 0.0rem;
+    margin-top: 0rem;
     margin-bottom: 0rem;
 }
 
@@ -814,7 +1079,9 @@ onMounted(() => {
     border-radius: 0.75rem;
     background: var(--card-bg, #fff);
     border: 1px solid var(--instruction-border, #e2e8f0);
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
 }
 
 .instruction-row:hover {
@@ -841,7 +1108,10 @@ onMounted(() => {
     border-radius: 0.375rem;
     border: 2px solid var(--ingredient-check-border, #94a3b8);
     background: var(--card-bg, #fff);
-    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
 }
 
 .instruction-row.completed .instruction-check {
@@ -909,8 +1179,12 @@ onMounted(() => {
 }
 
 @keyframes cooking-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .cooking-loading-text {
@@ -965,7 +1239,10 @@ onMounted(() => {
     border: 1px solid var(--instruction-btn-border, #cbd5e1);
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
 }
 
 .cooking-mode-toggle:hover {
@@ -976,7 +1253,9 @@ onMounted(() => {
 
 .cooking-mode-toggle:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--card-bg, #fff), 0 0 0 4px var(--instruction-next-bg, #0d9488);
+    box-shadow:
+        0 0 0 2px var(--card-bg, #fff),
+        0 0 0 4px var(--instruction-next-bg, #0d9488);
 }
 
 .cooking-empty-btn {
@@ -992,7 +1271,10 @@ onMounted(() => {
     border-radius: 0.75rem;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .cooking-empty-btn:hover {
@@ -1002,7 +1284,9 @@ onMounted(() => {
 
 .cooking-empty-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #3b82f6;
+    box-shadow:
+        0 0 0 2px #fff,
+        0 0 0 4px #3b82f6;
 }
 
 .cooking-empty-btn-icon {
