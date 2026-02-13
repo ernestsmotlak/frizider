@@ -179,8 +179,9 @@ const cardProgressPercent = computed(() => {
             <div class="wizard-nav">
                 <button
                     type="button"
-                    class="wizard-nav-link"
+                    class="wizard-nav-link wizard-nav-link--icon"
                     :disabled="isFirst"
+                    aria-label="Previous step"
                     @click="goPrev"
                 >
                     <svg
@@ -195,7 +196,6 @@ const cardProgressPercent = computed(() => {
                     >
                         <polyline points="15 18 9 12 15 6" />
                     </svg>
-                    Previous
                 </button>
                 <button
                     type="button"
@@ -210,18 +210,18 @@ const cardProgressPercent = computed(() => {
                             ? "Undo"
                             : isLast
                               ? "Complete"
-                              : "Done — Next"
+                              : "Done"
                     }}
                 </button>
                 <button
                     type="button"
-                    class="wizard-nav-link"
+                    class="wizard-nav-link wizard-nav-link--icon"
                     :disabled="isLast"
+                    aria-label="Next step"
                     @click="goNext"
                 >
-                    Next
                     <svg
-                        class="wizard-nav-icon wizard-nav-icon--right"
+                        class="wizard-nav-icon"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -504,14 +504,33 @@ const cardProgressPercent = computed(() => {
     cursor: not-allowed;
 }
 
+.wizard-nav-link--icon {
+    padding: 0.75rem;
+    min-width: 3rem;
+    min-height: 3rem;
+    justify-content: center;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--instruction-btn-border, #cbd5e1);
+    border-radius: 0.5rem;
+    color: var(--instruction-text-color, #1e293b);
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.wizard-nav-link--icon:hover:not(:disabled) {
+    background: var(--hover-bg, #f1f5f9);
+    border-color: var(--instruction-next-bg, #0d9488);
+    color: var(--instruction-next-bg, #0d9488);
+}
+
+.wizard-nav-link--icon .wizard-nav-icon {
+    width: 1.375rem;
+    height: 1.375rem;
+}
+
 .wizard-nav-icon {
     width: 1rem;
     height: 1rem;
     flex-shrink: 0;
-}
-
-.wizard-nav-icon--right {
-    order: 1;
 }
 
 .wizard-nav-primary {
