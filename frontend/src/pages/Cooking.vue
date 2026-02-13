@@ -304,6 +304,13 @@ onMounted(() => {
 
                 <hr class="page-divider" />
 
+                <button
+                    @click="normalCookingMode = !normalCookingMode"
+                    class="cooking-empty-btn"
+                >
+                    Change to wizard and back
+                </button>
+
                 <section v-if="normalCookingMode" class="cooking-instructions">
                     <h2 class="cooking-instructions-heading">Instructions</h2>
                     <template v-if="sortedInstructions.length > 0">
