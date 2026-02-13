@@ -2,6 +2,7 @@
 import { onMounted, ref, computed, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
+import InstructionWizard from "./Cooking/InstructionWizard.vue";
 import { useLoadingStore } from "../stores/loading";
 import { useToastStore } from "../stores/toast";
 import { formatTime } from "../utils/formatTime";
@@ -20,6 +21,7 @@ const isLoading = ref(true);
 const currentStepIndex = ref(0);
 const draggableIngredients = ref<CookingIngredient[]>([]);
 const draggableInstructions = ref<RecipeInstruction[]>([]);
+const normalCookingMode = ref(false);
 
 watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
@@ -302,7 +304,7 @@ onMounted(() => {
 
                 <hr class="page-divider" />
 
-                <section class="cooking-instructions">
+                <section v-if="normalCookingMode" class="cooking-instructions">
                     <h2 class="cooking-instructions-heading">Instructions</h2>
                     <template v-if="sortedInstructions.length > 0">
                         <div class="step-wizard">
@@ -351,6 +353,12 @@ onMounted(() => {
                     </template>
                     <p v-else class="instructions-empty">No instructions.</p>
                 </section>
+
+                <section v-else>
+                    <InstructionWizard/>
+                </section>
+
+
                 </template>
                 <template v-else>
                 <p class="cooking-mode-label" aria-label="Cooking mode">Cooking mode</p>
