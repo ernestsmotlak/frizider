@@ -321,6 +321,13 @@ onMounted(() => {
                     <p class="cooking-mode-label" aria-label="Cooking mode">
                         Cooking mode
                     </p>
+
+                    <button
+                        type="button"
+                        class="cooking-round-btn"
+                        aria-label="Round action"
+                    ></button>
+
                     <header
                         class="cooking-title"
                         :class="{ 'mt-2': !recipe.image_url }"
@@ -706,6 +713,28 @@ onMounted(() => {
     position: relative;
     padding: 1.25rem 1rem;
     text-align: center;
+}
+
+.cooking-round-btn {
+    display: block;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    margin: 0.5rem auto 0;
+    border: none;
+    border-radius: 50%;
+    background: #8b4513;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.cooking-round-btn:hover {
+    background: #a0522d;
+}
+
+.cooking-round-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--card-bg, #fff), 0 0 0 4px #8b4513;
 }
 
 .cooking-mode-label {
