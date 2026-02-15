@@ -87,31 +87,53 @@ const timersWrapStyle = computed(() => {
     const clamp = (value: number, min: number, max: number): number =>
         Math.max(min, Math.min(max, value));
 
-    const rightSpace =
-        rect.width - (roundButtonLeft.value + buttonSize + gap) - padding;
-    const leftSpace = roundButtonLeft.value - gap - padding;
-    let useRightSide = rightSpace >= leftSpace;
-    if (useRightSide && rightSpace < measuredPanelWidth && leftSpace >= measuredPanelWidth) {
-        useRightSide = false;
-    } else if (
-        !useRightSide &&
-        leftSpace < measuredPanelWidth &&
-        rightSpace >= measuredPanelWidth
-    ) {
-        useRightSide = true;
-    }
-
     const panelWidth = measuredPanelWidth;
-    const left = useRightSide
-        ? roundButtonLeft.value + buttonSize + gap
-        : roundButtonLeft.value - gap - panelWidth;
-    const top = roundButtonTop.value + buttonSize / 2 - panelHeight / 2;
-    const safeLeft = clamp(left, padding, rect.width - panelWidth - padding);
-    const safeTop = clamp(top, padding, rect.height - panelHeight - padding);
+
+    const overlapsButton = (left: number, top: number): boolean => {
+        const panelRight = left + panelWidth;
+        const panelBottom = top + panelHeight;
+        const btnLeft = roundButtonLeft.value;
+        const btnTop = roundButtonTop.value;
+        const btnRight = btnLeft + buttonSize;
+        const btnBottom = btnTop + buttonSize;
+
+        return !(
+            panelRight <= btnLeft ||
+            left >= btnRight ||
+            panelBottom <= btnTop ||
+            top >= btnBottom
+        );
+    };
+
+    const candidates = [
+        {
+            left: roundButtonLeft.value + buttonSize + gap,
+            top: roundButtonTop.value + buttonSize / 2 - panelHeight / 2,
+        },
+        {
+            left: roundButtonLeft.value - panelWidth - gap,
+            top: roundButtonTop.value + buttonSize / 2 - panelHeight / 2,
+        },
+        {
+            left: roundButtonLeft.value + buttonSize / 2 - panelWidth / 2,
+            top: roundButtonTop.value + buttonSize + gap,
+        },
+        {
+            left: roundButtonLeft.value + buttonSize / 2 - panelWidth / 2,
+            top: roundButtonTop.value - panelHeight - gap,
+        },
+    ].map((candidate) => ({
+        left: clamp(candidate.left, padding, rect.width - panelWidth - padding),
+        top: clamp(candidate.top, padding, rect.height - panelHeight - padding),
+    }));
+
+    const bestCandidate =
+        candidates.find((candidate) => !overlapsButton(candidate.left, candidate.top)) ??
+        candidates[0];
 
     return {
-        left: safeLeft + "px",
-        top: safeTop + "px",
+        left: bestCandidate.left + "px",
+        top: bestCandidate.top + "px",
     };
 });
 
@@ -856,7 +878,7 @@ onUnmounted(() => {
     background: #8b4513;
     cursor: grab;
     -webkit-tap-highlight-color: transparent;
-    z-index: 10;
+    z-index: 11;
 }
 
 .cooking-round-btn-dragging {
