@@ -12,6 +12,13 @@ class CookingSession extends Model
     protected $fillable = [
         'user_id',
         'recipe_id',
+        'timer_fab_x_percent',
+        'timer_fab_y_percent'
+    ];
+
+    protected $casts = [
+        'timer_fab_x_percent' => 'float',
+        'timer_fab_y_percent' => 'float'
     ];
 
     public function user()
@@ -22,5 +29,10 @@ class CookingSession extends Model
     public function recipe()
     {
         return $this->belongsTo(Recipe::class);
+    }
+
+    public function cookingSessionTimers()
+    {
+        return $this->hasMany(CookingSessionTimer::class);
     }
 }
