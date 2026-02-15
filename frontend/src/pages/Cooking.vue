@@ -87,14 +87,21 @@ const timersWrapStyle = computed(() => {
     const clamp = (value: number, min: number, max: number): number =>
         Math.max(min, Math.min(max, value));
 
-    const maxAllowedWidth = Math.max(80, rect.width - padding * 2);
-    const desiredWidth = Math.min(measuredPanelWidth, maxAllowedWidth);
     const rightSpace =
         rect.width - (roundButtonLeft.value + buttonSize + gap) - padding;
     const leftSpace = roundButtonLeft.value - gap - padding;
-    const useRightSide = rightSpace >= leftSpace;
-    const sideSpace = Math.max(80, useRightSide ? rightSpace : leftSpace);
-    const panelWidth = Math.min(desiredWidth, sideSpace);
+    let useRightSide = rightSpace >= leftSpace;
+    if (useRightSide && rightSpace < measuredPanelWidth && leftSpace >= measuredPanelWidth) {
+        useRightSide = false;
+    } else if (
+        !useRightSide &&
+        leftSpace < measuredPanelWidth &&
+        rightSpace >= measuredPanelWidth
+    ) {
+        useRightSide = true;
+    }
+
+    const panelWidth = measuredPanelWidth;
     const left = useRightSide
         ? roundButtonLeft.value + buttonSize + gap
         : roundButtonLeft.value - gap - panelWidth;
@@ -105,7 +112,6 @@ const timersWrapStyle = computed(() => {
     return {
         left: safeLeft + "px",
         top: safeTop + "px",
-        width: panelWidth + "px",
     };
 });
 
