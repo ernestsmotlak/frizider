@@ -42,8 +42,8 @@ const cookingModalOpen = ref(false);
 
 const ROUND_BTN_SIZE_PX = 40;
 const cookingCardRef = ref<HTMLElement | null>(null);
-const roundButtonLeft = ref(16);
-const roundButtonTop = ref(16);
+const roundButtonLeft = ref(18);
+const roundButtonTop = ref(52.5);
 const roundBtnDragging = ref(false);
 const roundBtnOffset = ref({ x: 0, y: 0 });
 
