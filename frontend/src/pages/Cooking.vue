@@ -47,7 +47,11 @@ const {
     roundButtonTop,
     roundBtnDragging,
     onRoundBtnPointerDown,
-} = useDraggableRoundButton({ initialLeft: 18, initialTop: 52.5 });
+} = useDraggableRoundButton({
+    initialLeft: 18,
+    initialTop: 52.5,
+    onClick: ({ left, top }) => console.log("round button location", { left, top }),
+});
 
 watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];

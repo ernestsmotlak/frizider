@@ -1,10 +1,12 @@
 import { onUnmounted, ref, type Ref } from "vue";
 
 const ROUND_BTN_SIZE_PX = 40;
+const LONG_PRESS_MS = 150;
 
 export interface UseDraggableRoundButtonOptions {
     initialLeft?: number;
     initialTop?: number;
+    onClick?: (position: { left: number; top: number }) => void;
 }
 
 export interface UseDraggableRoundButtonReturn {
@@ -21,11 +23,13 @@ export function useDraggableRoundButton(
     const initialLeft = options.initialLeft ?? 18;
     const initialTop = options.initialTop ?? 52.5;
 
+    const onClick = options.onClick;
     const containerRef = ref<HTMLElement | null>(null);
     const roundButtonLeft = ref(initialLeft);
     const roundButtonTop = ref(initialTop);
     const roundBtnDragging = ref(false);
     const roundBtnOffset = ref({ x: 0, y: 0 });
+    let longPressTimerId: ReturnType<typeof setTimeout> | null = null;
 
     function getCardRect(): DOMRect | null {
         return containerRef.value?.getBoundingClientRect() ?? null;
@@ -74,15 +78,12 @@ export function useDraggableRoundButton(
         document.removeEventListener("touchend", onDocumentPointerUp);
     }
 
-    function onRoundBtnPointerDown(e: MouseEvent | TouchEvent): void {
-        const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-        const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-        if ("touches" in e) e.preventDefault();
+    function startDrag(downClientX: number, downClientY: number): void {
         const rect = getCardRect();
         if (!rect) return;
         roundBtnOffset.value = {
-            x: clientX - (rect.left + roundButtonLeft.value),
-            y: clientY - (rect.top + roundButtonTop.value),
+            x: downClientX - (rect.left + roundButtonLeft.value),
+            y: downClientY - (rect.top + roundButtonTop.value),
         };
         roundBtnDragging.value = true;
         document.addEventListener("mousemove", onDocumentPointerMove);
@@ -91,7 +92,42 @@ export function useDraggableRoundButton(
         document.addEventListener("touchend", onDocumentPointerUp);
     }
 
+    function clearLongPressTimer(): void {
+        if (longPressTimerId != null) {
+            clearTimeout(longPressTimerId);
+            longPressTimerId = null;
+        }
+    }
+
+    function onRoundBtnPointerDown(e: MouseEvent | TouchEvent): void {
+        const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+        const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+        if ("touches" in e) e.preventDefault();
+        const rect = getCardRect();
+        if (!rect) return;
+
+        const handlePointerUpWhileWaiting = (): void => {
+            clearLongPressTimer();
+            document.removeEventListener("mouseup", handlePointerUpWhileWaiting);
+            document.removeEventListener("touchend", handlePointerUpWhileWaiting);
+            if (!roundBtnDragging.value) {
+                onClick?.({ left: roundButtonLeft.value, top: roundButtonTop.value });
+            }
+        };
+
+        longPressTimerId = setTimeout(() => {
+            longPressTimerId = null;
+            document.removeEventListener("mouseup", handlePointerUpWhileWaiting);
+            document.removeEventListener("touchend", handlePointerUpWhileWaiting);
+            startDrag(clientX, clientY);
+        }, LONG_PRESS_MS);
+
+        document.addEventListener("mouseup", handlePointerUpWhileWaiting);
+        document.addEventListener("touchend", handlePointerUpWhileWaiting);
+    }
+
     onUnmounted(() => {
+        clearLongPressTimer();
         document.removeEventListener("mousemove", onDocumentPointerMove);
         document.removeEventListener("mouseup", onDocumentPointerUp);
         document.removeEventListener("touchmove", onDocumentTouchMove);
