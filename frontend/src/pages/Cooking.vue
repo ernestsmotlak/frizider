@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed, watchEffect } from "vue";
+import { onMounted, ref, computed, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import CookingModal from "../components/CookingModal.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
 import InstructionWizard from "./Cooking/InstructionWizard.vue";
+import { useDraggableRoundButton } from "../composables/useDraggableRoundButton";
 import { useLoadingStore } from "../stores/loading";
 import { useToastStore } from "../stores/toast";
 import { formatTime } from "../utils/formatTime";
@@ -40,73 +41,13 @@ const draggableInstructions = ref<RecipeInstruction[]>([]);
 const normalCookingMode = ref(false);
 const cookingModalOpen = ref(false);
 
-const ROUND_BTN_SIZE_PX = 40;
-const cookingCardRef = ref<HTMLElement | null>(null);
-const roundButtonLeft = ref(18);
-const roundButtonTop = ref(52.5);
-const roundBtnDragging = ref(false);
-const roundBtnOffset = ref({ x: 0, y: 0 });
-
-function getCardRect(): DOMRect | null {
-    return cookingCardRef.value?.getBoundingClientRect() ?? null;
-}
-
-function clampRoundBtnPosition(left: number, top: number): { left: number; top: number } {
-    const rect = getCardRect();
-    if (!rect) return { left: roundButtonLeft.value, top: roundButtonTop.value };
-    const maxLeft = Math.max(0, rect.width - ROUND_BTN_SIZE_PX);
-    const maxTop = Math.max(0, rect.height - ROUND_BTN_SIZE_PX);
-    return {
-        left: Math.max(0, Math.min(maxLeft, left)),
-        top: Math.max(0, Math.min(maxTop, top)),
-    };
-}
-
-function onRoundBtnPointerDown(e: MouseEvent | TouchEvent): void {
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    if ("touches" in e) e.preventDefault();
-    const rect = getCardRect();
-    if (!rect) return;
-    roundBtnOffset.value = {
-        x: clientX - (rect.left + roundButtonLeft.value),
-        y: clientY - (rect.top + roundButtonTop.value),
-    };
-    roundBtnDragging.value = true;
-    document.addEventListener("mousemove", onDocumentPointerMove);
-    document.addEventListener("mouseup", onDocumentPointerUp);
-    document.addEventListener("touchmove", onDocumentTouchMove, { passive: false });
-    document.addEventListener("touchend", onDocumentPointerUp);
-}
-
-function onDocumentPointerMove(e: MouseEvent): void {
-    if (!roundBtnDragging.value) return;
-    applyRoundBtnPosition(e.clientX, e.clientY);
-}
-
-function onDocumentTouchMove(e: TouchEvent): void {
-    if (!roundBtnDragging.value || e.touches.length === 0) return;
-    e.preventDefault();
-    applyRoundBtnPosition(e.touches[0].clientX, e.touches[0].clientY);
-}
-
-function applyRoundBtnPosition(clientX: number, clientY: number): void {
-    const rect = getCardRect();
-    if (!rect) return;
-    const left = clientX - rect.left - roundBtnOffset.value.x;
-    const top = clientY - rect.top - roundBtnOffset.value.y;
-    const clamped = clampRoundBtnPosition(left, top);
-    roundButtonLeft.value = clamped.left;
-    roundButtonTop.value = clamped.top;
-}
-
-function onDocumentPointerUp(): void {
-    roundBtnDragging.value = false;
-    document.removeEventListener("mousemove", onDocumentPointerMove);
-    document.removeEventListener("mouseup", onDocumentPointerUp);
-    document.removeEventListener("touchmove", onDocumentTouchMove);
-    document.removeEventListener("touchend", onDocumentPointerUp);
-}
+const {
+    containerRef: roundButtonContainerRef,
+    roundButtonLeft,
+    roundButtonTop,
+    roundBtnDragging,
+    onRoundBtnPointerDown,
+} = useDraggableRoundButton({ initialLeft: 18, initialTop: 52.5 });
 
 watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
@@ -347,13 +288,6 @@ const goToRecipes = () => {
 onMounted(() => {
     fetchCookingSession();
 });
-
-onUnmounted(() => {
-    document.removeEventListener("mousemove", onDocumentPointerMove);
-    document.removeEventListener("mouseup", onDocumentPointerUp);
-    document.removeEventListener("touchmove", onDocumentTouchMove);
-    document.removeEventListener("touchend", onDocumentPointerUp);
-});
 </script>
 
 <template>
@@ -363,7 +297,7 @@ onUnmounted(() => {
             @close="cookingModalOpen = false"
         />
         <div class="cooking-page">
-            <div ref="cookingCardRef" class="cooking-card">
+            <div ref="roundButtonContainerRef" class="cooking-card">
                 <template v-if="isLoading">
                     <div class="cooking-loading">
                         <svg
