@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watchEffect } from "vue";
+import { onMounted, onUnmounted, ref, computed, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import CookingModal from "../components/CookingModal.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
@@ -43,6 +43,9 @@ const draggableIngredients = ref<CookingIngredient[]>([]);
 const draggableInstructions = ref<RecipeInstruction[]>([]);
 const normalCookingMode = ref(false);
 const cookingModalOpen = ref(false);
+const timersExpanded = ref(false);
+const roundButtonRef = ref<HTMLElement | null>(null);
+const timersWrapRef = ref<HTMLElement | null>(null);
 
 const {
     containerRef: roundButtonContainerRef,
@@ -53,8 +56,9 @@ const {
 } = useDraggableRoundButton({
     initialLeft: 18,
     initialTop: 52.5,
-    onClick: ({ left, top }) =>
-        console.log("round button location", { left, top }),
+    onClick: () => {
+        timersExpanded.value = !timersExpanded.value;
+    },
 });
 
 const timersWrapStyle = computed(() => {
@@ -320,8 +324,25 @@ const goToRecipes = () => {
     router.push("/recipes");
 };
 
+function onDocumentClick(e: MouseEvent): void {
+    if (!timersExpanded.value) return;
+    const target = e.target as Node;
+    if (
+        roundButtonRef.value?.contains(target) ||
+        timersWrapRef.value?.contains(target)
+    ) {
+        return;
+    }
+    timersExpanded.value = false;
+}
+
 onMounted(() => {
     fetchCookingSession();
+    document.addEventListener("click", onDocumentClick);
+});
+
+onUnmounted(() => {
+    document.removeEventListener("click", onDocumentClick);
 });
 </script>
 
@@ -367,21 +388,41 @@ onMounted(() => {
                     </p>
 
                     <button
+                        ref="roundButtonRef"
                         type="button"
                         class="cooking-round-btn"
                         :class="{
                             'cooking-round-btn-dragging': roundBtnDragging,
                         }"
-                        aria-label="Round action"
+                        aria-label="Timers"
                         :style="{
                             left: roundButtonLeft + 'px',
                             top: roundButtonTop + 'px',
                         }"
                         @mousedown.prevent="onRoundBtnPointerDown"
                         @touchstart.prevent="onRoundBtnPointerDown"
-                    ></button>
+                    >
+                        <svg
+                            class="cooking-round-btn-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                    </button>
 
-                    <div class="cooking-timers-wrap" :style="timersWrapStyle">
+                    <div
+                        ref="timersWrapRef"
+                        v-show="timersExpanded"
+                        class="cooking-timers-wrap"
+                        :style="timersWrapStyle"
+                    >
                         <TimersList :timers="timers" />
                     </div>
 
@@ -775,7 +816,9 @@ onMounted(() => {
 
 .cooking-round-btn {
     position: absolute;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
     padding: 0;
@@ -790,6 +833,12 @@ onMounted(() => {
 
 .cooking-round-btn-dragging {
     cursor: grabbing;
+}
+
+.cooking-round-btn-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #fff;
 }
 
 .cooking-round-btn:hover {
