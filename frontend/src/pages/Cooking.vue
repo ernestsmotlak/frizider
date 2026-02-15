@@ -71,19 +71,41 @@ const timersWrapStyle = computed(() => {
             top: desiredTop + "px",
         };
     }
-    const tw = rect.width * 0.5;
-    const th = rect.height * 0.5;
-    const clampedLeft = Math.max(
-        0,
-        Math.min(rect.width - tw, desiredLeft),
-    );
-    const clampedTop = Math.max(
-        0,
-        Math.min(rect.height - th, desiredTop),
-    );
+
+    const measuredPanelWidth =
+        timersWrapRef.value?.offsetWidth && timersWrapRef.value.offsetWidth > 0
+            ? timersWrapRef.value.offsetWidth
+            : 300;
+    const panelHeight =
+        timersWrapRef.value?.offsetHeight && timersWrapRef.value.offsetHeight > 0
+            ? timersWrapRef.value.offsetHeight
+            : 120;
+    const buttonSize = 40;
+    const gap = 10;
+    const padding = 8;
+
+    const clamp = (value: number, min: number, max: number): number =>
+        Math.max(min, Math.min(max, value));
+
+    const maxAllowedWidth = Math.max(80, rect.width - padding * 2);
+    const desiredWidth = Math.min(measuredPanelWidth, maxAllowedWidth);
+    const rightSpace =
+        rect.width - (roundButtonLeft.value + buttonSize + gap) - padding;
+    const leftSpace = roundButtonLeft.value - gap - padding;
+    const useRightSide = rightSpace >= leftSpace;
+    const sideSpace = Math.max(80, useRightSide ? rightSpace : leftSpace);
+    const panelWidth = Math.min(desiredWidth, sideSpace);
+    const left = useRightSide
+        ? roundButtonLeft.value + buttonSize + gap
+        : roundButtonLeft.value - gap - panelWidth;
+    const top = roundButtonTop.value + buttonSize / 2 - panelHeight / 2;
+    const safeLeft = clamp(left, padding, rect.width - panelWidth - padding);
+    const safeTop = clamp(top, padding, rect.height - panelHeight - padding);
+
     return {
-        left: clampedLeft + "px",
-        top: clampedTop + "px",
+        left: safeLeft + "px",
+        top: safeTop + "px",
+        width: panelWidth + "px",
     };
 });
 
@@ -854,8 +876,7 @@ onUnmounted(() => {
 
 .cooking-timers-wrap {
     position: absolute;
-    width: 50%;
-    height: 50%;
+    max-height: 16rem;
     z-index: 10;
     box-sizing: border-box;
 }
