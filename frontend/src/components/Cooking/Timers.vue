@@ -18,6 +18,6 @@ const props = defineProps<{
 <template>
     Timers here!!!
     <br />
-    <pre>{{timers}}</pre>
+    <pre>{{ timers }}</pre>
 </template>
 <style lang="css" scoped></style>
