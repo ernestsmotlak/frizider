@@ -31,13 +31,15 @@ class CookingSessionController extends Controller
 
     public function getCookingSession(Request $request)
     {
-        $cookingSession = CookingSession::where('user_id', auth()->id())->firstOrFail();
-
-        $recipe = Recipe::with(['recipeIngredients', 'recipeInstructions'])
-            ->findOrFail($cookingSession->recipe_id);
+        $cookingSession = CookingSession::with([
+            'recipe.recipeIngredients',
+            'recipe.recipeInstructions',
+            'cookingSessionTimers',
+        ])
+            ->where('user_id', auth()->id())->firstOrFail();
 
         return response()->json([
-            'data' => $recipe,
+            'data' => $cookingSession,
         ]);
     }
 
@@ -55,13 +57,27 @@ class CookingSessionController extends Controller
             ], 403);
         }
 
-        DB::transaction(function () use ($recipe) {
-            $recipe->recipeInstructions()->update(['completed' => false]);
+        DB::transaction(function () use ($validated) {
+            Recipe::findOrFail($validated['recipe_id'])
+                ->recipeInstructions()
+                ->update(['completed' => false]);
+
+            CookingSession::updateOrCreate(
+                ['user_id' => auth()->id()],
+                ['recipe_id' => $validated['recipe_id']],
+            );
         });
 
-        return response()->json([
-            'data' => $recipe->fresh()->load(['recipeIngredients', 'recipeInstructions']),
-        ]);
+        $cookingSession = CookingSession::with([
+            'recipe.recipeIngredients',
+            'recipe.recipeInstructions',
+            'cookingSessionTimers',
+        ])
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
+        return response()->json([
+            'data' => $cookingSession,
+        ]);
     }
 }

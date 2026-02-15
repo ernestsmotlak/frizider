@@ -18,9 +18,20 @@ const router = useRouter();
 
 type CookingIngredient = RecipeIngredient & { completed?: boolean };
 
+interface CookingSessionData {
+    id: number;
+    user_id: number;
+    recipe_id: number;
+    recipe: Recipe;
+    cooking_session_timers: unknown[];
+    timer_fab_x_percent?: number | null;
+    timer_fab_y_percent?: number | null;
+}
+
 const loadingStore = useLoadingStore();
 const toasterStore = useToastStore();
 
+const cookingSession = ref<CookingSessionData | null>(null);
 const recipe = ref<Recipe | null>(null);
 const isLoading = ref(true);
 const currentStepIndex = ref(0);
@@ -223,7 +234,9 @@ async function onWizardReset(): Promise<void> {
     axios
         .post(url, payload)
         .then((result) => {
-            recipe.value = (result.data.data ?? null) as Recipe | null;
+            const session = result.data.data as CookingSessionData | null;
+            cookingSession.value = session ?? null;
+            recipe.value = session?.recipe ?? null;
             currentStepIndex.value = 0;
         })
         .catch((error) => {
@@ -243,10 +256,13 @@ const fetchCookingSession = () => {
     axios
         .get("/api/get-cooking-session")
         .then((result) => {
-            recipe.value = (result.data.data ?? null) as Recipe | null;
+            const session = result.data.data as CookingSessionData | null;
+            cookingSession.value = session ?? null;
+            recipe.value = session?.recipe ?? null;
             currentStepIndex.value = 0;
         })
         .catch(() => {
+            cookingSession.value = null;
             recipe.value = null;
             toasterStore.show("error", "Error fetching cooking session data.");
         })
