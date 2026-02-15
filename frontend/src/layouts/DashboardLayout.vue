@@ -54,7 +54,7 @@ watch(() => route.path, () => {
 
 <template>
     <div
-        class="min-h-screen bg-green-100 pb-16 transition-transform duration-300 ease-out"
+        class="relative z-0 min-h-screen bg-green-100 pb-16 transition-transform duration-300 ease-out"
         :class="isActionPickerOpen ? 'scale-[0.985] -translate-y-1' : ''"
     >
         <div class="max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
@@ -127,7 +127,7 @@ watch(() => route.path, () => {
         </div>
     </Transition>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+    <nav class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 shadow-lg">
         <div class="flex justify-around items-center h-16">
             <router-link
                 to="/grocery-lists"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watchEffect } from "vue";
+import { onMounted, onUnmounted, ref, computed, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import CookingModal from "../components/CookingModal.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
@@ -39,6 +39,74 @@ const draggableIngredients = ref<CookingIngredient[]>([]);
 const draggableInstructions = ref<RecipeInstruction[]>([]);
 const normalCookingMode = ref(false);
 const cookingModalOpen = ref(false);
+
+const ROUND_BTN_SIZE_PX = 40;
+const cookingCardRef = ref<HTMLElement | null>(null);
+const roundButtonLeft = ref(16);
+const roundButtonTop = ref(16);
+const roundBtnDragging = ref(false);
+const roundBtnOffset = ref({ x: 0, y: 0 });
+
+function getCardRect(): DOMRect | null {
+    return cookingCardRef.value?.getBoundingClientRect() ?? null;
+}
+
+function clampRoundBtnPosition(left: number, top: number): { left: number; top: number } {
+    const rect = getCardRect();
+    if (!rect) return { left: roundButtonLeft.value, top: roundButtonTop.value };
+    const maxLeft = Math.max(0, rect.width - ROUND_BTN_SIZE_PX);
+    const maxTop = Math.max(0, rect.height - ROUND_BTN_SIZE_PX);
+    return {
+        left: Math.max(0, Math.min(maxLeft, left)),
+        top: Math.max(0, Math.min(maxTop, top)),
+    };
+}
+
+function onRoundBtnPointerDown(e: MouseEvent | TouchEvent): void {
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    if ("touches" in e) e.preventDefault();
+    const rect = getCardRect();
+    if (!rect) return;
+    roundBtnOffset.value = {
+        x: clientX - (rect.left + roundButtonLeft.value),
+        y: clientY - (rect.top + roundButtonTop.value),
+    };
+    roundBtnDragging.value = true;
+    document.addEventListener("mousemove", onDocumentPointerMove);
+    document.addEventListener("mouseup", onDocumentPointerUp);
+    document.addEventListener("touchmove", onDocumentTouchMove, { passive: false });
+    document.addEventListener("touchend", onDocumentPointerUp);
+}
+
+function onDocumentPointerMove(e: MouseEvent): void {
+    if (!roundBtnDragging.value) return;
+    applyRoundBtnPosition(e.clientX, e.clientY);
+}
+
+function onDocumentTouchMove(e: TouchEvent): void {
+    if (!roundBtnDragging.value || e.touches.length === 0) return;
+    e.preventDefault();
+    applyRoundBtnPosition(e.touches[0].clientX, e.touches[0].clientY);
+}
+
+function applyRoundBtnPosition(clientX: number, clientY: number): void {
+    const rect = getCardRect();
+    if (!rect) return;
+    const left = clientX - rect.left - roundBtnOffset.value.x;
+    const top = clientY - rect.top - roundBtnOffset.value.y;
+    const clamped = clampRoundBtnPosition(left, top);
+    roundButtonLeft.value = clamped.left;
+    roundButtonTop.value = clamped.top;
+}
+
+function onDocumentPointerUp(): void {
+    roundBtnDragging.value = false;
+    document.removeEventListener("mousemove", onDocumentPointerMove);
+    document.removeEventListener("mouseup", onDocumentPointerUp);
+    document.removeEventListener("touchmove", onDocumentTouchMove);
+    document.removeEventListener("touchend", onDocumentPointerUp);
+}
 
 watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
@@ -279,6 +347,13 @@ const goToRecipes = () => {
 onMounted(() => {
     fetchCookingSession();
 });
+
+onUnmounted(() => {
+    document.removeEventListener("mousemove", onDocumentPointerMove);
+    document.removeEventListener("mouseup", onDocumentPointerUp);
+    document.removeEventListener("touchmove", onDocumentTouchMove);
+    document.removeEventListener("touchend", onDocumentPointerUp);
+});
 </script>
 
 <template>
@@ -288,7 +363,7 @@ onMounted(() => {
             @close="cookingModalOpen = false"
         />
         <div class="cooking-page">
-            <div class="cooking-card">
+            <div ref="cookingCardRef" class="cooking-card">
                 <template v-if="isLoading">
                     <div class="cooking-loading">
                         <svg
@@ -325,7 +400,14 @@ onMounted(() => {
                     <button
                         type="button"
                         class="cooking-round-btn"
+                        :class="{ 'cooking-round-btn-dragging': roundBtnDragging }"
                         aria-label="Round action"
+                        :style="{
+                            left: roundButtonLeft + 'px',
+                            top: roundButtonTop + 'px',
+                        }"
+                        @mousedown.prevent="onRoundBtnPointerDown"
+                        @touchstart.prevent="onRoundBtnPointerDown"
                     ></button>
 
                     <header
@@ -702,6 +784,7 @@ onMounted(() => {
 }
 
 .cooking-card {
+    position: relative;
     background: var(--card-bg, #fff);
     border-radius: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -716,16 +799,22 @@ onMounted(() => {
 }
 
 .cooking-round-btn {
+    position: absolute;
     display: block;
     width: 2.5rem;
     height: 2.5rem;
     padding: 0;
-    margin: 0.5rem auto 0;
+    margin: 0;
     border: none;
     border-radius: 50%;
     background: #8b4513;
-    cursor: pointer;
+    cursor: grab;
     -webkit-tap-highlight-color: transparent;
+    z-index: 10;
+}
+
+.cooking-round-btn-dragging {
+    cursor: grabbing;
 }
 
 .cooking-round-btn:hover {
