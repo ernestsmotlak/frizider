@@ -18,6 +18,6 @@ const props = defineProps<{
 <template>
     Timers here!!!
     <br />
-    Hello
+    <pre>{{timers}}</pre>
 </template>
 <style lang="css" scoped></style>

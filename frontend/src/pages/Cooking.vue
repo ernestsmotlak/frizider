@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import CookingModal from "../components/CookingModal.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
 import InstructionWizard from "./Cooking/InstructionWizard.vue";
+import TimersList from "../components/Cooking/Timers.vue";
 import { useDraggableRoundButton } from "../composables/useDraggableRoundButton";
 import { useLoadingStore } from "../stores/loading";
 import { useToastStore } from "../stores/toast";
@@ -14,6 +15,7 @@ import type {
     RecipeIngredient,
     RecipeInstruction,
 } from "./Recipe/RecipePage.vue";
+import type { Timers } from "../components/Cooking/Timers.vue";
 
 const router = useRouter();
 
@@ -24,7 +26,7 @@ interface CookingSessionData {
     user_id: number;
     recipe_id: number;
     recipe: Recipe;
-    cooking_session_timers: unknown[];
+    cooking_session_timers: Timers[];
     timer_fab_x_percent?: number | null;
     timer_fab_y_percent?: number | null;
 }
@@ -34,6 +36,7 @@ const toasterStore = useToastStore();
 
 const cookingSession = ref<CookingSessionData | null>(null);
 const recipe = ref<Recipe | null>(null);
+const timers = ref<Timers[]>([]);
 const isLoading = ref(true);
 const currentStepIndex = ref(0);
 const draggableIngredients = ref<CookingIngredient[]>([]);
@@ -50,7 +53,8 @@ const {
 } = useDraggableRoundButton({
     initialLeft: 18,
     initialTop: 52.5,
-    onClick: ({ left, top }) => console.log("round button location", { left, top }),
+    onClick: ({ left, top }) =>
+        console.log("round button location", { left, top }),
 });
 
 watchEffect(() => {
@@ -272,6 +276,7 @@ const fetchCookingSession = () => {
             const session = result.data.data as CookingSessionData | null;
             cookingSession.value = session ?? null;
             recipe.value = session?.recipe ?? null;
+            timers.value = session?.cooking_session_timers ?? [];
             currentStepIndex.value = 0;
         })
         .catch(() => {
@@ -300,6 +305,7 @@ onMounted(() => {
             :is-open="cookingModalOpen"
             @close="cookingModalOpen = false"
         />
+        <TimersList :timers="timers" />
         <div class="cooking-page">
             <div ref="roundButtonContainerRef" class="cooking-card">
                 <template v-if="isLoading">
@@ -338,7 +344,9 @@ onMounted(() => {
                     <button
                         type="button"
                         class="cooking-round-btn"
-                        :class="{ 'cooking-round-btn-dragging': roundBtnDragging }"
+                        :class="{
+                            'cooking-round-btn-dragging': roundBtnDragging,
+                        }"
                         aria-label="Round action"
                         :style="{
                             left: roundButtonLeft + 'px',
@@ -761,7 +769,9 @@ onMounted(() => {
 
 .cooking-round-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--card-bg, #fff), 0 0 0 4px #8b4513;
+    box-shadow:
+        0 0 0 2px var(--card-bg, #fff),
+        0 0 0 4px #8b4513;
 }
 
 .cooking-mode-label {
