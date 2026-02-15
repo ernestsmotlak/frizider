@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class CookingSessionTimer extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'cooking_session_id',
+        'started_at',
+        'duration_seconds',
+        'note',
+        'status',
+        'sort_order',
+        'completed_at',
+        'paused_at',
+        'remaining_seconds_at_pause',
+    ];
+
+    protected $casts = [
+        'started_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'paused_at' => 'datetime',
+        'duration_seconds' => 'integer',
+        'remaining_seconds_at_pause' => 'integer',
+        'sort_order' => 'integer',
+    ];
+
+    public function cookingSession()
+    {
+        return $this->belongsTo(CookingSession::class);
+    }
+}
