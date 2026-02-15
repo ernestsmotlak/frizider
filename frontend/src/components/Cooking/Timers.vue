@@ -16,8 +16,19 @@ const props = defineProps<{
 }>();
 </script>
 <template>
-    Timers here!!!
-    <br />
-    <pre>{{ timers }}</pre>
+    <div class="timers-panel">
+        Timers here!!!
+        <br />
+        <div>{{ timers }}</div>
+    </div>
 </template>
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.timers-panel {
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: auto;
+    background: rgba(254, 202, 202, 0.7);
+}
+</style>

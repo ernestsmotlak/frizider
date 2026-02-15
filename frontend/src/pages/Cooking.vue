@@ -57,6 +57,32 @@ const {
         console.log("round button location", { left, top }),
 });
 
+const timersWrapStyle = computed(() => {
+    const rect = roundButtonContainerRef.value?.getBoundingClientRect();
+    const desiredLeft = roundButtonLeft.value + 48;
+    const desiredTop = roundButtonTop.value;
+    if (!rect) {
+        return {
+            left: desiredLeft + "px",
+            top: desiredTop + "px",
+        };
+    }
+    const tw = rect.width * 0.5;
+    const th = rect.height * 0.5;
+    const clampedLeft = Math.max(
+        0,
+        Math.min(rect.width - tw, desiredLeft),
+    );
+    const clampedTop = Math.max(
+        0,
+        Math.min(rect.height - th, desiredTop),
+    );
+    return {
+        left: clampedLeft + "px",
+        top: clampedTop + "px",
+    };
+});
+
 watchEffect(() => {
     const list = recipe.value?.recipe_ingredients ?? [];
     draggableIngredients.value = [...list]
@@ -305,7 +331,6 @@ onMounted(() => {
             :is-open="cookingModalOpen"
             @close="cookingModalOpen = false"
         />
-        <TimersList :timers="timers" />
         <div class="cooking-page">
             <div ref="roundButtonContainerRef" class="cooking-card">
                 <template v-if="isLoading">
@@ -355,6 +380,10 @@ onMounted(() => {
                         @mousedown.prevent="onRoundBtnPointerDown"
                         @touchstart.prevent="onRoundBtnPointerDown"
                     ></button>
+
+                    <div class="cooking-timers-wrap" :style="timersWrapStyle">
+                        <TimersList :timers="timers" />
+                    </div>
 
                     <header
                         class="cooking-title"
@@ -772,6 +801,14 @@ onMounted(() => {
     box-shadow:
         0 0 0 2px var(--card-bg, #fff),
         0 0 0 4px #8b4513;
+}
+
+.cooking-timers-wrap {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    z-index: 10;
+    box-sizing: border-box;
 }
 
 .cooking-mode-label {
