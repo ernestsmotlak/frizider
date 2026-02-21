@@ -34,4 +34,13 @@ class CookingSessionTimer extends Model
     {
         return $this->belongsTo(CookingSession::class);
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($timer) {
+            if (!$timer->status) {
+                $timer->status = 'idle';
+            }
+        });
+    }
 }
