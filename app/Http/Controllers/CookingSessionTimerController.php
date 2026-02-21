@@ -147,7 +147,60 @@ class CookingSessionTimerController extends Controller
 
     public function updateTimer(Request $request)
     {
+        $validated = $request->validate([
+            'timer_id' => 'required|integer|exists:cooking_session_timers,id',
+            'note' => 'sometimes|string',
+            'sort_order' => 'sometimes|integer',
+            'duration_seconds' => 'sometimes|integer|min:1',
+            'status' => 'sometimes|in:running,paused,idle,completed',
+        ]);
 
+        $timer = $this->cookingSession
+            ->cookingSessionTimers()
+            ->whereKey($validated['timer_id'])
+            ->firstOrFail();
+
+        if (isset($validated['status'])) {
+
+            switch ($validated['status']) {
+
+                case 'completed':
+                    $validated['completed_at'] = now();
+                    $validated['paused_at'] = null;
+                    $validated['remaining_seconds_at_pause'] = null;
+                    break;
+
+                case 'running':
+                    $validated['started_at'] = now();
+                    $validated['completed_at'] = null;
+                    $validated['paused_at'] = null;
+                    $validated['remaining_seconds_at_pause'] = null;
+                    break;
+
+                case 'paused':
+                    if ($timer->started_at) {
+                        $elapsed = $timer->started_at->diffInSeconds(now());
+                        $remaining = max(0, $timer->duration_seconds - $elapsed);
+                        $validated['remaining_seconds_at_pause'] = $remaining;
+                    }
+                    $validated['paused_at'] = now();
+                    $validated['completed_at'] = null;
+                    break;
+
+                case 'idle':
+                    $validated['started_at'] = null;
+                    $validated['paused_at'] = null;
+                    $validated['completed_at'] = null;
+                    $validated['remaining_seconds_at_pause'] = null;
+                    break;
+            }
+        }
+
+        $timer->update($validated);
+
+        return response()->json([
+            'data' => $this->cookingSession->refresh()->load('cookingSessionTimers'),
+        ]);
     }
 
     public function deleteTimer(Request $request)
