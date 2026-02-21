@@ -435,3 +435,145 @@ frontend/src/
   - **Bounds:** Clamp position so the FAB stays fully visible and does not sit under the sticky nav or in system safe areas (e.g. allow dragging only in the content rectangle from below header to above nav bar).
   - **Default:** First time (or no saved position): bottom-right above nav; after first drag, use saved position.
 - **Discoverability / a11y:** Expose a "Move timer button" hint (e.g. long-press hint in label or short instructions) so users know they can reposition the FAB.
+
+---
+
+## Cooking Session Timers – Extended Implementation
+
+### Architecture Overview
+
+**Pattern:** Centralize all timer API calls in a composable (`useCookingSessionTimers`). `Timers.vue` emits intent with minimal payloads; `Cooking.vue` listens, calls composable methods, and owns session/timers state. No POST logic or session data in Timers.vue.
+
+**Flow:** Timers.vue → emit (e.g. `start-timer` with `timer_id`) → Cooking.vue handler → composable method → axios → update `cookingSession` / `timers` refs from `response.data.data`.
+
+---
+
+### Backend API (CookingSessionTimerController)
+
+| Method | Payload | Returns |
+|--------|---------|---------|
+| `createTimer` | `{ note, duration_seconds }` | `data` (session + timers) |
+| `startTimer` | `{ timer_id }` | `data` |
+| `pauseOrContinueTimer` | `{ timer_id, action: "pause" \| "continue" }` | `data` |
+| `completeTimer` | `{ timer_id }` | `data` |
+| `updateTimer` | `{ timer_id }` + optional `note`, `sort_order`, `duration_seconds`, `status` | `data` |
+| `deleteTimer` | `{ timer_id }` | `data` |
+| `reorderTimers` | `{ orders: [{ timer_id, sort_order }, ...] }` | `data` |
+| `resetTimer` | `{ timer_id }` | `data` |
+
+**Middleware:** Accepts optional `location: { timer_fab_x_percent, timer_fab_y_percent }` to persist FAB position.
+
+**Timer statuses:** `idle`, `running`, `paused`, `completed`.
+
+---
+
+### Composable: `useCookingSessionTimers`
+
+**File:** `frontend/src/composables/useCookingSessionTimers.ts`
+
+**Options:**
+- `cookingSession: Ref<CookingSessionData | null>`
+- `timers: Ref<Timers[]>`
+- `onSuccess?: (data: CookingSessionData) => void` (optional)
+
+**Returned methods:**
+- `createTimer(payload: { note: string; duration_seconds: number })`
+- `startTimer(timerId: number)`
+- `pauseOrContinueTimer(timerId: number, action: "pause" | "continue")`
+- `completeTimer(timerId: number)`
+- `resetTimer(timerId: number)`
+- `deleteTimer(timerId: number)`
+- `reorderTimers(orders: Array<{ timer_id: number; sort_order: number }>)`
+
+**Behavior:** Each method POSTs to the timer API, then updates `cookingSession` and `timers` from `response.data.data`. Uses `useToastStore()` for errors.
+
+**Usage in Cooking.vue:**
+```ts
+const { createTimer, startTimer, pauseOrContinueTimer, completeTimer, resetTimer, deleteTimer, reorderTimers } =
+    useCookingSessionTimers({ cookingSession, timers });
+```
+
+---
+
+### Timers.vue – UI Additions
+
+#### 1. Extended `Timers` interface
+
+Add `id` and `original_duration_seconds`. Remove debug `<pre>{{ t }}</pre>`.
+
+#### 2. Per-timer action buttons (status-based)
+
+| Status | Button(s) | Emit |
+|--------|-----------|------|
+| `idle` | Start | `start-timer` |
+| `running` | Pause, Complete | `pause-timer`, `complete-timer` |
+| `paused` | Continue, Complete, Reset | `continue-timer`, `complete-timer`, `reset-timer` |
+| `completed` | Reset | `reset-timer` |
+| All | Delete | `delete-timer` |
+
+Use icons: Play ▶, Pause ⏸, Check ✓, Reset ↺, Trash/X.
+
+#### 3. Add-timer form (create)
+
+- Text input for **note**
+- Duration input (minutes and/or seconds)
+- "Add timer" button → emit `create-timer` with `{ note, duration_seconds }`
+
+Place at top of list or in collapsible section.
+
+#### 4. Empty state
+
+When `timers.length === 0`: message like "No timers yet" and primary "Add timer" button to reveal or focus the form.
+
+#### 5. Status-based visual styling
+
+- **idle**: neutral/gray
+- **running**: accent color, optional ring animation
+- **paused**: muted or orange
+- **completed**: checkmark, muted, strikethrough on note
+
+#### 6. Timer card layout
+
+```
+┌─────────────────────────────────────────────────┐
+│ [ring]  Note / label                             │
+│         MM:SS                                    │
+│         [Start/Pause/Continue] [Complete] [Reset] [Delete] │
+└─────────────────────────────────────────────────┘
+```
+
+Show only buttons valid for current status.
+
+#### 7. Optional: reorder
+
+- Drag handle (⋮⋮) on each card
+- VueDraggable on list, emit `reorder` on drag end
+
+#### 8. Other tweaks
+
+- Use `t.id` as `:key` instead of index
+- `aria-label` on icon-only buttons
+- Live countdown for `running` timers (compute remaining from `started_at` + `duration_seconds`)
+
+---
+
+### Implementation Checklist
+
+| Item | Where |
+|------|-------|
+| Add `id`, `original_duration_seconds` to `Timers` interface | Timers.vue |
+| Remove debug `<pre>` | Timers.vue |
+| Live countdown for `running` timers | Timers.vue |
+| Start / Pause / Continue buttons | Timers.vue |
+| Complete button | Timers.vue |
+| Reset button | Timers.vue |
+| Delete button | Timers.vue |
+| Add-timer form | Timers.vue |
+| Emit handlers (no axios in Timers) | Timers.vue |
+| Create composable `useCookingSessionTimers` | composables/ |
+| Wire composable in Cooking.vue | Cooking.vue |
+| Listen to emits, call composable methods | Cooking.vue |
+| Fix progress ring denominator logic | Timers.vue |
+| Timer reorder (optional) | Timers.vue |
+| Persist FAB position with `location` (optional) | Cooking.vue |
+| Wire timer routes in `api.php` | routes/api.php |
