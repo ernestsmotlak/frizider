@@ -467,19 +467,23 @@ onUnmounted(() => {
                         </svg>
                     </button>
 
-                    <div
-                        v-show="timersExpanded"
-                        class="cooking-timers-backdrop"
-                        aria-hidden="true"
-                    />
-                    <div
-                        ref="timersWrapRef"
-                        v-show="timersExpanded"
-                        class="cooking-timers-wrap"
-                        :style="timersWrapStyle"
-                    >
-                        <TimersList :timers="timers" />
-                    </div>
+                    <Transition name="cooking-timers-backdrop">
+                        <div
+                            v-if="timersExpanded"
+                            class="cooking-timers-backdrop"
+                            aria-hidden="true"
+                        />
+                    </Transition>
+                    <Transition name="cooking-timers-panel">
+                        <div
+                            v-if="timersExpanded"
+                            ref="timersWrapRef"
+                            class="cooking-timers-wrap"
+                            :style="timersWrapStyle"
+                        >
+                            <TimersList :timers="timers" />
+                        </div>
+                    </Transition>
 
                     <header
                         class="cooking-title"
@@ -913,6 +917,29 @@ onUnmounted(() => {
     z-index: 9;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+}
+
+.cooking-timers-backdrop-enter-active,
+.cooking-timers-backdrop-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.cooking-timers-backdrop-enter-from,
+.cooking-timers-backdrop-leave-to {
+    opacity: 0;
+}
+
+.cooking-timers-panel-enter-active,
+.cooking-timers-panel-leave-active {
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.cooking-timers-panel-enter-from,
+.cooking-timers-panel-leave-to {
+    opacity: 0;
+    transform: scale(0.96);
 }
 
 .cooking-timers-wrap {
