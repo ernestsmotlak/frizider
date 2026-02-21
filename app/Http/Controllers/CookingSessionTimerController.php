@@ -19,6 +19,18 @@ class CookingSessionTimerController extends Controller
                 ->cookingSession()
                 ->firstOrFail();
 
+            if ($request->has('location')) {
+                $validated = $request->validate([
+                    'location.timer_fab_x_percent' => 'required|numeric|min:0|max:100',
+                    'location.timer_fab_y_percent' => 'required|numeric|min:0|max:100',
+                ]);
+
+                $this->cookingSession->update([
+                    'timer_fab_x_percent' => (float)$validated['location']['timer_fab_x_percent'],
+                    'timer_fab_y_percent' => (float)$validated['location']['timer_fab_y_percent'],
+                ]);
+            }
+
             return $next($request);
         });
     }
