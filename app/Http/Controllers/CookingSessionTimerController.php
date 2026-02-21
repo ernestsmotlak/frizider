@@ -12,27 +12,23 @@ class CookingSessionTimerController extends Controller
 {
     private ?CookingSession $cookingSession = null;
 
-    public function __construct()
+    private function initializeCookingSession(Request $request): void
     {
-        $this->middleware(function ($request, $next) {
-            $this->cookingSession = auth()->user()
-                ->cookingSession()
-                ->firstOrFail();
+        $this->cookingSession = auth()->user()
+            ->cookingSession()
+            ->firstOrFail();
 
-            if ($request->has('location')) {
-                $validated = $request->validate([
-                    'location.timer_fab_x_percent' => 'required|numeric|min:0|max:100',
-                    'location.timer_fab_y_percent' => 'required|numeric|min:0|max:100',
-                ]);
+        if ($request->has('location')) {
+            $validated = $request->validate([
+                'location.timer_fab_x_percent' => 'required|numeric|min:0|max:100',
+                'location.timer_fab_y_percent' => 'required|numeric|min:0|max:100',
+            ]);
 
-                $this->cookingSession->update([
-                    'timer_fab_x_percent' => (float)$validated['location']['timer_fab_x_percent'],
-                    'timer_fab_y_percent' => (float)$validated['location']['timer_fab_y_percent'],
-                ]);
-            }
-
-            return $next($request);
-        });
+            $this->cookingSession->update([
+                'timer_fab_x_percent' => (float)$validated['location']['timer_fab_x_percent'],
+                'timer_fab_y_percent' => (float)$validated['location']['timer_fab_y_percent'],
+            ]);
+        }
     }
 
     public function createTimer(Request $request)
