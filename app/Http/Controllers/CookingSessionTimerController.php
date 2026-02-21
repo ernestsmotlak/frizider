@@ -36,10 +36,8 @@ class CookingSessionTimerController extends Controller
 
         return response()->json([
             'message' => 'Cooking session timer created!',
-            'timer' => $timer,
+            'data' => $this->cookingSession->refresh()->load('cookingSessionTimers'),
         ]);
-
-//        set timer status to idle or something.
     }
 
     public function startTimer(Request $request)
@@ -74,7 +72,27 @@ class CookingSessionTimerController extends Controller
 
     public function pauseOrContinueTimer(Request $request)
     {
+        $validated = $request->validate([
+            'timer_id' => 'required|integer|exists:cooking_session_timers,id',
+            'action' => 'required|string|in:pause,continue',
+        ]);
 
+        $timer = $this->cookingSession
+            ->cookingSessionTimers()
+            ->whereKey($validated['timer_id'])
+            ->firstOrFail();
+
+        if ($request->action === 'continue') {
+            /* continue action */
+
+        } else {
+            /* pause action */
+            
+        }
+
+        return response()->json([
+            'data' => $this->cookingSession->refresh()->load('cookingSessionTimers'),
+        ]);
     }
 
     public function completeTimer(Request $request)
