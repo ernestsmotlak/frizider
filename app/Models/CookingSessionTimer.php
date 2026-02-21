@@ -45,6 +45,9 @@ class CookingSessionTimer extends Model
             if (!$timer->status) {
                 $timer->status = 'idle';
             }
+            if (!$timer->original_duration_seconds) {
+                $timer->original_duration_seconds = $timer->duration_seconds;
+            }
         });
     }
 }
