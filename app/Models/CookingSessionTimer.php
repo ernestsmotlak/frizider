@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CookingSessionTimer extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $fillable = [
         'cooking_session_id',
