@@ -468,6 +468,11 @@ onUnmounted(() => {
                     </button>
 
                     <div
+                        v-show="timersExpanded"
+                        class="cooking-timers-backdrop"
+                        aria-hidden="true"
+                    />
+                    <div
                         ref="timersWrapRef"
                         v-show="timersExpanded"
                         class="cooking-timers-wrap"
@@ -900,6 +905,14 @@ onUnmounted(() => {
     box-shadow:
         0 0 0 2px var(--card-bg, #fff),
         0 0 0 4px #8b4513;
+}
+
+.cooking-timers-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .cooking-timers-wrap {
