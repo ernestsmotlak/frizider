@@ -205,6 +205,78 @@ class CookingSessionTimerController extends Controller
 
     public function deleteTimer(Request $request)
     {
+        $validated = $request->validate([
+            'timer_id' => 'required|integer|exists:cooking_session_timers,id',
+        ]);
 
+        $timer = $this->cookingSession
+            ->cookingSessionTimers()
+            ->whereKey($validated['timer_id'])
+            ->firstOrFail();
+
+        $timer->delete();
+
+        return response()->json([
+            'data' => $this->cookingSession->refresh()->load('cookingSessionTimers'),
+        ]);
+    }
+
+    public function reorderTimers(Request $request)
+    {
+        $validated = $request->validate([
+            'orders' => 'required|array|min:1',
+            'orders.*.timer_id' => 'required|integer|exists:cooking_session_timers,id',
+            'orders.*.sort_order' => 'required|integer',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            $timerIds = collect($validated['orders'])->pluck('timer_id')->values();
+
+            $count = $this->cookingSession
+                ->cookingSessionTimers()
+                ->whereIn('id', $timerIds)
+                ->count();
+
+            if ($count !== $timerIds->count()) {
+                abort(response()->json([
+                    'message' => 'One or more timers do not belong to this cooking session.',
+                ], 403));
+            }
+
+            foreach ($validated['orders'] as $row) {
+                $this->cookingSession
+                    ->cookingSessionTimers()
+                    ->whereKey($row['timer_id'])
+                    ->update(['sort_order' => (int)$row['sort_order']]);
+            }
+        });
+
+        return response()->json([
+            'data' => $this->cookingSession->refresh()->load('cookingSessionTimers'),
+        ]);
+    }
+
+    public function resetTimer(Request $request)
+    {
+        $validated = $request->validate([
+            'timer_id' => 'required|integer|exists:cooking_session_timers,id',
+        ]);
+
+        $timer = $this->cookingSession
+            ->cookingSessionTimers()
+            ->whereKey($validated['timer_id'])
+            ->firstOrFail();
+
+        $timer->update([
+            'status' => 'idle',
+            'started_at' => null,
+            'paused_at' => null,
+            'completed_at' => null,
+            'remaining_seconds_at_pause' => null,
+        ]);
+
+        return response()->json([
+            'data' => $this->cookingSession->refresh()->load('cookingSessionTimers'),
+        ]);
     }
 }
