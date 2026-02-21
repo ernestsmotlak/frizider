@@ -53,15 +53,9 @@ class CookingSessionTimerController extends Controller
             ->whereKey($validated['timer_id'])
             ->firstOrFail();
 
-        if ($timer->status === 'running') {
+        if ($timer->status !== 'idle') {
             return response()->json([
-                'message' => 'Cooking session timer already started!',
-            ]);
-        }
-
-        if ($timer->status === 'completed') {
-            return response()->json([
-                'message' => 'Cooking session timer already completed!',
+                'message' => 'Cooking session timer already started or completed!',
             ]);
         }
 
