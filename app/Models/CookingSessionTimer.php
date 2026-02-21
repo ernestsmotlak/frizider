@@ -15,6 +15,7 @@ class CookingSessionTimer extends Model
         'cooking_session_id',
         'started_at',
         'duration_seconds',
+        'original_duration_seconds',
         'note',
         'status',
         'sort_order',
@@ -28,6 +29,7 @@ class CookingSessionTimer extends Model
         'completed_at' => 'datetime',
         'paused_at' => 'datetime',
         'duration_seconds' => 'integer',
+        'original_duration_seconds' => 'integer',
         'remaining_seconds_at_pause' => 'integer',
         'sort_order' => 'integer',
     ];
