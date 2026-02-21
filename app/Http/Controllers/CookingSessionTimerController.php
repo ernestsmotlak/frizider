@@ -82,12 +82,39 @@ class CookingSessionTimerController extends Controller
             ->whereKey($validated['timer_id'])
             ->firstOrFail();
 
-        if ($request->action === 'continue') {
-            /* continue action */
+        if ($validated['action'] === 'continue') {
+            if ($timer->status !== 'paused' || $timer->remaining_seconds_at_pause === null) {
+                return response()->json([
+                    'message' => 'Timer is not paused, cannot continue.',
+                ], 422);
+            }
+
+            $timer->update([
+                'status' => 'running',
+                'started_at' => now(),
+                'duration_seconds' => (int)$timer->remaining_seconds_at_pause,
+                'paused_at' => null,
+                'remaining_seconds_at_pause' => null,
+                'completed_at' => null,
+            ]);
 
         } else {
-            /* pause action */
-            
+            if ($timer->status !== 'running' || !$timer->started_at) {
+                return response()->json([
+                    'message' => 'Timer is not running, cannot pause.',
+                ], 422);
+            }
+
+            $pausedAt = Carbon::now();
+            $elapsed = $timer->started_at->diffInSeconds($pausedAt);
+
+            $remaining = max(0, (int)$timer->duration_seconds - (int)$elapsed);
+
+            $timer->update([
+                'status' => 'paused',
+                'paused_at' => $pausedAt,
+                'remaining_seconds_at_pause' => $remaining,
+            ]);
         }
 
         return response()->json([
