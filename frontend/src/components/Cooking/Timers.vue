@@ -34,6 +34,7 @@ function displaySeconds(t: Timers): number {
                 :key="i"
                 class="timer-card"
             >
+                <pre class="bg-red-100">{{ t }}</pre>
                 <div class="timer-progress-ring">
                     <svg width="36" height="36" viewBox="0 0 36 36">
                         <circle
