@@ -269,6 +269,7 @@ class CookingSessionTimerController extends Controller
 
         $timer->update([
             'status' => 'idle',
+            'duration_seconds' => $timer->original_duration_seconds,
             'started_at' => null,
             'paused_at' => null,
             'completed_at' => null,
