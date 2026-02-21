@@ -124,7 +124,25 @@ class CookingSessionTimerController extends Controller
 
     public function completeTimer(Request $request)
     {
+        $validated = $request->validate([
+            'timer_id' => 'required|integer|exists:cooking_session_timers,id',
+        ]);
 
+        $timer = $this->cookingSession
+            ->cookingSessionTimers()
+            ->whereKey($validated['timer_id'])
+            ->firstOrFail();
+
+        $timer->update([
+            'status' => 'completed',
+            'completed_at' => Carbon::now(),
+            'paused_at' => null,
+            'remaining_seconds_at_pause' => null,
+        ]);
+
+        return response()->json([
+            'data' => $this->cookingSession->refresh()->load('cookingSessionTimers'),
+        ]);
     }
 
     public function updateTimer(Request $request)
