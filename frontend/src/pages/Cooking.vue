@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref, computed, watchEffect, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import CookingModal from "../components/CookingModal.vue";
+import FinishedTimer from "../components/Cooking/FinishedTimer.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
 import InstructionWizard from "./Cooking/InstructionWizard.vue";
 import TimersList from "../components/Cooking/Timers.vue";
@@ -45,6 +46,8 @@ const draggableInstructions = ref<RecipeInstruction[]>([]);
 const normalCookingMode = ref(false);
 const cookingModalOpen = ref(false);
 const timersExpanded = ref(false);
+const finishedTimerOpen = ref(false);
+const finishedTimerData = ref<{ note: string | null; duration_seconds: number } | null>(null);
 const roundButtonRef = ref<HTMLElement | null>(null);
 const timersWrapRef = ref<HTMLElement | null>(null);
 
@@ -519,8 +522,15 @@ function onTimerComplete(id: number): void {
         .post("/api/cooking-session/timers/complete", { timer_id: id })
         .then((response) => {
             timers.value = timersFromSession(response.data?.data ?? null);
+            const timer = timers.value.find((t) => t.id === id);
+            if (timer) {
+                finishedTimerData.value = {
+                    note: timer.note ?? null,
+                    duration_seconds: timer.duration_seconds ?? timer.original_duration_seconds ?? 0,
+                };
+                finishedTimerOpen.value = true;
+            }
             if ("Notification" in window && Notification.permission === "granted") {
-                const timer = timers.value.find((t) => t.id === id);
                 const note = timer?.note ?? "Timer";
                 new Notification("Timer complete", {
                     body: `${note} finished`,
@@ -562,6 +572,12 @@ onUnmounted(() => {
         <CookingModal
             :is-open="cookingModalOpen"
             @close="cookingModalOpen = false"
+        />
+        <FinishedTimer
+            :model-value="finishedTimerOpen"
+            :note="finishedTimerData?.note ?? null"
+            :duration_seconds="finishedTimerData?.duration_seconds ?? 0"
+            @update:model-value="(v) => { finishedTimerOpen = v; if (!v) finishedTimerData = null; }"
         />
         <div class="cooking-page">
             <div ref="roundButtonContainerRef" class="cooking-card">
@@ -630,14 +646,14 @@ onUnmounted(() => {
 
                     <Transition name="cooking-timers-backdrop">
                         <div
-                            v-if="timersExpanded"
+                            v-show="timersExpanded"
                             class="cooking-timers-backdrop"
                             aria-hidden="true"
                         />
                     </Transition>
                     <Transition name="cooking-timers-panel">
                         <div
-                            v-if="timersExpanded"
+                            v-show="timersExpanded"
                             ref="timersWrapRef"
                             class="cooking-timers-wrap"
                             :style="timersWrapStyle"
