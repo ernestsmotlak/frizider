@@ -33,6 +33,8 @@ class CookingSessionTimerController extends Controller
 
     public function createTimer(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'note' => 'required|string',
             'duration_seconds' => 'required|integer|min:1',
@@ -50,6 +52,8 @@ class CookingSessionTimerController extends Controller
 
     public function startTimer(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'timer_id' => 'required|integer|exists:cooking_session_timers,id',
         ]);
@@ -80,6 +84,8 @@ class CookingSessionTimerController extends Controller
 
     public function pauseOrContinueTimer(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'timer_id' => 'required|integer|exists:cooking_session_timers,id',
             'action' => 'required|string|in:pause,continue',
@@ -132,6 +138,8 @@ class CookingSessionTimerController extends Controller
 
     public function completeTimer(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'timer_id' => 'required|integer|exists:cooking_session_timers,id',
         ]);
@@ -155,6 +163,8 @@ class CookingSessionTimerController extends Controller
 
     public function updateTimer(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'timer_id' => 'required|integer|exists:cooking_session_timers,id',
             'note' => 'sometimes|string',
@@ -213,6 +223,8 @@ class CookingSessionTimerController extends Controller
 
     public function deleteTimer(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'timer_id' => 'required|integer|exists:cooking_session_timers,id',
         ]);
@@ -231,6 +243,8 @@ class CookingSessionTimerController extends Controller
 
     public function reorderTimers(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'orders' => 'required|array|min:1',
             'orders.*.timer_id' => 'required|integer|exists:cooking_session_timers,id',
@@ -266,6 +280,8 @@ class CookingSessionTimerController extends Controller
 
     public function resetTimer(Request $request)
     {
+        $this->initializeCookingSession($request);
+
         $validated = $request->validate([
             'timer_id' => 'required|integer|exists:cooking_session_timers,id',
         ]);
