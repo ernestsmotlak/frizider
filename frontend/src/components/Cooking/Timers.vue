@@ -31,7 +31,8 @@ const emit = defineEmits<{
 
 const showAddForm = ref(false);
 const newNote = ref("");
-const newMinutes = ref(5);
+const newMinutes = ref(0);
+const newSeconds = ref(30);
 const tick = ref(0);
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -127,12 +128,17 @@ const remainingSeconds = computed(() => {
 function addTimer(): void {
     const note = newNote.value.trim();
     if (!note) return;
+    const mins = Math.max(0, Number(newMinutes.value) || 0);
+    const secs = Math.max(0, Math.min(59, Number(newSeconds.value) || 0));
+    const totalSeconds = mins * 60 + secs;
+    if (totalSeconds < 1) return;
     emit("add", {
         note,
-        duration_seconds: newMinutes.value * 60,
+        duration_seconds: totalSeconds,
     });
     newNote.value = "";
-    newMinutes.value = 5;
+    newMinutes.value = 0;
+    newSeconds.value = 30;
     showAddForm.value = false;
 }
 
@@ -336,15 +342,27 @@ function handleDelete(t: Timers): void {
                 class="timer-add-input"
                 @keydown.enter="addTimer"
             />
-            <div class="timer-add-row">
-                <label class="timer-add-label">Minutes:</label>
-                <input
-                    v-model.number="newMinutes"
-                    type="number"
-                    min="1"
-                    max="999"
-                    class="timer-add-minutes"
-                />
+            <div class="timer-add-row timer-add-duration">
+                <div class="timer-add-field">
+                    <label class="timer-add-label">Min</label>
+                    <input
+                        v-model.number="newMinutes"
+                        type="number"
+                        min="0"
+                        max="999"
+                        class="timer-add-input-num"
+                    />
+                </div>
+                <div class="timer-add-field">
+                    <label class="timer-add-label">Sec</label>
+                    <input
+                        v-model.number="newSeconds"
+                        type="number"
+                        min="0"
+                        max="59"
+                        class="timer-add-input-num"
+                    />
+                </div>
             </div>
             <div class="timer-add-buttons">
                 <button
@@ -631,13 +649,23 @@ function handleDelete(t: Timers): void {
     gap: 0.75rem;
 }
 
+.timer-add-duration {
+    gap: 1rem;
+}
+
+.timer-add-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
 .timer-add-label {
     font-size: 0.75rem;
     color: var(--text-muted, #64748b);
 }
 
-.timer-add-minutes {
-    width: 5rem;
+.timer-add-input-num {
+    width: 4rem;
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
     color: var(--instruction-text-color, #1e293b);
@@ -647,7 +675,7 @@ function handleDelete(t: Timers): void {
     outline: none;
 }
 
-.timer-add-minutes:focus {
+.timer-add-input-num:focus {
     border-color: #0d9488;
 }
 
