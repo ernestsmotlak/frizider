@@ -513,6 +513,24 @@ function onTimerAdd(payload: { note: string; duration_seconds: number }): void {
         .finally(() => loadingStore.stop());
 }
 
+function onTimerComplete(id: number): void {
+    loadingStore.start();
+    axios
+        .post("/api/cooking-session/timers/complete", { timer_id: id })
+        .then((response) => {
+            timers.value = timersFromSession(response.data?.data ?? null);
+            if ("Notification" in window && Notification.permission === "granted") {
+                const timer = timers.value.find((t) => t.id === id);
+                const note = timer?.note ?? "Timer";
+                new Notification("Timer complete", {
+                    body: `${note} finished`,
+                });
+            }
+        })
+        .catch(() => toasterStore.show("error", "Could not complete timer."))
+        .finally(() => loadingStore.stop());
+}
+
 const goToRecipes = () => {
     router.push("/recipes");
 };
@@ -632,6 +650,7 @@ onUnmounted(() => {
                                 @reset="onTimerReset"
                                 @delete="onTimerDelete"
                                 @add="onTimerAdd"
+                                @complete="onTimerComplete"
                             />
                         </div>
                     </Transition>

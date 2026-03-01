@@ -26,6 +26,7 @@ const emit = defineEmits<{
     reset: [id: number];
     delete: [id: number];
     add: [payload: { note: string; duration_seconds: number }];
+    complete: [id: number];
 }>();
 
 const showAddForm = ref(false);
@@ -50,7 +51,49 @@ watch(
 );
 onUnmounted(() => {
     if (intervalId) clearInterval(intervalId);
+    completionTimeouts.forEach((tid) => clearTimeout(tid));
+    completionTimeouts.clear();
 });
+
+const completionTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
+
+watch(
+    () =>
+        props.timers
+            .filter(
+                (t): t is Timers & { id: number } =>
+                    t.status === "running" &&
+                    t.id != null &&
+                    t.started_at != null,
+            )
+            .map((t) => ({
+                id: t.id,
+                endMs:
+                    new Date(t.started_at).getTime() +
+                    t.duration_seconds * 1000,
+            })),
+    (running) => {
+        completionTimeouts.forEach((tid, id) => {
+            if (!running.some((r) => r.id === id)) {
+                clearTimeout(tid);
+                completionTimeouts.delete(id);
+            }
+        });
+        for (const { id, endMs } of running) {
+            if (completionTimeouts.has(id)) continue;
+            const delay = endMs - Date.now();
+            const tid = setTimeout(
+                () => {
+                    completionTimeouts.delete(id);
+                    emit("complete", id);
+                },
+                Math.max(0, delay),
+            );
+            completionTimeouts.set(id, tid);
+        }
+    },
+    { immediate: true },
+);
 
 function formatTime(seconds: number): string {
     const m = Math.floor(seconds / 60);
