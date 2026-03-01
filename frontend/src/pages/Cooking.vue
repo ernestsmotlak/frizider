@@ -232,6 +232,10 @@ const hasTime = computed(() => {
     );
 });
 
+const runningTimersCount = computed(() =>
+    timers.value.filter((t) => t.status === "running").length,
+);
+
 function formatIngredient(ing: RecipeIngredient): string {
     const parts: string[] = [];
     if (ing.quantity != null) parts.push(String(ing.quantity));
@@ -621,7 +625,9 @@ onUnmounted(() => {
                         :class="{
                             'cooking-round-btn-dragging': roundBtnDragging,
                         }"
-                        aria-label="Timers"
+                        :aria-label="runningTimersCount > 0
+                            ? `Timers (${runningTimersCount} running)`
+                            : 'Timers'"
                         :style="{
                             left: roundButtonLeft + 'px',
                             top: roundButtonTop + 'px',
@@ -642,6 +648,13 @@ onUnmounted(() => {
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="12 6 12 12 16 14" />
                         </svg>
+                        <span
+                            v-if="runningTimersCount > 0 && !timersExpanded"
+                            class="cooking-round-btn-badge"
+                            aria-hidden="true"
+                        >
+                            {{ runningTimersCount > 99 ? "99+" : runningTimersCount }}
+                        </span>
                     </button>
 
                     <Transition name="cooking-timers-backdrop">
@@ -1070,7 +1083,7 @@ onUnmounted(() => {
     margin: 0;
     border: none;
     border-radius: 50%;
-    background: #8b4513;
+    background: var(--instruction-next-bg, #0d9488);
     cursor: grab;
     -webkit-tap-highlight-color: transparent;
     z-index: 11;
@@ -1087,14 +1100,33 @@ onUnmounted(() => {
 }
 
 .cooking-round-btn:hover {
-    background: #a0522d;
+    background: var(--instruction-next-bg-hover, #0f766e);
 }
 
 .cooking-round-btn:focus-visible {
     outline: none;
     box-shadow:
         0 0 0 2px var(--card-bg, #fff),
-        0 0 0 4px #8b4513;
+        0 0 0 4px var(--instruction-next-bg, #0d9488);
+}
+
+.cooking-round-btn-badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    background: var(--timer-badge-bg, #dc2626);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .cooking-timers-backdrop {
