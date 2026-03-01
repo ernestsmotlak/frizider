@@ -121,6 +121,14 @@ const runningCount = computed(() =>
     props.timers.filter((t) => t.status === "running").length,
 );
 
+const sortedTimers = computed(() =>
+    [...props.timers].sort((a, b) => {
+        const aCompleted = a.status === "completed" ? 1 : 0;
+        const bCompleted = b.status === "completed" ? 1 : 0;
+        return aCompleted - bCompleted;
+    }),
+);
+
 const remainingSeconds = computed(() => {
     void tick.value;
     return (t: Timers) => getRemaining(t);
@@ -203,7 +211,7 @@ function handleDelete(t: Timers): void {
     <div class="timers-panel">
         <ul class="timers-list">
             <li
-                v-for="(t, i) in props.timers"
+                v-for="(t, i) in sortedTimers"
                 :key="t.id ?? i"
                 class="timer-card"
             >
