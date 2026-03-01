@@ -37,6 +37,14 @@ const noteError = ref("");
 const tick = ref(0);
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
+const NOTE_MAX_CHARS = 8;
+
+function truncateNote(note: string | null | undefined): string {
+    const s = String(note ?? "").trim() || "Timer";
+    if (s.length <= NOTE_MAX_CHARS) return s;
+    return s.slice(0, NOTE_MAX_CHARS) + "...";
+}
+
 watch(
     () => props.timers.some((t) => t.status === "running"),
     (hasRunning) => {
@@ -259,7 +267,7 @@ function handleDelete(t: Timers): void {
                 </div>
                 <div class="timer-info">
                     <p class="timer-original">{{ formatTime(t.original_duration_seconds ?? t.duration_seconds) }}</p>
-                    <p class="timer-note">{{ t.note ?? "Timer" }}</p>
+                    <p class="timer-note">{{ truncateNote(t.note) }}</p>
                     <div class="timer-meta">
                         <span
                             class="timer-status-dot"
