@@ -394,14 +394,14 @@ function handleDelete(t: Timers): void {
                 <button
                     type="button"
                     class="timer-add-submit"
-                    @click="addTimer"
+                    @click.stop="addTimer"
                 >
                     Add Timer
                 </button>
                 <button
                     type="button"
                     class="timer-add-cancel"
-                    @click="showAddForm = false"
+                    @click.stop="showAddForm = false"
                 >
                     Cancel
                 </button>
