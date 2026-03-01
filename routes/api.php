@@ -53,6 +53,7 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::post('create-cooking-session', [CookingSessionController::class, 'createCookingSession']);
     Route::get('get-cooking-session', [CookingSessionController::class, 'getCookingSession']);
+    Route::post('cooking-session/timer-fab-position', [CookingSessionController::class, 'updateTimerFabPosition']);
 
     Route::post('reset-all-recipe-steps', [CookingSessionController::class, 'resetRecipeData']);
 });

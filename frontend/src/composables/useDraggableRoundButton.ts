@@ -7,6 +7,7 @@ export interface UseDraggableRoundButtonOptions {
     initialLeft?: number;
     initialTop?: number;
     onClick?: (position: { left: number; top: number }) => void;
+    onDragEnd?: (position: { left: number; top: number }) => void;
 }
 
 export interface UseDraggableRoundButtonReturn {
@@ -24,6 +25,7 @@ export function useDraggableRoundButton(
     const initialTop = options.initialTop ?? 52.5;
 
     const onClick = options.onClick;
+    const onDragEnd = options.onDragEnd;
     const containerRef = ref<HTMLElement | null>(null);
     const roundButtonLeft = ref(initialLeft);
     const roundButtonTop = ref(initialTop);
@@ -71,11 +73,15 @@ export function useDraggableRoundButton(
     }
 
     function onDocumentPointerUp(): void {
+        const wasDragging = roundBtnDragging.value;
         roundBtnDragging.value = false;
         document.removeEventListener("mousemove", onDocumentPointerMove);
         document.removeEventListener("mouseup", onDocumentPointerUp);
         document.removeEventListener("touchmove", onDocumentTouchMove);
         document.removeEventListener("touchend", onDocumentPointerUp);
+        if (wasDragging) {
+            onDragEnd?.({ left: roundButtonLeft.value, top: roundButtonTop.value });
+        }
     }
 
     function startDrag(downClientX: number, downClientY: number): void {

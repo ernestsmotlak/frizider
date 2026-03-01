@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed, watchEffect } from "vue";
+import { onMounted, onUnmounted, ref, computed, watchEffect, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import CookingModal from "../components/CookingModal.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
@@ -47,6 +47,46 @@ const timersExpanded = ref(false);
 const roundButtonRef = ref<HTMLElement | null>(null);
 const timersWrapRef = ref<HTMLElement | null>(null);
 
+function getViewportForPosition() {
+    const vv = window.visualViewport;
+    return {
+        width: vv?.width ?? window.innerWidth,
+        height: vv?.height ?? window.innerHeight,
+        offsetLeft: vv?.offsetLeft ?? 0,
+        offsetTop: vv?.offsetTop ?? 0,
+    };
+}
+
+function saveTimerFabPosition(leftPx: number, topPx: number): void {
+    if (!cookingSession.value?.id) return;
+    const rect = roundButtonContainerRef.value?.getBoundingClientRect();
+    if (!rect) return;
+    const vp = getViewportForPosition();
+    const visualLeft = rect.left + leftPx - vp.offsetLeft;
+    const visualTop = rect.top + topPx - vp.offsetTop;
+    const timer_fab_x_percent = Math.min(
+        100,
+        Math.max(0, (visualLeft / vp.width) * 100),
+    );
+    const timer_fab_y_percent = Math.min(
+        100,
+        Math.max(0, (visualTop / vp.height) * 100),
+    );
+    axios
+        .post("/api/cooking-session/timer-fab-position", {
+            location: { timer_fab_x_percent, timer_fab_y_percent },
+        })
+        .then((response) => {
+            const updated = response.data.data as { timer_fab_x_percent?: number; timer_fab_y_percent?: number } | null;
+            if (cookingSession.value && updated && typeof updated.timer_fab_x_percent === "number" && typeof updated.timer_fab_y_percent === "number") {
+                cookingSession.value = { ...cookingSession.value, timer_fab_x_percent: updated.timer_fab_x_percent, timer_fab_y_percent: updated.timer_fab_y_percent };
+            }
+        })
+        .catch(() => {
+            toasterStore.show("error", "Could not save timer button position.");
+        });
+}
+
 const {
     containerRef: roundButtonContainerRef,
     roundButtonLeft,
@@ -59,6 +99,7 @@ const {
     onClick: () => {
         timersExpanded.value = !timersExpanded.value;
     },
+    onDragEnd: (position) => saveTimerFabPosition(position.left, position.top),
 });
 
 const timersWrapStyle = computed(() => {
@@ -347,6 +388,29 @@ async function onWizardReset(): Promise<void> {
         });
 }
 
+const ROUND_BTN_SIZE_PX = 40;
+
+function applySavedTimerFabPosition(session: CookingSessionData | null): void {
+    const x = session?.timer_fab_x_percent;
+    const y = session?.timer_fab_y_percent;
+    if (x == null || y == null) return;
+    nextTick(() => {
+        requestAnimationFrame(() => {
+            const rect = roundButtonContainerRef.value?.getBoundingClientRect();
+            if (!rect) return;
+            const vp = getViewportForPosition();
+            const visualLeft = (x / 100) * vp.width + vp.offsetLeft;
+            const visualTop = (y / 100) * vp.height + vp.offsetTop;
+            const leftPx = visualLeft - rect.left;
+            const topPx = visualTop - rect.top;
+            const maxLeft = Math.max(0, rect.width - ROUND_BTN_SIZE_PX);
+            const maxTop = Math.max(0, rect.height - ROUND_BTN_SIZE_PX);
+            roundButtonLeft.value = Math.max(0, Math.min(maxLeft, leftPx));
+            roundButtonTop.value = Math.max(0, Math.min(maxTop, topPx));
+        });
+    });
+}
+
 const fetchCookingSession = () => {
     isLoading.value = true;
     loadingStore.start();
@@ -358,6 +422,7 @@ const fetchCookingSession = () => {
             recipe.value = session?.recipe ?? null;
             timers.value = session?.cooking_session_timers ?? [];
             currentStepIndex.value = 0;
+            applySavedTimerFabPosition(session ?? null);
         })
         .catch(() => {
             cookingSession.value = null;

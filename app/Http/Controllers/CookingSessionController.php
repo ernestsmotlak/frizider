@@ -80,4 +80,23 @@ class CookingSessionController extends Controller
             'data' => $cookingSession,
         ]);
     }
+
+    public function updateTimerFabPosition(Request $request)
+    {
+        $validated = $request->validate([
+            'location.timer_fab_x_percent' => 'required|numeric|min:0|max:100',
+            'location.timer_fab_y_percent' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $cookingSession = CookingSession::where('user_id', auth()->id())->firstOrFail();
+
+        $cookingSession->update([
+            'timer_fab_x_percent' => (float) $validated['location']['timer_fab_x_percent'],
+            'timer_fab_y_percent' => (float) $validated['location']['timer_fab_y_percent'],
+        ]);
+
+        return response()->json([
+            'data' => $cookingSession->fresh(),
+        ]);
+    }
 }
