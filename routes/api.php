@@ -12,6 +12,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CookingSessionController;
+use App\Http\Controllers\CookingSessionTimerController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -54,6 +55,13 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::post('create-cooking-session', [CookingSessionController::class, 'createCookingSession']);
     Route::get('get-cooking-session', [CookingSessionController::class, 'getCookingSession']);
     Route::post('cooking-session/timer-fab-position', [CookingSessionController::class, 'updateTimerFabPosition']);
+
+    Route::post('cooking-session/timers', [CookingSessionTimerController::class, 'createTimer']);
+    Route::post('cooking-session/timers/start', [CookingSessionTimerController::class, 'startTimer']);
+    Route::post('cooking-session/timers/pause-or-continue', [CookingSessionTimerController::class, 'pauseOrContinueTimer']);
+    Route::post('cooking-session/timers/complete', [CookingSessionTimerController::class, 'completeTimer']);
+    Route::post('cooking-session/timers/reset', [CookingSessionTimerController::class, 'resetTimer']);
+    Route::delete('cooking-session/timers', [CookingSessionTimerController::class, 'deleteTimer']);
 
     Route::post('reset-all-recipe-steps', [CookingSessionController::class, 'resetRecipeData']);
 });

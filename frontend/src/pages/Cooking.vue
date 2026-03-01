@@ -26,7 +26,8 @@ interface CookingSessionData {
     user_id: number;
     recipe_id: number;
     recipe: Recipe;
-    cooking_session_timers: Timers[];
+    cooking_session_timers?: Timers[];
+    cookingSessionTimers?: Timers[];
     timer_fab_x_percent?: number | null;
     timer_fab_y_percent?: number | null;
 }
@@ -411,6 +412,11 @@ function applySavedTimerFabPosition(session: CookingSessionData | null): void {
     });
 }
 
+function timersFromSession(session: { cooking_session_timers?: Timers[]; cookingSessionTimers?: Timers[] } | null): Timers[] {
+    if (!session) return [];
+    return session.cooking_session_timers ?? session.cookingSessionTimers ?? [];
+}
+
 const fetchCookingSession = () => {
     isLoading.value = true;
     loadingStore.start();
@@ -420,7 +426,7 @@ const fetchCookingSession = () => {
             const session = result.data.data as CookingSessionData | null;
             cookingSession.value = session ?? null;
             recipe.value = session?.recipe ?? null;
-            timers.value = session?.cooking_session_timers ?? [];
+            timers.value = timersFromSession(session ?? null);
             currentStepIndex.value = 0;
             applySavedTimerFabPosition(session ?? null);
         })
@@ -434,6 +440,78 @@ const fetchCookingSession = () => {
             loadingStore.stop();
         });
 };
+
+function onTimerStart(id: number): void {
+    loadingStore.start();
+    axios
+        .post("/api/cooking-session/timers/start", { timer_id: id })
+        .then((response) => {
+            timers.value = timersFromSession(response.data?.data ?? null);
+        })
+        .catch(() => toasterStore.show("error", "Could not start timer."))
+        .finally(() => loadingStore.stop());
+}
+
+function onTimerPause(id: number): void {
+    loadingStore.start();
+    axios
+        .post("/api/cooking-session/timers/pause-or-continue", {
+            timer_id: id,
+            action: "pause",
+        })
+        .then((response) => {
+            timers.value = timersFromSession(response.data?.data ?? null);
+        })
+        .catch(() => toasterStore.show("error", "Could not pause timer."))
+        .finally(() => loadingStore.stop());
+}
+
+function onTimerResume(id: number): void {
+    loadingStore.start();
+    axios
+        .post("/api/cooking-session/timers/pause-or-continue", {
+            timer_id: id,
+            action: "continue",
+        })
+        .then((response) => {
+            timers.value = timersFromSession(response.data?.data ?? null);
+        })
+        .catch(() => toasterStore.show("error", "Could not resume timer."))
+        .finally(() => loadingStore.stop());
+}
+
+function onTimerReset(id: number): void {
+    loadingStore.start();
+    axios
+        .post("/api/cooking-session/timers/reset", { timer_id: id })
+        .then((response) => {
+            timers.value = timersFromSession(response.data?.data ?? null);
+        })
+        .catch(() => toasterStore.show("error", "Could not reset timer."))
+        .finally(() => loadingStore.stop());
+}
+
+function onTimerDelete(id: number): void {
+    loadingStore.start();
+    axios
+        .delete("/api/cooking-session/timers", { data: { timer_id: id } })
+        .then((response) => {
+            timers.value = timersFromSession(response.data?.data ?? null);
+        })
+        .catch(() => toasterStore.show("error", "Could not delete timer."))
+        .finally(() => loadingStore.stop());
+}
+
+function onTimerAdd(payload: { note: string; duration_seconds: number }): void {
+    loadingStore.start();
+    axios
+        .post("/api/cooking-session/timers", payload)
+        .then((response) => {
+            timers.value = timersFromSession(response.data?.data ?? null);
+        })
+        .catch(() => toasterStore.show("error", "Could not add timer."))
+        .finally(() => loadingStore.stop());
+}
 
 const goToRecipes = () => {
     router.push("/recipes");
@@ -546,7 +624,15 @@ onUnmounted(() => {
                             class="cooking-timers-wrap"
                             :style="timersWrapStyle"
                         >
-                            <TimersList :timers="timers" />
+                            <TimersList
+                                :timers="timers"
+                                @start="onTimerStart"
+                                @pause="onTimerPause"
+                                @resume="onTimerResume"
+                                @reset="onTimerReset"
+                                @delete="onTimerDelete"
+                                @add="onTimerAdd"
+                            />
                         </div>
                     </Transition>
 

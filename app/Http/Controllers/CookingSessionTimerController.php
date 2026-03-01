@@ -42,7 +42,13 @@ class CookingSessionTimerController extends Controller
 
         $timer = $this->cookingSession
             ->cookingSessionTimers()
-            ->create($validated);
+            ->create(array_merge($validated, [
+                'status' => 'running',
+                'started_at' => Carbon::now(),
+                'paused_at' => null,
+                'remaining_seconds_at_pause' => null,
+                'completed_at' => null,
+            ]));
 
         return response()->json([
             'message' => 'Cooking session timer created!',
@@ -293,7 +299,7 @@ class CookingSessionTimerController extends Controller
 
         $timer->update([
             'status' => 'idle',
-            'duration_seconds' => $timer->original_duration_seconds,
+            'duration_seconds' => $timer->original_duration_seconds ?? $timer->duration_seconds,
             'started_at' => null,
             'paused_at' => null,
             'completed_at' => null,
