@@ -324,7 +324,7 @@ function handleDelete(t: Timers): void {
             v-else
             type="button"
             class="timer-add-dashed"
-            @click="showAddForm = true"
+            @click.stop="showAddForm = true"
         >
             <svg class="timer-add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19" />
