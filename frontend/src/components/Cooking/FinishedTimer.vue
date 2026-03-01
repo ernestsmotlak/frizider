@@ -41,9 +41,9 @@ function onBackdropClick(event: MouseEvent): void {
                     class="finished-timer-modal"
                     @click.stop
                 >
-                    <h2 id="finished-timer-title" class="finished-timer-title">
+                    <span id="finished-timer-title" class="finished-timer-badge">
                         Timer complete
-                    </h2>
+                    </span>
                     <p class="finished-timer-note">
                         {{ note ?? "Timer" }}
                     </p>
@@ -80,40 +80,50 @@ function onBackdropClick(event: MouseEvent): void {
 
 .finished-timer-modal {
     background: var(--card-bg, #fff);
+    border: 1px solid var(--instruction-border, #e2e8f0);
     border-radius: 1rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     padding: 1.5rem;
     min-width: 16rem;
     max-width: 20rem;
     text-align: center;
 }
 
-.finished-timer-title {
-    font-size: 1.125rem;
+.finished-timer-badge {
+    display: inline-block;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: var(--instruction-text-color, #1e293b);
-    margin: 0 0 0.75rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted, #64748b);
+    background: rgba(107, 114, 128, 0.15);
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    margin: 0 0 1rem 0;
 }
 
 .finished-timer-note {
-    font-size: 1.25rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--instruction-text-color, #1e293b);
     margin: 0 0 0.5rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .finished-timer-duration {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #0d9488;
+    letter-spacing: 0.02em;
     margin: 0 0 1rem 0;
 }
 
 .finished-timer-close {
     width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 0.9375rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #fff;
     background: #8b4513;
