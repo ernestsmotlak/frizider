@@ -33,6 +33,7 @@ const showAddForm = ref(false);
 const newNote = ref("");
 const newMinutes = ref(0);
 const newSeconds = ref(30);
+const noteError = ref("");
 const tick = ref(0);
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -125,9 +126,18 @@ const remainingSeconds = computed(() => {
     return (t: Timers) => getRemaining(t);
 });
 
+function openAddForm(): void {
+    noteError.value = "";
+    showAddForm.value = true;
+}
+
 function addTimer(): void {
     const note = newNote.value.trim();
-    if (!note) return;
+    if (!note) {
+        noteError.value = "Please enter a timer name.";
+        return;
+    }
+    noteError.value = "";
     const mins = Math.max(0, Number(newMinutes.value) || 0);
     const secs = Math.max(0, Math.min(59, Number(newSeconds.value) || 0));
     const totalSeconds = mins * 60 + secs;
@@ -240,6 +250,7 @@ function handleDelete(t: Timers): void {
                     </span>
                 </div>
                 <div class="timer-info">
+                    <p class="timer-original">{{ formatTime(t.original_duration_seconds ?? t.duration_seconds) }}</p>
                     <p class="timer-note">{{ t.note ?? "Timer" }}</p>
                     <div class="timer-meta">
                         <span
@@ -340,8 +351,15 @@ function handleDelete(t: Timers): void {
                 type="text"
                 placeholder="Timer name..."
                 class="timer-add-input"
+                :class="{ 'timer-add-input-error': noteError }"
+                :aria-invalid="!!noteError"
+                aria-describedby="note-error"
                 @keydown.enter="addTimer"
+                @input="noteError = ''"
             />
+            <p v-if="noteError" id="note-error" class="timer-add-error">
+                {{ noteError }}
+            </p>
             <div class="timer-add-row timer-add-duration">
                 <div class="timer-add-field">
                     <label class="timer-add-label">Min</label>
@@ -385,7 +403,7 @@ function handleDelete(t: Timers): void {
             v-else
             type="button"
             class="timer-add-dashed"
-            @click.stop="showAddForm = true"
+            @click.stop="openAddForm"
         >
             <svg class="timer-add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19" />
@@ -491,6 +509,14 @@ function handleDelete(t: Timers): void {
     min-width: 0;
 }
 
+.timer-original {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted, #64748b);
+    margin: 0 0 0.125rem 0;
+}
+
 .timer-note {
     font-size: 0.875rem;
     font-weight: 600;
@@ -535,6 +561,7 @@ function handleDelete(t: Timers): void {
     color: var(--text-muted, #64748b);
     text-transform: capitalize;
 }
+
 
 .timer-actions {
     display: flex;
@@ -643,6 +670,21 @@ function handleDelete(t: Timers): void {
     box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
 }
 
+.timer-add-input-error {
+    border-color: #dc2626;
+}
+
+.timer-add-input-error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
+.timer-add-error {
+    font-size: 0.8125rem;
+    color: #dc2626;
+    margin: 0;
+}
+
 .timer-add-row {
     display: flex;
     align-items: center;
@@ -727,32 +769,38 @@ function handleDelete(t: Timers): void {
 .timer-add-dashed {
     margin-top: 0.75rem;
     width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-muted, #94a3b8);
-    background: transparent;
-    border: 2px dashed var(--instruction-border, #e2e8f0);
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #475569;
+    background: rgba(139, 69, 19, 0.06);
+    border: 2px dashed #94a3b8;
     border-radius: 1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: border-color 0.2s, color 0.2s, transform 0.1s;
+    transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.1s;
 }
 
 .timer-add-dashed:hover {
-    border-color: rgba(139, 69, 19, 0.4);
+    border-color: #8b4513;
     color: #8b4513;
+    background: rgba(139, 69, 19, 0.1);
 }
 
 .timer-add-dashed:active {
     transform: scale(0.98);
 }
 
+.timer-add-dashed:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #8b4513;
+}
+
 .timer-add-icon {
-    width: 1rem;
-    height: 1rem;
+    width: 1.125rem;
+    height: 1.125rem;
 }
 </style>
