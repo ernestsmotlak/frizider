@@ -54,28 +54,31 @@ const handleClose = () => {
             <div
                 v-if="isOpen"
                 @click="handleClose"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             >
                 <Transition name="modal-content" appear>
                     <div
                         v-if="isOpen"
-                        @click.stop
-                        class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col"
-                        style="box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(34, 197, 94, 0.1);"
+                        class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
                     >
-                        <div class="px-6 py-5 flex items-center justify-between border-b border-gray-300">
-                            <h2 class="text-lg font-semibold text-gray-900">Choose an action</h2>
-                            <button
-                                @click="handleClose"
-                                class="p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all duration-200"
+                        <div class="mx-auto max-w-md" @click.stop>
+                            <div
+                                class="bg-white rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col"
+                                style="box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(34, 197, 94, 0.1);"
                             >
-                                <svg class="w-7 h-7 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="p-4 sm:p-6">
-                            <div class="grid grid-cols-2 gap-3">
+                                <div class="px-6 py-5 flex items-center justify-between border-b border-gray-300">
+                                    <h2 class="text-lg font-semibold text-gray-900">Choose an action</h2>
+                                    <button
+                                        @click="handleClose"
+                                        class="p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all duration-200"
+                                    >
+                                        <svg class="w-7 h-7 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="p-4 sm:p-6">
+                                    <div class="grid grid-cols-2 gap-3">
                                 <button
                                     @click="handleComplete"
                                     type="button"
@@ -110,6 +113,8 @@ const handleClose = () => {
                                     <div class="text-sm font-semibold text-gray-900">Shopping</div>
                                     <div class="text-xs text-gray-500">Check items and buy</div>
                                 </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -148,12 +153,12 @@ const handleClose = () => {
 
 .modal-content-enter-from {
     opacity: 0;
-    transform: scale(0.95) translateY(10px);
+    transform: translateY(14px);
 }
 
 .modal-content-leave-to {
     opacity: 0;
-    transform: scale(0.95) translateY(10px);
+    transform: translateY(14px);
 }
 
 </style>

@@ -70,9 +70,9 @@ function onBackdropClick(event: MouseEvent): void {
     inset: 0;
     z-index: 100;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    padding: 1rem;
+    padding: 1rem 1rem calc(4rem + 0.75rem);
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -84,8 +84,8 @@ function onBackdropClick(event: MouseEvent): void {
     border-radius: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     padding: 1.5rem;
-    min-width: 16rem;
-    max-width: 20rem;
+    width: 100%;
+    max-width: 28rem;
     text-align: center;
 }
 

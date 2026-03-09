@@ -24,30 +24,33 @@ const handleCancel = () => {
             <div
                 v-if="confirmStore.isOpen"
                 @click="handleBackdropClick"
-                class="fixed inset-0 z-99999 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                class="fixed inset-0 z-99999 bg-black/50 backdrop-blur-sm"
             >
                 <Transition name="modal-content" appear>
                     <div
                         v-if="confirmStore.isOpen"
-                        @click.stop
-                        class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col"
+                        class="fixed left-0 right-0 bottom-16 z-99999 px-4 pb-3"
                     >
-                        <div class="px-6 py-6">
-                            <p class="text-gray-900 text-base leading-relaxed">{{ confirmStore.message }}</p>
-                        </div>
-                        <div class="border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row justify-between gap-3">
-                            <button
-                                @click="handleCancel"
-                                class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                @click="handleConfirm"
-                                class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                            >
-                                Confirm
-                            </button>
+                        <div class="mx-auto max-w-md" @click.stop>
+                            <div class="bg-white rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col">
+                                <div class="px-6 py-6">
+                                    <p class="text-gray-900 text-base leading-relaxed">{{ confirmStore.message }}</p>
+                                </div>
+                                <div class="border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row justify-between gap-3">
+                                    <button
+                                        @click="handleCancel"
+                                        class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        @click="handleConfirm"
+                                        class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                    >
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </Transition>
@@ -80,12 +83,11 @@ const handleCancel = () => {
 
 .modal-content-enter-from {
     opacity: 0;
-    transform: translateY(100vh);
+    transform: translateY(14px);
 }
 
 .modal-content-leave-to {
     opacity: 0;
-    transform: translateY(100vh);
+    transform: translateY(14px);
 }
 </style>
-

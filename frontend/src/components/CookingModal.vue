@@ -31,43 +31,44 @@ const handleAddTimer = () => {
             <div
                 v-if="isOpen"
                 @click="handleClose"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             >
                 <Transition name="modal-content" appear>
                     <div
                         v-if="isOpen"
-                        @click.stop
-                        class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 max-w-md w-full overflow-hidden flex flex-col"
+                        class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
                     >
-                        <div
-                            class="px-6 py-5 flex items-center justify-between border-b border-gray-300"
-                        >
-                            <h2 class="text-lg font-semibold text-gray-900">
-                                Cooking
-                            </h2>
-                            <button
-                                @click="handleClose"
-                                type="button"
-                                class="p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all duration-200"
-                                aria-label="Close"
-                            >
-                                <svg
-                                    class="w-7 h-7 text-gray-400 hover:text-gray-600"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    viewBox="0 0 24 24"
+                        <div class="mx-auto max-w-md" @click.stop>
+                            <div class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 w-full overflow-hidden flex flex-col">
+                                <div
+                                    class="px-6 py-5 flex items-center justify-between border-b border-gray-300"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="p-3">
-                            <div class="grid grid-cols-2 gap-3">
+                                    <h2 class="text-lg font-semibold text-gray-900">
+                                        Cooking
+                                    </h2>
+                                    <button
+                                        @click="handleClose"
+                                        type="button"
+                                        class="p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all duration-200"
+                                        aria-label="Close"
+                                    >
+                                        <svg
+                                            class="w-7 h-7 text-gray-400 hover:text-gray-600"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M6 18L18 6M6 6l12 12"
+                                            ></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="p-3">
+                                    <div class="grid grid-cols-2 gap-3">
                                 <button
                                     @click="handleReturn"
                                     type="button"
@@ -133,6 +134,8 @@ const handleAddTimer = () => {
                                         Set a timer
                                     </div>
                                 </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -171,11 +174,11 @@ const handleAddTimer = () => {
 
 .modal-content-enter-from {
     opacity: 0;
-    transform: scale(0.95) translateY(10px);
+    transform: translateY(14px);
 }
 
 .modal-content-leave-to {
     opacity: 0;
-    transform: scale(0.95) translateY(10px);
+    transform: translateY(14px);
 }
 </style>

@@ -12,9 +12,12 @@ export default defineConfig({
         }
     }), tailwindcss()],
     server: {
+        host: '127.0.0.1',
+        port: 8003,
+        strictPort: true,
         proxy: {
             '/api': {
-                target: 'http://127.0.0.1:8000',
+                target: 'http://127.0.0.1:8004',
                 changeOrigin: true,
                 secure: false,
             }

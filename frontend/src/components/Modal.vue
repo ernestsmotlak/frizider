@@ -20,30 +20,33 @@ const handleBackdropClick = (event: MouseEvent) => {
             <div
                 v-if="isOpen"
                 @click="handleBackdropClick"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             >
                 <Transition name="modal-content" appear>
                     <div
                         v-if="isOpen"
-                        @click.stop
-                        class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col"
+                        class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
                     >
-                        <div v-if="$slots.header" class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                            <slot name="header" />
-                            <button
-                                @click="emit('close')"
-                                class="ml-4 p-2 rounded-lg active:scale-95 transition-transform duration-200"
-                            >
-                                <svg class="w-6 h-6 text-gray-500 hover:text-red-700 transition-all duration-200 hover:scale-150" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="flex-1 overflow-y-auto px-6 py-6">
-                            <slot name="body" />
-                        </div>
-                        <div v-if="$slots.footer" class="border-t border-gray-200 px-6 py-4">
-                            <slot name="footer" />
+                        <div class="mx-auto max-w-lg" @click.stop>
+                            <div class="bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                                <div v-if="$slots.header" class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                                    <slot name="header" />
+                                    <button
+                                        @click="emit('close')"
+                                        class="ml-4 p-2 rounded-lg active:scale-95 transition-transform duration-200"
+                                    >
+                                        <svg class="w-6 h-6 text-gray-500 hover:text-red-700 transition-all duration-200 hover:scale-150" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="flex-1 overflow-y-auto px-6 py-6">
+                                    <slot name="body" />
+                                </div>
+                                <div v-if="$slots.footer" class="border-t border-gray-200 px-6 py-4">
+                                    <slot name="footer" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </Transition>
@@ -76,12 +79,11 @@ const handleBackdropClick = (event: MouseEvent) => {
 
 .modal-content-enter-from {
     opacity: 0;
-    transform: translateY(100vh);
+    transform: translateY(14px);
 }
 
 .modal-content-leave-to {
     opacity: 0;
-    transform: translateY(100vh);
+    transform: translateY(14px);
 }
 </style>
-
