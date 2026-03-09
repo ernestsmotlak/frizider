@@ -59,6 +59,11 @@ const openActionModal = () => {
     isActionModalOpen.value = true;
 };
 
+const openActionModalFromButton = (event: Event) => {
+    event.stopPropagation();
+    openActionModal();
+};
+
 const closeActionModal = () => {
     isActionModalOpen.value = false;
 };
@@ -152,13 +157,26 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
             </div>
         </div>
         <div class="p-4 flex-1 min-w-0 flex flex-col justify-center">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 break-words">
-                {{ recipe.name }}
-            </h3>
+            <div class="flex items-start justify-between gap-2">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 break-words">
+                    {{ recipe.name }}
+                </h3>
+                <button
+                    type="button"
+                    @click="openActionModalFromButton"
+                    class="w-11 h-11 -mt-1 -mr-1 flex-shrink-0 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors flex items-center justify-center"
+                    aria-label="Open recipe actions"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01"></path>
+                    </svg>
+                </button>
+            </div>
             <p class="text-sm text-gray-600 line-clamp-1 leading-relaxed break-words min-h-[1.25rem]">
                 <template v-if="recipe.description">{{ truncateDescription(recipe.description, 100) }}</template>
 <!--                <template v-else>&nbsp;</template>-->
             </p>
+            <p class="mt-2 text-xs text-amber-600 sm:hidden">Hold card for cooking options</p>
         </div>
     </div>
 

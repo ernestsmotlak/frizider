@@ -130,7 +130,7 @@ const handleRegister = () => {
                                        type="text"
                                        v-model="userData.username"
                                        placeholder="Enter your username"
-                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[var(--brand-500)] focus:border-transparent transition-all">
                                 <div v-if="isUsernameValid()"
                                      class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
@@ -154,7 +154,7 @@ const handleRegister = () => {
                                        type="email"
                                        v-model="userData.email"
                                        placeholder="Enter your email"
-                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[var(--brand-500)] focus:border-transparent transition-all">
                                 <div v-if="isEmailValid()"
                                      class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
@@ -176,7 +176,7 @@ const handleRegister = () => {
                                        type="password"
                                        v-model="userData.password"
                                        placeholder="Enter your password"
-                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[var(--brand-500)] focus:border-transparent transition-all">
                                 <div v-if="isPasswordValid()"
                                      class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
@@ -200,7 +200,7 @@ const handleRegister = () => {
                                        type="password"
                                        v-model="userData.repeatPassword"
                                        placeholder="Confirm your password"
-                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#646cff] focus:border-transparent transition-all">
+                                       class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[var(--brand-500)] focus:border-transparent transition-all">
                                 <div v-if="isPasswordValid()"
                                      class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
@@ -216,7 +216,7 @@ const handleRegister = () => {
                         </div>
 
                         <button type="submit"
-                                class="w-full px-6 py-3 bg-[#646cff] text-white rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[#535bf2] hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+                                class="w-full px-6 py-3 bg-[var(--brand-600)] text-white rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[var(--brand-700)] hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
                             Register
                         </button>
                     </form>
@@ -225,7 +225,7 @@ const handleRegister = () => {
                         <p class="text-sm text-gray-600">
                             Already have an account?
                             <button @click="goToLogin()"
-                                    class="cursor-pointer text-[#646cff] font-semibold hover:text-[#535bf2] transition-colors">
+                                    class="cursor-pointer text-[var(--brand-600)] font-semibold hover:text-[var(--brand-700)] transition-colors">
                                 Sign in
                             </button>
                         </p>

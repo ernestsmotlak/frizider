@@ -1,6 +1,6 @@
 import { onUnmounted, ref, type Ref } from "vue";
 
-const ROUND_BTN_SIZE_PX = 40;
+const ROUND_BTN_SIZE_PX = 44;
 const LONG_PRESS_MS = 150;
 
 export interface UseDraggableRoundButtonOptions {

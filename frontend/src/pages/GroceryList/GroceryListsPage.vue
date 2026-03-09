@@ -132,7 +132,7 @@ onUnmounted(() => {
                 <div class="px-4 pt-6 pb-4">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex-1">
-                            <h2 class="text-3xl sm:text-3xl font-bold tracking-tight" :class="selectMode ? 'text-blue-700' : 'text-gray-900'">
+                            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight" :class="selectMode ? 'text-blue-700' : 'text-gray-900'">
                                 {{ selectMode ? 'Select Lists' : 'Grocery Lists' }}
                             </h2>
                             <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
@@ -142,7 +142,7 @@ onUnmounted(() => {
                         <button
                             @click="handleSelectMode"
                             :class="[
-                                'me-1 p-2 border-2 rounded-lg shadow-md hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200',
+                                'me-1 w-11 h-11 border-2 rounded-lg shadow-md hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center',
                                 selectMode
                                     ? 'border-blue-600 bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:border-blue-700'
                                     : 'border-gray-200 bg-white/90 backdrop-blur-sm hover:border-gray-300 hover:bg-white'
@@ -160,7 +160,7 @@ onUnmounted(() => {
                         <button
                             v-if="!selectMode"
                             @click="handleAddGroceryList"
-                            class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                            class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
                         >
                             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                                  viewBox="0 0 24 24">
@@ -173,9 +173,9 @@ onUnmounted(() => {
                         {{ selectMode ? `${selectedGroceryLists.length} of ${allRows} selected` : `${allRows} shopping list${allRows !== 1 ? 's' : ''}` }}
                     </p>
 
-                    <div class="mt-4 flex flex-row">
+                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-stretch">
                         <label for="grocery-lists-search" class="sr-only">Search shopping lists</label>
-                        <div class="relative w-[75%] h-full">
+                        <div class="relative w-full sm:w-[75%] h-full">
                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
                                      viewBox="0 0 24 24">
@@ -211,7 +211,7 @@ onUnmounted(() => {
                                 </svg>
                             </button>
                         </div>
-                        <div class="w-[25%] pl-3">
+                        <div class="w-full sm:w-[25%] sm:pl-3">
                             <GroceryListStatusFilter v-model="statusFilter"/>
                         </div>
                     </div>
@@ -269,7 +269,11 @@ onUnmounted(() => {
 
         </div>
 
-        <div v-if="selectMode && selectedGroceryLists.length > 0" class="fixed bottom-16 left-0 right-0 z-50 px-5 pb-4">
+        <div
+            v-if="selectMode && selectedGroceryLists.length > 0"
+            class="fixed left-0 right-0 z-50 px-5"
+            style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.75rem, env(safe-area-inset-bottom));"
+        >
             <div class="max-w-xs mx-auto">
                 <div class="drop-shadow-[0_0_40px_rgba(34,197,94,0.4)]">
                     <button

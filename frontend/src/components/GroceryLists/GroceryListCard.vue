@@ -71,6 +71,11 @@ const openActionModal = () => {
     isActionModalOpen.value = true;
 }
 
+const openActionModalFromButton = (event: Event) => {
+    event.stopPropagation();
+    openActionModal();
+}
+
 const closeActionModal = () => {
     isActionModalOpen.value = false;
 }
@@ -223,15 +228,28 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
                 ]">
                     {{ groceryList.name }}
                 </h3>
-                <span
-                    v-if="groceryList.completed_at"
-                    class="inline-flex gap-1.5 px-1 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200 flex-shrink-0"
-                >
-                    <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3"
-                         viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </span>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <span
+                        v-if="groceryList.completed_at"
+                        class="inline-flex gap-1.5 px-1 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200"
+                    >
+                        <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" stroke-width="3"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </span>
+                    <button
+                        v-if="!props.selectMode"
+                        type="button"
+                        @click="openActionModalFromButton"
+                        class="w-11 h-11 -my-1 -mr-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center"
+                        aria-label="Open list actions"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <p :class="[
                 'text-sm line-clamp-1 leading-relaxed break-words min-h-[1.25rem]',
@@ -240,6 +258,7 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
                 <template v-if="groceryList.notes">{{ truncateNotes(groceryList.notes, 100) }}</template>
                 <!--                <template v-else>&nbsp;</template>-->
             </p>
+            <p v-if="!props.selectMode" class="mt-2 text-xs text-blue-600 sm:hidden">Hold card for status actions</p>
         </div>
     </div>
 

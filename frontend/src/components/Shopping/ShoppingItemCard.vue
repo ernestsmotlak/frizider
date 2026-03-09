@@ -135,7 +135,7 @@ onUnmounted(() => {
                             <div class="relative notes-tooltip-container" v-if="item.notes">
                                 <button
                                     @click="handleInfoClick"
-                                    class="p-0.5 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors flex-shrink-0"
+                                    class="w-11 h-11 -m-1 text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0 flex items-center justify-center"
                                     title="Show notes"
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -191,7 +191,7 @@ onUnmounted(() => {
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <button
                             @click="handleEdit"
-                            class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            class="w-11 h-11 -m-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center"
                             title="Edit item"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

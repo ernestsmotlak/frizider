@@ -58,14 +58,14 @@ onUnmounted(() => {
                 <div class="px-4 pt-6 pb-4">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex-1">
-                            <h2 class="text-3xl font-bold text-gray-900">Recipes</h2>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Recipes</h2>
                             <p class="text-xs text-gray-500">
                                 Long press recipe to go cooking
                             </p>
                         </div>
                         <button
                             @click="handleAddRecipe"
-                            class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                            class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
                         >
                             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                                  viewBox="0 0 24 24">
@@ -167,4 +167,3 @@ onUnmounted(() => {
         </div>
     </DashboardLayout>
 </template>
-

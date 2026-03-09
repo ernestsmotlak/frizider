@@ -277,7 +277,10 @@ onMounted(() => {
 
 <template>
     <DashboardLayout>
-        <div class="pt-4 px-5 pb-20">
+        <div
+            class="pt-4 px-5 pb-20"
+            style="padding-bottom: calc(5rem + env(safe-area-inset-bottom));"
+        >
             <div class="shopping-card bg-white rounded-2xl border-2 border-gray-200">
                 <p class="shopping-mode-label" aria-label="Shopping">Shopping mode</p>
                 <div class="px-4 pt-6 pb-5">
@@ -290,14 +293,13 @@ onMounted(() => {
                                     </svg>
 
                                 </div>
-                                <h2 class="text-3xl sm:text-3xl font-bold tracking-tight text-gray-900">
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
                                     Shopping
                                 </h2>
                             </div>
                             <button
                                 @click="toggleFridgeModal"
-                                class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
-                                :class="{'go-to-lists-pulse': shoppingItems.length > 0}"
+                                class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
                             >
                                 <img src="/fridge_icon.png" alt="Fridge" class="w-5 h-5" />
                             </button>
@@ -337,7 +339,7 @@ onMounted(() => {
                             <button
                                 type="button"
                                 @click="reRouteToGroceryLists"
-                                class="go-to-lists-pulse inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                 aria-label="Go to shopping lists"
                             >
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -447,7 +449,8 @@ onMounted(() => {
         <Transition name="action-picker-panel">
             <div
                 v-if="isFridgeModalOpen"
-                class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
+                class="fixed left-0 right-0 z-50 px-4"
+                style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
             >
                 <div class="mx-auto max-w-md">
                     <div class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 p-3">
@@ -561,20 +564,5 @@ onMounted(() => {
 .action-picker-panel-leave-to {
     opacity: 0;
     transform: translateY(14px);
-}
-
-@keyframes go-to-lists-pulse {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.4);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 0 0 12px rgba(107, 114, 128, 0);
-        transform: scale(1.03);
-    }
-}
-
-.go-to-lists-pulse {
-    animation: go-to-lists-pulse 1.8s ease-in-out infinite;
 }
 </style>

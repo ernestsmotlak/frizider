@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+:root {
+    --brand-50: #ecfdf3;
+    --brand-100: #d1fae5;
+    --brand-500: #10b981;
+    --brand-600: #059669;
+    --brand-700: #047857;
+}
+
 @keyframes pulsate {
     0%, 100% {
         background-color: rgb(243, 244, 246);

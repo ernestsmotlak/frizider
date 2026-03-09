@@ -3,20 +3,12 @@
         <button
             type="button"
             @click="isOpen = !isOpen"
-            class="w-full h-full px-4 text-base text-gray-900 border border-gray-300 rounded-lg
+            class="w-full h-11 px-4 text-base text-gray-900 border border-gray-300 rounded-lg
            focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none
            bg-white hover:border-gray-400 transition-colors duration-200
            flex items-center justify-between"
         >
-            <svg
-                class="w-5 h-5 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                style="transform: rotate(90deg);"
-            >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
+            <span class="text-sm font-medium text-gray-700">{{ selectedLabel }}</span>
             <svg
                 class="w-5 h-5 text-gray-500 transition-transform duration-200"
                 :class="{ 'rotate-180': isOpen }"
@@ -88,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 
 type FilterValue = "all" | "completed" | "unfinished";
 
@@ -103,6 +95,7 @@ const emit = defineEmits<{
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
 const selectedValue = ref<FilterValue>(props.modelValue ?? "all");
+const selectedLabel = ref("All");
 
 const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
@@ -112,13 +105,24 @@ const handleClickOutside = (event: MouseEvent) => {
 
 const selectOption = (value: FilterValue) => {
     selectedValue.value = value;
+    selectedLabel.value = value === "completed" ? "Completed" : value === "unfinished" ? "Unfinished" : "All";
     emit("update:modelValue", value);
     isOpen.value = false;
 };
 
 onMounted(() => {
     document.addEventListener("click", handleClickOutside);
+    selectedLabel.value = selectedValue.value === "completed" ? "Completed" : selectedValue.value === "unfinished" ? "Unfinished" : "All";
 });
+
+watch(
+    () => props.modelValue,
+    (value) => {
+        if (!value) return;
+        selectedValue.value = value;
+        selectedLabel.value = value === "completed" ? "Completed" : value === "unfinished" ? "Unfinished" : "All";
+    }
+);
 
 onUnmounted(() => {
     document.removeEventListener("click", handleClickOutside);

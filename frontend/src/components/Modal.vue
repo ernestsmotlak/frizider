@@ -25,7 +25,8 @@ const handleBackdropClick = (event: MouseEvent) => {
                 <Transition name="modal-content" appear>
                     <div
                         v-if="isOpen"
-                        class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
+                        class="fixed left-0 right-0 z-50 px-4"
+                        style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
                     >
                         <div class="mx-auto max-w-lg" @click.stop>
                             <div class="bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">

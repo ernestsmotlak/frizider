@@ -125,7 +125,7 @@ const timersWrapStyle = computed(() => {
         timersWrapRef.value?.offsetHeight && timersWrapRef.value.offsetHeight > 0
             ? timersWrapRef.value.offsetHeight
             : 120;
-    const buttonSize = 40;
+    const buttonSize = 44;
     const gap = 10;
     const padding = 8;
 
@@ -396,7 +396,7 @@ async function onWizardReset(): Promise<void> {
         });
 }
 
-const ROUND_BTN_SIZE_PX = 40;
+const ROUND_BTN_SIZE_PX = 44;
 
 function applySavedTimerFabPosition(session: CookingSessionData | null): void {
     const x = session?.timer_fab_x_percent;
@@ -802,7 +802,6 @@ onUnmounted(() => {
                         <button
                             type="button"
                             class="cooking-title-icon"
-                            :class="{ 'go-to-lists-pulse': recipe.id }"
                             aria-label="Fridge"
                             @click="cookingModalOpen = true"
                         >
@@ -1077,8 +1076,8 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
     padding: 0;
     margin: 0;
     border: none;
@@ -1094,8 +1093,8 @@ onUnmounted(() => {
 }
 
 .cooking-round-btn-icon {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.35rem;
+    height: 1.35rem;
     color: #fff;
 }
 

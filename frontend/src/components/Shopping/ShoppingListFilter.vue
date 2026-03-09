@@ -20,11 +20,11 @@ const handleSelect = (listId: number | null) => {
 </script>
 
 <template>
-    <div class="flex flex-wrap gap-2 mb-6">
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
         <button
             @click="handleSelect(null)"
             :class="[
-                'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
+                'px-4 py-2.5 min-h-11 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
                 selectedListId === null
                     ? 'bg-gray-700 text-white'
                     : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -37,7 +37,7 @@ const handleSelect = (listId: number | null) => {
             :key="list.id"
             @click="handleSelect(list.id)"
             :class="[
-                'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2',
+                'px-4 py-2.5 min-h-11 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 flex items-center gap-2',
                 selectedListId === list.id
                     ? 'bg-gray-700 text-white'
                     : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'

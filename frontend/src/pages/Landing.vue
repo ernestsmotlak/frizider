@@ -24,11 +24,11 @@ const goToRegister = () => {
 
                     <div class="space-y-4 pt-4">
                         <button @click="goToLogin"
-                                class="w-full px-6 py-3 bg-[#646cff] text-white rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[#535bf2] hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+                                class="w-full px-6 py-3 bg-[var(--brand-600)] text-white rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[var(--brand-700)] hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
                             Login
                         </button>
                         <button @click="goToRegister"
-                                class="w-full px-6 py-3 bg-white text-[#646cff] border-2 border-[#646cff] rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[#646cff] hover:text-white hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+                                class="w-full px-6 py-3 bg-white text-[var(--brand-600)] border-2 border-[var(--brand-600)] rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 hover:bg-[var(--brand-600)] hover:text-white hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
                             Register
                         </button>
                     </div>
@@ -37,7 +37,6 @@ const goToRegister = () => {
         </div>
     </LoginLayout>
 </template>
-
 
 
 

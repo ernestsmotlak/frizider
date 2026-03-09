@@ -27,16 +27,16 @@ const iconColorClasses = {
 </script>
 
 <template>
-    <div class="fixed top-4 right-4 z-99999 flex flex-col gap-2">
+    <div class="toast-container fixed inset-x-0 bottom-0 z-99999 flex flex-col gap-2 px-4 pb-4 pointer-events-none sm:inset-x-auto sm:bottom-auto sm:top-4 sm:right-4 sm:px-0 sm:pb-0">
         <TransitionGroup
             name="toast"
             tag="div"
-            class="flex flex-col gap-2"
+            class="flex flex-col gap-2 w-full sm:w-auto"
         >
             <div
                 v-for="toast in toastStore.toasts"
                 :key="toast.id"
-                class="flex items-center gap-3 px-4 py-4 rounded-lg shadow-lg bg-white border border-gray-200 text-gray-900 min-w-[300px] max-w-[400px]"
+                class="pointer-events-auto flex items-center gap-3 px-4 py-4 rounded-xl shadow-lg bg-white border border-gray-200 text-gray-900 w-full sm:min-w-[300px] sm:max-w-[400px]"
             >
                 <div
                     :class="[
@@ -72,6 +72,10 @@ const iconColorClasses = {
 </template>
 
 <style scoped>
+.toast-container {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+
 .toast-enter-active {
     transition: all 0.3s ease-out;
 }
@@ -82,15 +86,25 @@ const iconColorClasses = {
 
 .toast-enter-from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateY(18px);
 }
 
 .toast-leave-to {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateY(18px);
 }
 
 .toast-move {
     transition: transform 0.3s ease;
+}
+
+@media (min-width: 640px) {
+    .toast-enter-from {
+        transform: translateX(100%);
+    }
+
+    .toast-leave-to {
+        transform: translateX(100%);
+    }
 }
 </style>

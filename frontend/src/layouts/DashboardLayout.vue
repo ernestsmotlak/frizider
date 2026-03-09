@@ -54,8 +54,9 @@ watch(() => route.path, () => {
 
 <template>
     <div
-        class="relative z-0 min-h-screen bg-green-100 pb-16 transition-transform duration-300 ease-out"
+        class="relative z-0 min-h-screen bg-green-100 transition-transform duration-300 ease-out"
         :class="isActionPickerOpen ? 'scale-[0.985] -translate-y-1' : ''"
+        style="padding-bottom: calc(4rem + env(safe-area-inset-bottom));"
     >
         <div class="max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
             <div class="">
@@ -81,7 +82,8 @@ watch(() => route.path, () => {
     <Transition name="action-picker-panel">
         <div
             v-if="isActionPickerOpen"
-            class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
+            class="fixed left-0 right-0 z-50 px-4"
+            style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
         >
             <div class="mx-auto max-w-md">
                 <div class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 p-3">
@@ -92,7 +94,7 @@ watch(() => route.path, () => {
                             class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                             aria-label="Go shopping"
                         >
-                            <div class="dashboard_layout__pulse flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-green-300 group-hover:shadow-md">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-green-300 group-hover:shadow-md">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
@@ -109,7 +111,7 @@ watch(() => route.path, () => {
                             class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                             aria-label="Start cooking"
                         >
-                            <div class="dashboard_layout__pulse dashboard_layout__pulse_delay flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-green-300 group-hover:shadow-md">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-green-300 group-hover:shadow-md">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10V8a4 4 0 0 1 8 0v2"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8z"></path>
@@ -127,7 +129,10 @@ watch(() => route.path, () => {
         </div>
     </Transition>
 
-    <nav class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 shadow-lg">
+    <nav
+        class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 shadow-lg"
+        style="padding-bottom: env(safe-area-inset-bottom);"
+    >
         <div class="flex justify-around items-center h-16">
             <router-link
                 to="/grocery-lists"
@@ -205,35 +210,5 @@ watch(() => route.path, () => {
 .action-picker-panel-leave-to {
     opacity: 0;
     transform: translateY(14px);
-}
-
-.dashboard_layout__pulse {
-    animation: dashboard_layout_pulse 1.35s ease-in-out infinite;
-}
-
-.dashboard_layout__pulse_delay {
-    animation-delay: 0.18s;
-}
-
-@keyframes dashboard_layout_pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.08);
-    }
-    50% {
-        transform: scale(1.04);
-        box-shadow: 0 10px 26px rgba(16, 185, 129, 0.16);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.08);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .dashboard_layout__pulse,
-    .dashboard_layout__pulse_delay {
-        animation: none;
-    }
 }
 </style>

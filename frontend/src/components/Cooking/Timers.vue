@@ -587,8 +587,8 @@ function handleDelete(t: Timers): void {
 }
 
 .timer-btn {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
     padding: 0;
     border: none;
     border-radius: 0.75rem;
