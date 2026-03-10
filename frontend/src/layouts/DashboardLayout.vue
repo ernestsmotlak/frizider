@@ -54,11 +54,19 @@ watch(() => route.path, () => {
 
 <template>
     <div
-        class="relative z-0 min-h-screen bg-green-100 transition-transform duration-300 ease-out"
+        class="dashboard-shell relative z-0 min-h-screen transition-transform duration-300 ease-out"
         :class="isActionPickerOpen ? 'scale-[0.985] -translate-y-1' : ''"
         style="padding-bottom: calc(4rem + env(safe-area-inset-bottom));"
     >
-        <div class="max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
+        <div class="mesh-background" aria-hidden="true">
+            <div class="mesh-background__blob mesh-background__blob--sage"></div>
+            <div class="mesh-background__blob mesh-background__blob--mint"></div>
+            <div class="mesh-background__blob mesh-background__blob--peach"></div>
+            <div class="mesh-background__blob mesh-background__blob--lemon"></div>
+            <div class="mesh-background__grain"></div>
+        </div>
+
+        <div class="relative z-10 max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
             <div class="">
                 <BackButton/>
             </div>
@@ -66,7 +74,7 @@ watch(() => route.path, () => {
                 <LogoComponent/>
             </div>
         </div>
-        <div class="max-w-md mx-auto min-h-screen">
+        <div class="relative z-10 max-w-md mx-auto min-h-screen">
             <slot/>
         </div>
     </div>
@@ -188,6 +196,98 @@ watch(() => route.path, () => {
 </template>
 
 <style scoped>
+.dashboard-shell {
+    background: linear-gradient(180deg, #f8fffb 0%, #eff9f2 52%, #e7f4eb 100%);
+}
+
+.mesh-background {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.mesh-background__blob {
+    position: absolute;
+    width: min(64vw, 560px);
+    height: min(64vw, 560px);
+    border-radius: 9999px;
+    filter: blur(55px);
+    opacity: 0.44;
+    mix-blend-mode: multiply;
+}
+
+.mesh-background__blob--sage {
+    left: -22%;
+    top: -14%;
+    background: #8ed8a4;
+    animation: mesh-drift-sage 26s ease-in-out infinite alternate;
+}
+
+.mesh-background__blob--mint {
+    right: -24%;
+    top: 20%;
+    background: #7ad8bc;
+    animation: mesh-drift-mint 30s ease-in-out infinite alternate;
+}
+
+.mesh-background__blob--peach {
+    left: 12%;
+    bottom: -30%;
+    background: #ffc79f;
+    animation: mesh-drift-peach 34s ease-in-out infinite alternate;
+}
+
+.mesh-background__blob--lemon {
+    right: 2%;
+    bottom: -24%;
+    background: #ffea98;
+    animation: mesh-drift-lemon 28s ease-in-out infinite alternate;
+}
+
+.mesh-background__grain {
+    position: absolute;
+    inset: -50%;
+    opacity: 0.08;
+    background-image: radial-gradient(circle at 2px 2px, rgba(4, 120, 87, 0.45) 1.1px, transparent 0);
+    background-size: 4px 4px;
+    animation: mesh-grain 8s steps(2, end) infinite;
+}
+
+@keyframes mesh-drift-sage {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(46px, 28px, 0) scale(1.08); }
+}
+
+@keyframes mesh-drift-mint {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(-52px, 40px, 0) scale(1.1); }
+}
+
+@keyframes mesh-drift-peach {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(36px, -48px, 0) scale(1.06); }
+}
+
+@keyframes mesh-drift-lemon {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(-38px, -34px, 0) scale(1.08); }
+}
+
+@keyframes mesh-grain {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(-2%, 1%); }
+    100% { transform: translate(1%, -1%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mesh-background__blob,
+    .mesh-background__grain {
+        animation: none;
+    }
+}
+
 .action-picker-backdrop-enter-active,
 .action-picker-backdrop-leave-active {
     transition: opacity 0.2s ease;
