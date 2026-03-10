@@ -82,7 +82,7 @@ watch(() => route.path, () => {
     <Transition name="action-picker-backdrop">
         <div
             v-if="isActionPickerOpen"
-            class="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px]"
+            class="action-picker-backdrop fixed inset-0 z-40"
             @click="closeActionPicker"
         ></div>
     </Transition>
@@ -94,32 +94,32 @@ watch(() => route.path, () => {
             style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
         >
             <div class="mx-auto max-w-md">
-                <div class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 p-3">
+                <div class="action-panel rounded-2xl p-3">
                     <div class="grid grid-cols-2 gap-3">
                         <button
                             type="button"
                             @click="goToShopping"
-                            class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                            class="action-choice group flex flex-col items-center justify-center gap-2 rounded-xl px-3 py-4 transition-all duration-200 hover:-translate-y-1 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                             aria-label="Go shopping"
                         >
-                            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-green-300 group-hover:shadow-md">
+                            <div class="action-choice__icon flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 group-hover:scale-110">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                                 </svg>
                             </div>
-                            <div class="text-sm font-semibold text-gray-900">Shopping</div>
-                            <div class="text-xs text-gray-500">Check items and buy</div>
+                            <div class="action-choice__title text-sm font-semibold">Shopping</div>
+                            <div class="action-choice__subtitle text-xs">Check items and buy</div>
                         </button>
 
                         <button
                             type="button"
                             @click="goToCooking"
-                            class="group flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-green-50 px-3 py-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-green-300 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                            class="action-choice group flex flex-col items-center justify-center gap-2 rounded-xl px-3 py-4 transition-all duration-200 hover:-translate-y-1 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                             aria-label="Start cooking"
                         >
-                            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm ring-1 ring-green-200 text-green-700 transition-all duration-200 group-hover:scale-110 group-hover:ring-green-300 group-hover:shadow-md">
+                            <div class="action-choice__icon flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 group-hover:scale-110">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10V8a4 4 0 0 1 8 0v2"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8z"></path>
@@ -128,8 +128,8 @@ watch(() => route.path, () => {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h4"></path>
                                 </svg>
                             </div>
-                            <div class="text-sm font-semibold text-gray-900">Cooking</div>
-                            <div class="text-xs text-gray-500">Follow steps and cook</div>
+                            <div class="action-choice__title text-sm font-semibold">Cooking</div>
+                            <div class="action-choice__subtitle text-xs">Follow steps and cook</div>
                         </button>
                     </div>
                 </div>
@@ -138,38 +138,38 @@ watch(() => route.path, () => {
     </Transition>
 
     <nav
-        class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 shadow-lg"
+        class="bottom-nav fixed bottom-0 left-0 right-0 z-20"
         style="padding-bottom: env(safe-area-inset-bottom);"
     >
         <div class="flex justify-around items-center h-16">
             <router-link
                 to="/grocery-lists"
-                class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                :class="isGroceryList ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
+                class="bottom-nav__item flex flex-col items-center justify-center flex-1 h-full transition-colors"
+                :class="isGroceryList ? 'bottom-nav__item--active' : '' "
             >
                 <span class="text-sm font-medium">Shopping lists</span>
             </router-link>
             <button
                 type="button"
                 @click="toggleActionPicker"
-                class="group relative flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
+                class="bottom-nav__item bottom-nav__item--action group relative flex flex-col items-center justify-center flex-1 h-full transition-colors"
                 :class="[
-                    isIngredientsTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black',
-                    isActionPickerOpen ? 'text-green-700' : '',
+                    isIngredientsTab ? 'bottom-nav__item--active' : '',
+                    isActionPickerOpen ? 'bottom-nav__item--open' : '',
                 ]"
                 aria-label="Open shopping and cooking"
                 :aria-expanded="isActionPickerOpen"
             >
                 <span class="sr-only">Go shopping or start cooking</span>
                 <div class="flex items-center gap-2">
-                    <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-white/70 ring-1 ring-gray-200 shadow-sm transition-transform duration-200 group-hover:scale-105">
+                    <div class="bottom-nav__mini-icon flex items-center justify-center w-9 h-9 rounded-xl transition-transform duration-200 group-hover:scale-105">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                         </svg>
                     </div>
-                    <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-white/70 ring-1 ring-gray-200 shadow-sm transition-transform duration-200 group-hover:scale-105">
+                    <div class="bottom-nav__mini-icon flex items-center justify-center w-9 h-9 rounded-xl transition-transform duration-200 group-hover:scale-105">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10V8a4 4 0 0 1 8 0v2"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8z"></path>
@@ -181,13 +181,13 @@ watch(() => route.path, () => {
                 </div>
                 <span
                     v-if="isActionPickerOpen"
-                    class="absolute -top-1 w-2 h-2 rounded-full bg-green-600 shadow"
+                    class="absolute -top-1 w-2 h-2 rounded-full bg-[var(--accent)] shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
                 ></span>
             </button>
             <router-link
                 to="/recipes"
-                class="flex flex-col items-center justify-center flex-1 h-full text-gray-600 hover:text-green-600 transition-colors"
-                :class="isRecipesTab ? '!text-green-600 !bg-green-50 border-t-2 border-green-600' : 'text-black' "
+                class="bottom-nav__item flex flex-col items-center justify-center flex-1 h-full transition-colors"
+                :class="isRecipesTab ? 'bottom-nav__item--active' : '' "
             >
                 <span class="text-sm font-medium">Recipes</span>
             </router-link>
@@ -198,6 +198,66 @@ watch(() => route.path, () => {
 <style scoped>
 .dashboard-shell {
     background: linear-gradient(180deg, #f8fffb 0%, #eff9f2 52%, #e7f4eb 100%);
+}
+
+.action-picker-backdrop {
+    background: rgba(6, 44, 33, 0.18);
+    backdrop-filter: blur(3px);
+}
+
+.action-panel {
+    position: relative;
+    border: 1px solid var(--line-soft);
+    background: var(--surface-strong);
+    box-shadow: var(--shadow-elevated);
+    backdrop-filter: blur(12px);
+    isolation: isolate;
+}
+
+.action-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0.06;
+    background-image: var(--panel-grain);
+    background-size: 4px 4px;
+    pointer-events: none;
+}
+
+.action-choice {
+    border: 1px solid var(--line-soft);
+    background: linear-gradient(180deg, var(--surface-stronger) 0%, var(--surface) 100%);
+    box-shadow: 0 8px 18px rgba(7, 82, 58, 0.08);
+    color: var(--text-strong);
+}
+
+.action-choice:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-soft);
+}
+
+.action-choice:focus-visible {
+    --tw-ring-color: color-mix(in srgb, var(--accent), white 10%);
+}
+
+.action-choice__icon {
+    background: rgba(251, 255, 251, 0.8);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, white 78%);
+    color: var(--accent-strong);
+    box-shadow: 0 7px 16px rgba(6, 95, 70, 0.12);
+}
+
+.action-choice:hover .action-choice__icon {
+    border-color: color-mix(in srgb, var(--accent) 35%, white 65%);
+}
+
+.action-choice__title {
+    color: var(--text-strong);
+}
+
+.action-choice__subtitle {
+    color: var(--text-muted);
 }
 
 .mesh-background {
@@ -253,6 +313,58 @@ watch(() => route.path, () => {
     background-image: radial-gradient(circle at 2px 2px, rgba(4, 120, 87, 0.45) 1.1px, transparent 0);
     background-size: 4px 4px;
     animation: mesh-grain 8s steps(2, end) infinite;
+}
+
+.bottom-nav {
+    border-top: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--surface-strong) 94%, white 6%);
+    box-shadow: 0 -8px 24px rgba(7, 82, 58, 0.1);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    isolation: isolate;
+}
+
+.bottom-nav::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    background-image: var(--panel-grain);
+    background-size: 4px 4px;
+    pointer-events: none;
+}
+
+.bottom-nav__item {
+    color: var(--text-muted);
+}
+
+.bottom-nav__item:hover {
+    color: var(--accent);
+}
+
+.bottom-nav__item--active {
+    color: var(--accent-strong);
+    background: color-mix(in srgb, var(--accent-soft) 72%, white 28%);
+    border-top: 2px solid var(--accent);
+}
+
+.bottom-nav__item--open {
+    color: var(--accent-strong);
+}
+
+.bottom-nav__mini-icon {
+    background: rgba(251, 255, 251, 0.72);
+    border: 1px solid var(--line-soft);
+    box-shadow: 0 6px 14px rgba(7, 82, 58, 0.1);
+}
+
+.bottom-nav__item--active .bottom-nav__mini-icon,
+.bottom-nav__item--open .bottom-nav__mini-icon {
+    border-color: color-mix(in srgb, var(--accent) 30%, white 70%);
+    background: color-mix(in srgb, var(--accent-soft) 52%, white 48%);
 }
 
 @keyframes mesh-drift-sage {

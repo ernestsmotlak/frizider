@@ -6,6 +6,19 @@
     --brand-500: #10b981;
     --brand-600: #059669;
     --brand-700: #047857;
+    --surface: rgba(249, 253, 247, 0.86);
+    --surface-strong: rgba(245, 251, 242, 0.95);
+    --surface-stronger: rgba(241, 249, 237, 0.98);
+    --line-soft: rgba(6, 95, 70, 0.14);
+    --line-strong: rgba(6, 95, 70, 0.24);
+    --text-strong: #1f3327;
+    --text-muted: #557063;
+    --accent-soft: rgba(16, 185, 129, 0.16);
+    --accent: #0e9f6e;
+    --accent-strong: #0a7f5a;
+    --shadow-soft: 0 12px 36px rgba(7, 82, 58, 0.1);
+    --shadow-elevated: 0 20px 46px rgba(7, 82, 58, 0.16);
+    --panel-grain: radial-gradient(circle at 1px 1px, rgba(3, 84, 63, 0.08) 1px, transparent 0);
 }
 
 @keyframes pulsate {
