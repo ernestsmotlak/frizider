@@ -128,7 +128,7 @@ onUnmounted(() => {
 <template>
     <DashboardLayout>
         <div class="pt-7 px-5">
-            <div class="bg-gray-50 rounded-2xl border-2 border-gray-200">
+            <div class="bg-white rounded-2xl border-2 border-gray-200" style="background-color: #ffffff;">
                 <div class="px-4 pt-6 pb-4">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex-1">

@@ -281,7 +281,7 @@ onMounted(() => {
             class="pt-4 px-5 pb-20"
             style="padding-bottom: calc(5rem + env(safe-area-inset-bottom));"
         >
-            <div class="shopping-card bg-white rounded-2xl border-2 border-gray-200">
+            <div class="shopping-card bg-white rounded-2xl border-2 border-gray-200" style="background-color: #ffffff;">
                 <p class="shopping-mode-label" aria-label="Shopping">Shopping mode</p>
                 <div class="px-4 pt-6 pb-5">
                     <div class="flex-1 mb-4">
