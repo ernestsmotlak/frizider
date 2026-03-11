@@ -21,6 +21,13 @@
     --panel-grain: radial-gradient(circle at 1px 1px, rgba(3, 84, 63, 0.08) 1px, transparent 0);
 }
 
+.app-surface-gradient {
+    background:
+        radial-gradient(circle at 92% -20%, rgba(255, 234, 152, 0.16), transparent 40%),
+        radial-gradient(circle at -4% 120%, rgba(142, 216, 164, 0.12), transparent 46%),
+        linear-gradient(180deg, #ffffff 0%, #fbfffc 100%) !important;
+}
+
 @keyframes pulsate {
     0%, 100% {
         background-color: rgb(243, 244, 246);

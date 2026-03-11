@@ -29,7 +29,7 @@ const handleBackdropClick = (event: MouseEvent) => {
                         style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
                     >
                         <div class="mx-auto max-w-lg" @click.stop>
-                            <div class="bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                            <div class="bg-white app-surface-gradient rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                                 <div v-if="$slots.header" class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                                     <slot name="header" />
                                     <button

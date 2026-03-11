@@ -15,7 +15,7 @@ const goHome = () => {
 
 <template>
     <DashboardLayout>
-        <div class="px-6 py-6 text-center shadow-2xl mt-5 bg-gray-50 rounded-2xl border-2 border-gray-200">
+        <div class="px-6 py-6 text-center shadow-2xl mt-5 bg-gray-50 app-surface-gradient rounded-2xl border-2 border-gray-200">
             <div class="mb-8">
                 <h1 class="text-5xl font-bold text-red-600 mb-4">{{ errorCode }}</h1>
                 <h2 class="text-3xl font-bold text-gray-800 mb-4">Oops! Something went wrong.</h2>

@@ -67,7 +67,7 @@ const handleClose = () => {
                     >
                         <div class="mx-auto max-w-md" @click.stop>
                             <div
-                                class="bg-white rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col"
+                                class="bg-white app-surface-gradient rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col"
                                 style="box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(234, 179, 8, 0.1);"
                             >
                                 <div class="px-6 py-5 flex items-center justify-between border-b border-gray-300">

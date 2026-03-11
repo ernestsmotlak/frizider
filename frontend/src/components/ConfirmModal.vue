@@ -32,7 +32,7 @@ const handleCancel = () => {
                         class="fixed left-0 right-0 bottom-16 z-99999 px-4 pb-3"
                     >
                         <div class="mx-auto max-w-md" @click.stop>
-                            <div class="bg-white rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col">
+                            <div class="bg-white app-surface-gradient rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col">
                                 <div class="px-6 py-6">
                                     <p class="text-gray-900 text-base leading-relaxed">{{ confirmStore.message }}</p>
                                 </div>

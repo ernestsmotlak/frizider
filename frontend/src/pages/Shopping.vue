@@ -281,7 +281,7 @@ onMounted(() => {
             class="pt-4 px-5 pb-20"
             style="padding-bottom: calc(5rem + env(safe-area-inset-bottom));"
         >
-            <div class="shopping-card bg-white rounded-2xl border-2 border-gray-200" style="background-color: #ffffff;">
+            <div class="shopping-card bg-white app-surface-gradient rounded-2xl border-2 border-gray-200">
                 <p class="shopping-mode-label" aria-label="Shopping">Shopping mode</p>
                 <div class="px-4 pt-6 pb-5">
                     <div class="flex-1 mb-4">
@@ -453,7 +453,7 @@ onMounted(() => {
                 style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
             >
                 <div class="mx-auto max-w-md">
-                    <div class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 p-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white/95 app-surface-gradient shadow-2xl ring-1 ring-black/5 p-3">
                         <div class="flex flex-col gap-3">
                             <button
                                 type="button"

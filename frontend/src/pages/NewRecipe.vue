@@ -150,7 +150,7 @@ const removeInstruction = (index: number) => {
 <template>
     <DashboardLayout>
         <div class="p-6 max-w-4xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden relative border-2 border-gray-200">
+            <div class="bg-white app-surface-gradient rounded-2xl shadow-2xl overflow-hidden relative border-2 border-gray-200">
                 <div class="p-8 space-y-6">
                     <div>
                         <h1 class="text-4xl font-bold text-gray-900 mb-6">Create New Recipe</h1>

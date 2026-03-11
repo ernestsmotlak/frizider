@@ -39,7 +39,7 @@ const handleAddTimer = () => {
                         class="fixed left-0 right-0 bottom-16 z-50 px-4 pb-3"
                     >
                         <div class="mx-auto max-w-md" @click.stop>
-                            <div class="rounded-2xl border border-gray-200 bg-white/95 shadow-2xl ring-1 ring-black/5 w-full overflow-hidden flex flex-col">
+                            <div class="rounded-2xl border border-gray-200 bg-white/95 app-surface-gradient shadow-2xl ring-1 ring-black/5 w-full overflow-hidden flex flex-col">
                                 <div
                                     class="px-6 py-5 flex items-center justify-between border-b border-gray-300"
                                 >

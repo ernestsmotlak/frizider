@@ -169,7 +169,7 @@ const formatDate = (dateString: string | null): string => {
 </script>
 
 <template>
-    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden relative border-2 border-gray-200">
+    <div class="bg-white app-surface-gradient rounded-2xl shadow-2xl overflow-hidden relative border-2 border-gray-200">
         <div class="absolute top-2 right-2">
             <div class="relative menu-container">
                 <button @click.stop="toggleMenu"
