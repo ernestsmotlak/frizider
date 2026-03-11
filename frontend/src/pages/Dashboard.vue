@@ -105,13 +105,13 @@ const quickCreates = [
 .hero-card {
     position: relative;
     border-radius: 1.2rem;
-    border: 1px solid var(--line-soft);
+    border: 1px solid color-mix(in srgb, var(--line-soft) 80%, white 20%);
     padding: 1.15rem 1rem;
     background:
-        radial-gradient(circle at 92% -20%, rgba(255, 234, 152, 0.34), transparent 35%),
-        radial-gradient(circle at -4% 120%, rgba(142, 216, 164, 0.26), transparent 42%),
-        linear-gradient(180deg, var(--surface-strong) 0%, var(--surface) 100%);
-    box-shadow: var(--shadow-elevated);
+        radial-gradient(circle at 92% -20%, rgba(255, 234, 152, 0.28), transparent 37%),
+        radial-gradient(circle at -4% 120%, rgba(142, 216, 164, 0.2), transparent 44%),
+        linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(251, 255, 252, 1) 100%);
+    box-shadow: 0 14px 30px rgba(7, 82, 58, 0.14);
 }
 
 .hero-date {
@@ -186,12 +186,12 @@ const quickCreates = [
 
 .shortcut-card {
     border-radius: 1rem;
-    border: 1px solid var(--line-soft);
-    background: linear-gradient(180deg, var(--surface-strong) 0%, var(--surface) 100%);
+    border: 1px solid color-mix(in srgb, var(--line-soft) 82%, white 18%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(250, 255, 251, 1) 100%);
     padding: 0.85rem 0.78rem;
     text-decoration: none;
     transition: transform 170ms ease, border-color 170ms ease, box-shadow 170ms ease;
-    box-shadow: 0 8px 20px rgba(7, 82, 58, 0.08);
+    box-shadow: 0 10px 22px rgba(7, 82, 58, 0.1);
 }
 
 .shortcut-card:hover {
@@ -230,17 +230,18 @@ const quickCreates = [
     gap: 0.6rem;
     padding: 0.72rem 0.78rem;
     border-radius: 0.9rem;
-    border: 1px solid var(--line-soft);
-    background: color-mix(in srgb, var(--surface-strong) 92%, white 8%);
+    border: 1px solid color-mix(in srgb, var(--line-soft) 82%, white 18%);
+    background: rgba(255, 255, 255, 1);
     text-decoration: none;
     color: var(--text-strong);
     transition: border-color 170ms ease, transform 170ms ease, box-shadow 170ms ease;
+    box-shadow: 0 9px 18px rgba(7, 82, 58, 0.08);
 }
 
 .quick-create-item:hover {
     border-color: var(--line-strong);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 12px 24px rgba(7, 82, 58, 0.13);
 }
 
 .quick-create-icon {
@@ -250,7 +251,7 @@ const quickCreates = [
     place-items: center;
     border-radius: 0.64rem;
     border: 1px solid color-mix(in srgb, var(--accent) 18%, white 82%);
-    background: color-mix(in srgb, var(--accent-soft) 50%, white 50%);
+    background: color-mix(in srgb, var(--accent-soft) 38%, white 62%);
     font-size: 0.96rem;
 }
 
