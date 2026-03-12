@@ -78,7 +78,7 @@ const handleLogin = () => {
 <template>
     <LoginLayout>
         <div
-            class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12">
+            class="min-h-screen flex items-center justify-center auth-page-bg px-4 py-12">
             <div class="w-full max-w-md space-y-4">
                 <div class="auth-card bg-white app-surface-gradient rounded-2xl shadow-xl border-2 border-gray-200 p-8 space-y-6">
                     <div class="text-center space-y-2">
