@@ -298,7 +298,7 @@ const removeInstruction = (index: number) => {
                             No ingredients added yet. Click "Add Ingredient" to get started.
                         </div>
                         <div v-for="(ingredient, index) in ingredients" :key="index"
-                             class="relative bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
+                             class="ingredient-card relative rounded-2xl p-4 space-y-3 border">
                             <button
                                 type="button"
                                 @click="removeIngredient(index)"
@@ -316,7 +316,7 @@ const removeInstruction = (index: number) => {
                                     <input
                                         v-model="ingredient.name"
                                         type="text"
-                                        class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                        class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                         placeholder="e.g., Flour"
                                     />
                                 </div>
@@ -328,7 +328,7 @@ const removeInstruction = (index: number) => {
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                             placeholder="2"
                                         />
                                     </div>
@@ -337,7 +337,7 @@ const removeInstruction = (index: number) => {
                                         <input
                                             v-model="ingredient.unit"
                                             type="text"
-                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                             placeholder="cups"
                                         />
                                     </div>
@@ -348,7 +348,7 @@ const removeInstruction = (index: number) => {
                                 <input
                                     v-model="ingredient.notes"
                                     type="text"
-                                    class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                    class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                     placeholder="e.g., sifted, room temperature"
                                 />
                             </div>
@@ -439,6 +439,18 @@ const removeInstruction = (index: number) => {
         radial-gradient(120% 120% at 110% -12%, rgba(72, 132, 255, 0.14) 0%, rgba(72, 132, 255, 0) 72%),
         linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
     box-shadow: 0 8px 20px rgba(34, 81, 173, 0.12);
+}
+
+.ingredient-card {
+    border-color: #d9efe2;
+    background:
+        radial-gradient(120% 120% at 110% -12%, rgba(53, 196, 125, 0.14) 0%, rgba(53, 196, 125, 0) 72%),
+        linear-gradient(180deg, #ffffff 0%, #f7fff9 100%);
+    box-shadow: 0 8px 20px rgba(16, 93, 61, 0.12);
+}
+
+.ingredient-input {
+    background: #ffffff;
 }
 
 .instruction-index {
