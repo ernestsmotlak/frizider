@@ -100,7 +100,7 @@ const removeItem = (index: number) => {
 <template>
     <DashboardLayout>
         <div class="p-6 max-w-4xl mx-auto">
-            <div class="bg-white app-surface-gradient rounded-2xl shadow-2xl overflow-hidden relative border-2 border-gray-200">
+            <div class="recipes-hero-card rounded-2xl overflow-hidden relative">
                 <div class="p-8 space-y-6">
                     <div>
                         <h1 class="text-4xl font-bold text-gray-900 mb-6">Create New Shopping List</h1>
@@ -256,5 +256,12 @@ const removeItem = (index: number) => {
 </template>
 
 <style scoped>
-
+.recipes-hero-card {
+    border: 4px solid color-mix(in srgb, var(--line-soft) 58%, var(--accent-soft) 42%);
+    background:
+        radial-gradient(85% 75% at 100% 0%, rgba(255, 200, 120, 0.3) 0%, rgba(255, 200, 120, 0) 70%),
+        radial-gradient(70% 85% at 0% 100%, rgba(116, 221, 164, 0.12) 0%, rgba(116, 221, 164, 0) 72%),
+        linear-gradient(135deg, #ffffff 0%, #fcfffc 45%, #f8fbf9 100%);
+    box-shadow: 0 18px 38px rgba(11, 96, 68, 0.2);
+}
 </style>
