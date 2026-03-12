@@ -147,7 +147,7 @@ const removeItem = (index: number) => {
                             <input
                                 v-model="formData.name"
                                 type="text"
-                                class="w-full px-4 py-3 text-2xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                class="top-form-input w-full px-4 py-3 text-2xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                 placeholder="Enter shopping list name"
                             />
                         </div>
@@ -157,7 +157,7 @@ const removeItem = (index: number) => {
                             <textarea
                                 v-model="formData.notes"
                                 rows="3"
-                                class="w-full px-4 py-3 text-lg text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                                class="top-form-input w-full px-4 py-3 text-lg text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                                 placeholder="Enter notes (optional)"
                             ></textarea>
                         </div>
@@ -174,22 +174,34 @@ const removeItem = (index: number) => {
                                 + Add Item
                             </button>
                         </div>
-                        <div v-if="items.length === 0" class="text-sm text-gray-500 italic">
+                        <div v-if="items.length === 0"
+                             class="text-sm text-gray-500 italic rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/40 p-4">
                             No items added yet. Click "Add Item" to get started.
                         </div>
                         <div v-for="(item, index) in items" :key="index"
-                             class="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
-                                    <div class="md:col-span-2">
+                             class="ingredient-card relative rounded-2xl p-4 space-y-3 border">
+                            <button
+                                type="button"
+                                @click="removeItem(index)"
+                                class="absolute top-4 right-4 w-10 h-10 inline-flex items-center justify-center text-red-600 border border-red-200 bg-white rounded-xl shadow-sm hover:bg-red-50 hover:border-red-300 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
+                                title="Remove item"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                            <div class="pr-14 space-y-3">
+                                <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                                         <input
                                             v-model="item.name"
                                             type="text"
-                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                             placeholder="e.g., Milk"
                                         />
                                     </div>
+                                <div class="grid grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
                                         <input
@@ -197,7 +209,7 @@ const removeItem = (index: number) => {
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                             placeholder="2"
                                         />
                                     </div>
@@ -206,29 +218,18 @@ const removeItem = (index: number) => {
                                         <input
                                             v-model="item.unit"
                                             type="text"
-                                            class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                            class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                             placeholder="liters"
                                         />
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    @click="removeItem(index)"
-                                    class="flex-shrink-0 mt-6 w-10 h-10 inline-flex items-center justify-center text-red-600 border border-red-200 bg-white rounded-xl shadow-sm hover:bg-red-50 hover:border-red-300 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
-                                    title="Remove item"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
                                 <input
                                     v-model="item.notes"
                                     type="text"
-                                    class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                    class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                     placeholder="e.g., organic, whole milk"
                                 />
                             </div>
@@ -263,5 +264,21 @@ const removeItem = (index: number) => {
         radial-gradient(70% 85% at 0% 100%, rgba(116, 221, 164, 0.12) 0%, rgba(116, 221, 164, 0) 72%),
         linear-gradient(135deg, #ffffff 0%, #fcfffc 45%, #f8fbf9 100%);
     box-shadow: 0 18px 38px rgba(11, 96, 68, 0.2);
+}
+
+.top-form-input {
+    background: #ffffff;
+}
+
+.ingredient-card {
+    border-color: #d9efe2;
+    background:
+        radial-gradient(120% 120% at 110% -12%, rgba(53, 196, 125, 0.14) 0%, rgba(53, 196, 125, 0) 72%),
+        linear-gradient(180deg, #ffffff 0%, #f7fff9 100%);
+    box-shadow: 0 8px 20px rgba(16, 93, 61, 0.12);
+}
+
+.ingredient-input {
+    background: #ffffff;
 }
 </style>
