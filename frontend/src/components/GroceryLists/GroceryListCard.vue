@@ -242,7 +242,7 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
                         v-if="!props.selectMode"
                         type="button"
                         @click="openActionModalFromButton"
-                        class="w-7 h-7 -my-1 -mr-1 rounded-lg border border-gray-200/80 bg-white/70 text-gray-500 hover:text-gray-700 hover:bg-white hover:border-gray-300 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                        class="w-7 h-7 -my-1 -mr-1 rounded-lg border border-gray-200/80 bg-white/70 text-gray-500 hover:text-slate-800 hover:bg-slate-50/90 hover:border-slate-300 hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
                         aria-label="Open list actions"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.05" viewBox="0 0 24 24">
