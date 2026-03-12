@@ -197,7 +197,7 @@ const removeInstruction = (index: number) => {
                             <input
                                 v-model="formData.name"
                                 type="text"
-                                class="w-full px-4 py-3 text-2xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                class="top-form-input w-full px-4 py-3 text-2xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                 placeholder="Enter recipe name"
                             />
                         </div>
@@ -207,7 +207,7 @@ const removeInstruction = (index: number) => {
                             <textarea
                                 v-model="formData.description"
                                 rows="3"
-                                class="w-full px-4 py-3 text-lg text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                                class="top-form-input w-full px-4 py-3 text-lg text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                                 placeholder="Enter recipe description"
                             ></textarea>
                         </div>
@@ -228,7 +228,7 @@ const removeInstruction = (index: number) => {
                                         v-model="formData.servings"
                                         type="number"
                                         min="1"
-                                        class="w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                                        class="top-form-input w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                                         placeholder="4"
                                     />
                                 </div>
@@ -250,7 +250,7 @@ const removeInstruction = (index: number) => {
                                         v-model="formData.prep_time"
                                         type="number"
                                         min="0"
-                                        class="w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        class="top-form-input w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                         placeholder="15"
                                     />
                                 </div>
@@ -272,7 +272,7 @@ const removeInstruction = (index: number) => {
                                         v-model="formData.cook_time"
                                         type="number"
                                         min="0"
-                                        class="w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                                        class="top-form-input w-full px-3 py-2 text-lg font-semibold text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
                                         placeholder="30"
                                     />
                                 </div>
@@ -450,6 +450,10 @@ const removeInstruction = (index: number) => {
 }
 
 .ingredient-input {
+    background: #ffffff;
+}
+
+.top-form-input {
     background: #ffffff;
 }
 
