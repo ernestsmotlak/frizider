@@ -161,7 +161,7 @@ const removeInstruction = (index: number) => {
                         <div class="flex items-center gap-3">
                             <div
                                 v-if="formData.emoji"
-                                class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl cursor-pointer hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                                class="emoji-pulsate flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-4xl cursor-pointer transition-all duration-200 border-2 border-dashed border-gray-300 bg-white/90 shadow-sm hover:bg-white hover:border-gray-400 hover:shadow-md hover:scale-105 active:scale-95"
                                 @click="showEmojiPicker = !showEmojiPicker"
                             >
                                 {{ formData.emoji }}
@@ -170,7 +170,7 @@ const removeInstruction = (index: number) => {
                                 v-else
                                 type="button"
                                 @click="showEmojiPicker = !showEmojiPicker"
-                                class="emoji-pulsate flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl hover:bg-gray-200 transition-colors border-2 border-dashed border-gray-300"
+                                class="emoji-pulsate flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-4xl transition-all duration-200 border-2 border-dashed border-gray-300 bg-white/90 shadow-sm hover:bg-white hover:border-gray-400 hover:shadow-md hover:scale-105 active:scale-95"
                             >
                                 🥪
                             </button>
@@ -286,11 +286,14 @@ const removeInstruction = (index: number) => {
                             <button
                                 type="button"
                                 @click="addIngredient"
-                                class="px-3 py-1.5 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl border-2 border-emerald-100 bg-gradient-to-b from-white to-emerald-50 text-emerald-600 shadow-sm hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md active:translate-y-0 active:scale-[0.98] transition-all duration-200"
                             >
                                 + Add Ingredient
                             </button>
                         </div>
+                        <p v-if="ingredients.length > 0" class="text-xs text-gray-500 -mt-2">
+                            You can edit the order of ingredients later.
+                        </p>
                         <div v-if="ingredients.length === 0" class="text-sm text-gray-500 italic">
                             No ingredients added yet. Click "Add Ingredient" to get started.
                         </div>
@@ -331,7 +334,7 @@ const removeInstruction = (index: number) => {
                                 <button
                                     type="button"
                                     @click="removeIngredient(index)"
-                                    class="flex-shrink-0 mt-6 px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    class="flex-shrink-0 mt-6 w-10 h-10 inline-flex items-center justify-center text-red-600 border border-red-200 bg-white rounded-xl shadow-sm hover:bg-red-50 hover:border-red-300 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
                                     title="Remove ingredient"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,11 +361,14 @@ const removeInstruction = (index: number) => {
                             <button
                                 type="button"
                                 @click="addInstruction"
-                                class="px-3 py-1.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl border-2 border-blue-100 bg-gradient-to-b from-white to-blue-50 text-blue-600 shadow-sm hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md active:translate-y-0 active:scale-[0.98] transition-all duration-200"
                             >
                                 + Add Instruction
                             </button>
                         </div>
+                        <p v-if="instructions.length > 0" class="text-xs text-gray-500 -mt-2">
+                            You can edit the order of instructions later.
+                        </p>
                         <div v-if="instructions.length === 0" class="text-sm text-gray-500 italic">
                             No instructions added yet. Click "Add Instruction" to get started.
                         </div>
@@ -384,7 +390,7 @@ const removeInstruction = (index: number) => {
                                 <button
                                     type="button"
                                     @click="removeInstruction(index)"
-                                    class="flex-shrink-0 mt-1 px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    class="flex-shrink-0 mt-1 w-10 h-10 inline-flex items-center justify-center text-red-600 border border-red-200 bg-white rounded-xl shadow-sm hover:bg-red-50 hover:border-red-300 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
                                     title="Remove instruction"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -399,13 +405,13 @@ const removeInstruction = (index: number) => {
                     <div class="flex justify-between gap-3 pt-4 border-t border-gray-200">
                         <button
                             @click="handleCancel"
-                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                            class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border-2 border-gray-200 bg-white/90 text-gray-700 font-semibold shadow-sm hover:-translate-y-0.5 hover:border-gray-300 hover:bg-white hover:shadow-md active:translate-y-0 active:scale-[0.98] transition-all duration-200"
                         >
                             Cancel
                         </button>
                         <button
                             @click="createRecipe"
-                            class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                            class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border-2 border-blue-600 bg-gradient-to-b from-blue-500 to-blue-600 text-white font-semibold shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:from-blue-600 hover:to-blue-700 hover:border-blue-700 active:translate-y-0 active:scale-[0.98] transition-all duration-200"
                         >
                             Create Recipe
                         </button>
