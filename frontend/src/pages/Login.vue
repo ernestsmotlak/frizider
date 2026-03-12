@@ -82,7 +82,7 @@ const handleLogin = () => {
             <div class="w-full max-w-md space-y-4">
                 <div class="auth-card bg-white app-surface-gradient rounded-2xl shadow-xl border-2 border-gray-200 p-8 space-y-6">
                     <div class="text-center space-y-2">
-                        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-none">Frizider</h1>
+                        <h1 class="brand-title text-4xl sm:text-5xl font-extrabold tracking-tight leading-none">Frizider</h1>
                         <p class="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--brand-700)]">Login</p>
                         <p class="text-gray-600">Sign in to your account</p>
                     </div>
@@ -188,6 +188,29 @@ const handleLogin = () => {
     border: 1px solid var(--line-soft);
     color: var(--brand-700);
     background: color-mix(in srgb, var(--brand-50) 65%, white 35%);
+}
+
+
+
+.brand-title {
+    position: relative;
+    display: inline-block;
+    color: transparent;
+    background-image: linear-gradient(135deg, #111827 0%, #1f3327 48%, #047857 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0 2px 12px rgba(6, 95, 70, 0.16);
+}
+
+.brand-title::after {
+    content: "";
+    position: absolute;
+    left: -4%;
+    right: -4%;
+    bottom: -0.22rem;
+    height: 2px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, transparent 0%, rgba(6, 95, 70, 0.28) 24%, rgba(6, 95, 70, 0.56) 50%, rgba(6, 95, 70, 0.28) 76%, transparent 100%);
 }
 
 @keyframes sweep {
