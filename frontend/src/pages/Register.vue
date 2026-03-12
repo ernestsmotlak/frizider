@@ -115,8 +115,8 @@ const handleRegister = () => {
             <div class="w-full max-w-md space-y-4">
                 <div class="auth-card bg-white app-surface-gradient rounded-2xl shadow-xl border-2 border-gray-200 p-8 space-y-6">
                     <div class="text-center space-y-2">
-                        <p class="text-xs font-semibold tracking-[0.18em] uppercase text-gray-500">Frizider</p>
-                        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Create Account</h1>
+                        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-none">Frizider</h1>
+                        <p class="text-xs font-semibold tracking-[0.18em] uppercase text-[var(--brand-700)]">Create Account</p>
                         <p class="text-gray-600">Sign up to get started</p>
                     </div>
 
