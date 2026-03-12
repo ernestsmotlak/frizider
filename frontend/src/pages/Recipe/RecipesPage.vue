@@ -54,7 +54,7 @@ onUnmounted(() => {
 <template>
     <DashboardLayout>
         <div class="pt-7 px-5">
-            <div class="bg-white app-surface-gradient rounded-2xl border-2 border-gray-200">
+            <div class="recipes-hero-card rounded-2xl">
                 <div class="px-4 pt-6 pb-4">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex-1">
@@ -167,3 +167,14 @@ onUnmounted(() => {
         </div>
     </DashboardLayout>
 </template>
+
+<style scoped>
+.recipes-hero-card {
+    border: 1px solid color-mix(in srgb, var(--line-soft) 58%, var(--accent-soft) 42%);
+    background:
+        radial-gradient(85% 75% at 100% 0%, rgba(255, 200, 120, 0.3) 0%, rgba(255, 200, 120, 0) 70%),
+        radial-gradient(70% 85% at 0% 100%, rgba(116, 221, 164, 0.2) 0%, rgba(116, 221, 164, 0) 72%),
+        linear-gradient(135deg, #ffffff 0%, #fbfffb 45%, #f5faf7 100%);
+    box-shadow: 0 18px 38px rgba(11, 96, 68, 0.2);
+}
+</style>
