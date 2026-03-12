@@ -174,8 +174,11 @@ const removeItem = (index: number) => {
                                 + Add Item
                             </button>
                         </div>
+                        <p v-if="items.length > 0" class="text-xs text-gray-500 -mt-2">
+                            You can edit the order of items later.
+                        </p>
                         <div v-if="items.length === 0"
-                             class="text-sm text-gray-500 italic rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/40 p-4">
+                             class="text-sm text-gray-500 italic">
                             No items added yet. Click "Add Item" to get started.
                         </div>
                         <div v-for="(item, index) in items" :key="index"
