@@ -112,16 +112,17 @@ const handleRegister = () => {
     <LoginLayout>
         <div
             class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12">
-            <div class="w-full max-w-md">
-                <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-8 space-y-6">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+            <div class="w-full max-w-md space-y-4">
+                <div class="auth-card bg-white app-surface-gradient rounded-2xl shadow-xl border-2 border-gray-200 p-8 space-y-6">
+                    <div class="text-center space-y-2">
+                        <p class="text-xs font-semibold tracking-[0.18em] uppercase text-gray-500">Frizider</p>
+                        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Create Account</h1>
                         <p class="text-gray-600">Sign up to get started</p>
                     </div>
 
                     <form @submit.prevent="handleRegister" class="space-y-5">
                         <div class="space-y-1">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                            <label class="block text-xs font-semibold tracking-[0.1em] uppercase text-gray-700 mb-1">
                                 Username
                             </label>
                             <div class="relative">
@@ -146,7 +147,7 @@ const handleRegister = () => {
                         </div>
 
                         <div class="space-y-1">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                            <label class="block text-xs font-semibold tracking-[0.1em] uppercase text-gray-700 mb-1">
                                 Email
                             </label>
                             <div class="relative">
@@ -168,7 +169,7 @@ const handleRegister = () => {
                         </div>
 
                         <div class="space-y-1">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                            <label class="block text-xs font-semibold tracking-[0.1em] uppercase text-gray-700 mb-1">
                                 Password
                             </label>
                             <div class="relative">
@@ -192,7 +193,7 @@ const handleRegister = () => {
                         </div>
 
                         <div class="space-y-1">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                            <label class="block text-xs font-semibold tracking-[0.1em] uppercase text-gray-700 mb-1">
                                 Repeat Password
                             </label>
                             <div class="relative">
@@ -237,5 +238,50 @@ const handleRegister = () => {
 </template>
 
 <style scoped>
+.auth-card {
+    position: relative;
+    overflow: hidden;
+}
 
+.auth-card::after {
+    content: "";
+    position: absolute;
+    inset: -30% -60%;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.48) 50%, transparent 60%);
+    transform: translateX(-120%);
+    animation: sweep 8s ease-in-out infinite;
+}
+
+.feature-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.feature-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid var(--line-soft);
+    color: var(--brand-700);
+    background: color-mix(in srgb, var(--brand-50) 65%, white 35%);
+}
+
+@keyframes sweep {
+    0% {
+        transform: translateX(-120%);
+        opacity: 0;
+    }
+    18% {
+        opacity: 0.75;
+    }
+    40%, 100% {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
 </style>

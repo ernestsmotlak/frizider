@@ -15,11 +15,12 @@ const goToRegister = () => {
     <LoginLayout>
         <div
             class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12">
-            <div class="w-full max-w-md">
-                <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-8 space-y-6 text-center">
+            <div class="w-full max-w-md space-y-4">
+                <div class="auth-card bg-white app-surface-gradient rounded-2xl shadow-xl border-2 border-gray-200 p-8 space-y-6 text-center">
                     <div class="space-y-4">
-                        <h1 class="text-4xl font-bold text-gray-900">Welcome</h1>
-                        <p class="text-gray-600 text-lg">Get started by logging in or creating a new account</p>
+                        <p class="text-xs font-semibold tracking-[0.18em] uppercase text-gray-500">Frizider</p>
+                        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900">Welcome</h1>
+                        <p class="text-gray-600 text-base">Get started by logging in or creating a new account</p>
                     </div>
 
                     <div class="space-y-4 pt-4">
@@ -33,11 +34,86 @@ const goToRegister = () => {
                         </button>
                     </div>
                 </div>
+
+                <ul class="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
+                    <li class="feature-pill">
+                        <span class="feature-icon">
+                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </span>
+                        Calm workflow
+                    </li>
+                    <li class="feature-pill">
+                        <span class="feature-icon">
+                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18"/>
+                            </svg>
+                        </span>
+                        Clean structure
+                    </li>
+                    <li class="feature-pill">
+                        <span class="feature-icon">
+                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="4" y="6" width="16" height="12" rx="2"/>
+                            </svg>
+                        </span>
+                        Premium feel
+                    </li>
+                </ul>
             </div>
         </div>
     </LoginLayout>
 </template>
 
+<style scoped>
+.auth-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-card::after {
+    content: "";
+    position: absolute;
+    inset: -30% -60%;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.48) 50%, transparent 60%);
+    transform: translateX(-120%);
+    animation: sweep 8s ease-in-out infinite;
+}
+
+.feature-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.feature-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid var(--line-soft);
+    color: var(--brand-700);
+    background: color-mix(in srgb, var(--brand-50) 65%, white 35%);
+}
+
+@keyframes sweep {
+    0% {
+        transform: translateX(-120%);
+        opacity: 0;
+    }
+    18% {
+        opacity: 0.75;
+    }
+    40%, 100% {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+</style>
 
 
 
