@@ -373,24 +373,19 @@ const removeInstruction = (index: number) => {
                             No instructions added yet. Click "Add Instruction" to get started.
                         </div>
                         <div v-for="(instruction, index) in instructions" :key="index"
-                             class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <div class="flex items-start gap-3">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600 mt-1">
-                                    {{ index + 1 }}
-                                </div>
-                                <div class="flex-1">
-                                    <textarea
-                                        v-model="instruction.instruction"
-                                        rows="2"
-                                        class="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                                        placeholder="Enter instruction step..."
-                                    ></textarea>
+                             class="instruction-card rounded-2xl p-4 border">
+                            <div class="flex items-center justify-between gap-3 mb-3">
+                                <div class="inline-flex items-center gap-2.5">
+                                    <div
+                                        class="instruction-index flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center font-bold">
+                                        {{ index + 1 }}
+                                    </div>
+                                    <p class="text-sm font-semibold text-blue-800">Step {{ index + 1 }}</p>
                                 </div>
                                 <button
                                     type="button"
                                     @click="removeInstruction(index)"
-                                    class="flex-shrink-0 mt-1 w-10 h-10 inline-flex items-center justify-center text-red-600 border border-red-200 bg-white rounded-xl shadow-sm hover:bg-red-50 hover:border-red-300 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
+                                    class="instruction-delete-btn flex-shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-xl transition-all duration-200"
                                     title="Remove instruction"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -399,6 +394,12 @@ const removeInstruction = (index: number) => {
                                     </svg>
                                 </button>
                             </div>
+                            <textarea
+                                v-model="instruction.instruction"
+                                rows="3"
+                                class="instruction-textarea w-full px-3.5 py-3 text-gray-900 rounded-xl outline-none resize-y min-h-[90px]"
+                                placeholder="Enter instruction step..."
+                            ></textarea>
                         </div>
                     </div>
 
@@ -430,5 +431,40 @@ const removeInstruction = (index: number) => {
         radial-gradient(70% 85% at 0% 100%, rgba(116, 221, 164, 0.12) 0%, rgba(116, 221, 164, 0) 72%),
         linear-gradient(135deg, #ffffff 0%, #fcfffc 45%, #f8fbf9 100%);
     box-shadow: 0 18px 38px rgba(11, 96, 68, 0.2);
+}
+
+.instruction-card {
+    border-color: #d9e4ff;
+    background:
+        radial-gradient(120% 120% at 110% -12%, rgba(72, 132, 255, 0.14) 0%, rgba(72, 132, 255, 0) 72%),
+        linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+    box-shadow: 0 8px 20px rgba(34, 81, 173, 0.12);
+}
+
+.instruction-index {
+    color: #2f5bd8;
+    background: #dfeaff;
+}
+
+.instruction-textarea {
+    border: 1px solid #bfccdf;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.instruction-textarea:focus {
+    border-color: #3a67e8;
+    box-shadow: 0 0 0 3px rgba(58, 103, 232, 0.16);
+}
+
+.instruction-delete-btn {
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    background: #fff7f7;
+}
+
+.instruction-delete-btn:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
 }
 </style>
