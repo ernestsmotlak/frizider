@@ -173,8 +173,8 @@ onUnmounted(() => {
     border: 1px solid color-mix(in srgb, var(--line-soft) 58%, var(--accent-soft) 42%);
     background:
         radial-gradient(85% 75% at 100% 0%, rgba(255, 200, 120, 0.3) 0%, rgba(255, 200, 120, 0) 70%),
-        radial-gradient(70% 85% at 0% 100%, rgba(116, 221, 164, 0.2) 0%, rgba(116, 221, 164, 0) 72%),
-        linear-gradient(135deg, #ffffff 0%, #fbfffb 45%, #f5faf7 100%);
+        radial-gradient(70% 85% at 0% 100%, rgba(116, 221, 164, 0.12) 0%, rgba(116, 221, 164, 0) 72%),
+        linear-gradient(135deg, #ffffff 0%, #fcfffc 45%, #f8fbf9 100%);
     box-shadow: 0 18px 38px rgba(11, 96, 68, 0.2);
 }
 </style>
