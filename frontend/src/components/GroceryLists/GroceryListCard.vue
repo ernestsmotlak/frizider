@@ -176,7 +176,7 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
         @touchend="handleTouchEnd"
         @touchcancel="handleTouchCancel"
         :class="[
-            'rounded-xl shadow-sm transition-all duration-200 overflow-hidden border flex flex-row relative',
+            'rounded-xl shadow-sm transition-all duration-300 ease-out overflow-hidden border flex flex-row relative md:hover:scale-[1.02] md:hover:-translate-y-0.5 md:hover:shadow-lg',
             props.selectMode
                 ? (props.isSelected
                     ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-400 shadow-lg cursor-pointer'
