@@ -303,7 +303,7 @@ onUnmounted(() => {
 
 <style scoped>
 .recipes-hero-card {
-    border: 1px solid color-mix(in srgb, var(--line-soft) 58%, var(--accent-soft) 42%);
+    border: 4px solid color-mix(in srgb, var(--line-soft) 58%, var(--accent-soft) 42%);
     background:
         radial-gradient(85% 75% at 100% 0%, rgba(255, 200, 120, 0.3) 0%, rgba(255, 200, 120, 0) 70%),
         radial-gradient(70% 85% at 0% 100%, rgba(116, 221, 164, 0.12) 0%, rgba(116, 221, 164, 0) 72%),

@@ -136,7 +136,7 @@ const truncateDescription = (text: string | null, maxLength: number = 100): stri
         @touchcancel="handleTouchCancel"
         :class="[
             'rounded-xl shadow-sm transition-all duration-200 cursor-pointer overflow-hidden border flex flex-row',
-            'border-gray-100 hover:shadow-lg',
+            'border-slate-200/80 bg-white/85 hover:border-slate-300 hover:shadow-md',
             isLongPressing ? 'scale-95 ring-2 ring-amber-400 bg-amber-50/50 shadow-xl' : 'active:scale-[0.98]'
         ]"
     >

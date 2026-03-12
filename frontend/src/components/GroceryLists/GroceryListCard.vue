@@ -180,9 +180,9 @@ const truncateNotes = (text: string | null, maxLength: number = 100): string => 
             props.selectMode
                 ? (props.isSelected
                     ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-400 shadow-lg cursor-pointer'
-                    : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer')
-                : 'hover:shadow-lg cursor-pointer border-gray-100',
-            !props.selectMode && (groceryList.completed_at ? 'border-green-100 bg-green-50/70 ring-1 ring-green-200/60' : ''),
+                    : 'border-slate-300/80 bg-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer')
+                : 'cursor-pointer border-slate-200/80 bg-white/85 hover:border-slate-300 hover:shadow-md',
+            !props.selectMode && (groceryList.completed_at ? 'border-green-200 bg-green-50/70 ring-1 ring-green-200/70' : ''),
             props.selectMode && groceryList.completed_at && '',
             !props.selectMode && (isLongPressing ? 'scale-95 ring-2 ring-blue-400 bg-blue-50/50 shadow-xl' : 'active:scale-[0.98]')
         ]"
