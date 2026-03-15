@@ -8,6 +8,38 @@ const route = useRoute();
 const router = useRouter();
 
 const isActionPickerOpen = ref(false);
+const actionSearchQuery = ref('');
+
+type DashboardAction = {
+    id: string;
+    label: string;
+    description: string;
+    route: string;
+    featured: boolean;
+    keywords: string[];
+    icon: 'cart' | 'pot';
+};
+
+const dashboardActions: DashboardAction[] = [
+    {
+        id: 'shopping',
+        label: 'Shopping',
+        description: 'Check items and buy',
+        route: '/shopping',
+        featured: true,
+        keywords: ['buy', 'store', 'market', 'groceries', 'items'],
+        icon: 'cart',
+    },
+    {
+        id: 'cooking',
+        label: 'Cooking',
+        description: 'Follow steps and cook',
+        route: '/cooking',
+        featured: true,
+        keywords: ['cook', 'kitchen', 'steps', 'recipe'],
+        icon: 'pot',
+    },
+];
 
 const isRecipesTab = computed(() => {
     if (route.path.startsWith('/recipes')) return true;
@@ -31,21 +63,30 @@ const isIngredientsTab = computed(() => {
 
 const closeActionPicker = () => {
     isActionPickerOpen.value = false;
+    actionSearchQuery.value = '';
 };
 
 const toggleActionPicker = () => {
     isActionPickerOpen.value = !isActionPickerOpen.value;
 };
 
-const goToShopping = () => {
+const openAction = (action: DashboardAction) => {
     closeActionPicker();
-    router.push('/shopping');
+    router.push(action.route);
 };
 
-const goToCooking = () => {
-    closeActionPicker();
-    router.push('/cooking');
-};
+const normalizedActionQuery = computed(() => actionSearchQuery.value.trim().toLowerCase());
+
+const filteredActions = computed(() => {
+    if (!normalizedActionQuery.value) return dashboardActions;
+
+    return dashboardActions.filter((action) => {
+        const haystack = `${action.label} ${action.description} ${action.keywords.join(' ')}`.toLowerCase();
+        return haystack.includes(normalizedActionQuery.value);
+    });
+});
+
+const featuredActions = computed(() => filteredActions.value.filter((action) => action.featured));
 
 watch(() => route.path, () => {
     closeActionPicker();
@@ -95,32 +136,50 @@ watch(() => route.path, () => {
         >
             <div class="mx-auto max-w-md">
                 <div class="action-panel rounded-2xl p-3">
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="action-panel__header px-1 pb-2">
+                        <div class="action-panel__title-row">
+                            <h3 class="action-panel__title">Actions</h3>
+                            <span class="action-panel__count text-xs font-semibold">{{ filteredActions.length }} available</span>
+                        </div>
+                        <label for="action-search" class="sr-only">Search actions</label>
+                        <input
+                            id="action-search"
+                            v-model="actionSearchQuery"
+                            type="text"
+                            placeholder="Search actions..."
+                            class="action-panel__search mt-2 w-full rounded-xl px-3 py-2 text-sm"
+                        />
+                    </div>
+
+                    <div class="action-panel__body">
+                        <div v-if="featuredActions.length" class="grid grid-cols-2 gap-3">
                         <button
+                            v-for="action in featuredActions"
+                            :key="action.id"
                             type="button"
-                            @click="goToShopping"
+                            @click="openAction(action)"
                             class="action-choice group flex flex-col items-center justify-center gap-2 rounded-xl px-3 py-4 transition-all duration-200 hover:-translate-y-1 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                            aria-label="Go shopping"
+                            :aria-label="`Open ${action.label}`"
                         >
                             <div class="action-choice__icon flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 group-hover:scale-110">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg
+                                    v-if="action.icon === 'cart'"
+                                    class="w-8 h-8"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
                                 </svg>
-                            </div>
-                            <div class="action-choice__title text-sm font-semibold">Shopping</div>
-                            <div class="action-choice__subtitle text-xs">Check items and buy</div>
-                        </button>
-
-                        <button
-                            type="button"
-                            @click="goToCooking"
-                            class="action-choice group flex flex-col items-center justify-center gap-2 rounded-xl px-3 py-4 transition-all duration-200 hover:-translate-y-1 active:translate-y-0 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                            aria-label="Start cooking"
-                        >
-                            <div class="action-choice__icon flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 group-hover:scale-110">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg
+                                    v-else
+                                    class="w-8 h-8"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10V8a4 4 0 0 1 8 0v2"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h2"></path>
@@ -128,9 +187,30 @@ watch(() => route.path, () => {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h4"></path>
                                 </svg>
                             </div>
-                            <div class="action-choice__title text-sm font-semibold">Cooking</div>
-                            <div class="action-choice__subtitle text-xs">Follow steps and cook</div>
+                            <div class="action-choice__title text-sm font-semibold">{{ action.label }}</div>
+                            <div class="action-choice__subtitle text-xs">{{ action.description }}</div>
                         </button>
+                        </div>
+
+                        <div class="action-list mt-3">
+                            <div class="action-list__heading px-1 pb-1 text-xs font-semibold uppercase tracking-[0.08em]">
+                                All actions
+                            </div>
+                            <button
+                                v-for="action in filteredActions"
+                                :key="`${action.id}-list`"
+                                type="button"
+                                class="action-list__item"
+                                @click="openAction(action)"
+                            >
+                                <span class="action-list__label">{{ action.label }}</span>
+                                <span class="action-list__description">{{ action.description }}</span>
+                            </button>
+                        </div>
+
+                        <p v-if="!filteredActions.length" class="action-panel__empty text-center text-sm">
+                            No actions found yet.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -165,17 +245,35 @@ watch(() => route.path, () => {
                     isIngredientsTab ? 'bottom-nav__item--active' : '',
                     isActionPickerOpen ? 'bottom-nav__item--open' : '',
                 ]"
-                aria-label="Open shopping and cooking"
+                aria-label="Open actions hub"
                 :aria-expanded="isActionPickerOpen"
             >
-                <span class="sr-only">Go shopping or start cooking</span>
+                <span class="sr-only">Open actions hub</span>
                 <div class="bottom-nav__action-orb transition-transform duration-200 group-hover:scale-105">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                    <svg
+                        v-if="isActionPickerOpen"
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M18 6L6 18"></path>
+                    </svg>
+                    <svg
+                        v-else
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 7h3v3H7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 7h3v3h-3z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 14h3v3H7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 14h3v3h-3z"></path>
                     </svg>
                 </div>
-                <span class="bottom-nav__label text-xs font-semibold">Quick action</span>
+                <span class="bottom-nav__label text-xs font-semibold">Actions</span>
                 <span
                     v-if="isActionPickerOpen"
                     class="absolute -top-1.5 right-[30%] w-2.5 h-2.5 rounded-full bg-[var(--accent)] shadow-[0_0_0_5px_rgba(16,185,129,0.14)]"
@@ -213,11 +311,15 @@ watch(() => route.path, () => {
 
 .action-panel {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: min(62vh, 32rem);
     border: 1px solid var(--line-soft);
     background: var(--surface-strong);
     box-shadow: var(--shadow-elevated);
     backdrop-filter: blur(12px);
     isolation: isolate;
+    overflow: hidden;
 }
 
 .action-panel::before {
@@ -229,6 +331,50 @@ watch(() => route.path, () => {
     background-image: var(--panel-grain);
     background-size: 4px 4px;
     pointer-events: none;
+}
+
+.action-panel__header,
+.action-panel__body {
+    position: relative;
+    z-index: 1;
+}
+
+.action-panel__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.action-panel__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-strong);
+}
+
+.action-panel__count {
+    color: var(--text-muted);
+}
+
+.action-panel__search {
+    border: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--surface-stronger) 85%, white 15%);
+    color: var(--text-strong);
+}
+
+.action-panel__search::placeholder {
+    color: color-mix(in srgb, var(--text-muted) 92%, white 8%);
+}
+
+.action-panel__search:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--accent) 38%, white 62%);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, white 25%);
+}
+
+.action-panel__body {
+    overflow-y: auto;
+    padding: 0.15rem 0.1rem 0.25rem;
 }
 
 .action-choice {
@@ -264,6 +410,46 @@ watch(() => route.path, () => {
 
 .action-choice__subtitle {
     color: var(--text-muted);
+}
+
+.action-list__heading {
+    color: color-mix(in srgb, var(--text-muted) 90%, black 10%);
+}
+
+.action-list__item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-radius: 0.8rem;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 0.62rem 0.72rem;
+    color: var(--text-strong);
+    text-align: left;
+    transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.action-list__item:hover {
+    background: color-mix(in srgb, var(--accent-soft) 58%, white 42%);
+    border-color: color-mix(in srgb, var(--accent) 26%, white 74%);
+}
+
+.action-list__label {
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.action-list__description {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.action-panel__empty {
+    color: var(--text-muted);
+    padding: 0.8rem 0.3rem;
 }
 
 .mesh-background {
