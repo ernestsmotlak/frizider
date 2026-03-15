@@ -283,7 +283,7 @@ onMounted(() => {
         >
             <div class="shopping-card bg-white app-surface-gradient rounded-2xl border-2 border-gray-200">
                 <p class="shopping-mode-label" aria-label="Shopping">Shopping mode</p>
-                <div class="px-4 pt-6 pb-5">
+                <div class="px-4 pt-6 pb-12">
                     <div class="flex-1 mb-4">
                         <div class="flex items-center justify-between mb-1">
                             <div class="flex items-center gap-3">
