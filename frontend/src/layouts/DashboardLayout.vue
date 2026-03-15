@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import BackButton from "../components/BackButton.vue";
 import LogoComponent from "../components/LogoComponent.vue";
@@ -9,6 +9,8 @@ const router = useRouter();
 
 const isActionPickerOpen = ref(false);
 const actionSearchQuery = ref('');
+const actionPanelRef = ref<HTMLElement | null>(null);
+const actionToggleRef = ref<HTMLElement | null>(null);
 
 type DashboardAction = {
     id: string;
@@ -88,6 +90,28 @@ const filteredActions = computed(() => {
 
 const featuredActions = computed(() => filteredActions.value.filter((action) => action.featured));
 
+const handleGlobalPointerDown = (event: PointerEvent) => {
+    if (!isActionPickerOpen.value) return;
+
+    const target = event.target as Node | null;
+    if (!target) return;
+
+    const clickedInsidePanel = actionPanelRef.value?.contains(target);
+    const clickedOnToggle = actionToggleRef.value?.contains(target);
+
+    if (clickedInsidePanel || clickedOnToggle) return;
+
+    closeActionPicker();
+};
+
+onMounted(() => {
+    document.addEventListener('pointerdown', handleGlobalPointerDown, true);
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener('pointerdown', handleGlobalPointerDown, true);
+});
+
 watch(() => route.path, () => {
     closeActionPicker();
 });
@@ -135,7 +159,7 @@ watch(() => route.path, () => {
             style="bottom: calc(5.5rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
         >
             <div class="mx-auto max-w-md">
-                <div class="action-panel rounded-2xl p-3">
+                <div ref="actionPanelRef" class="action-panel rounded-2xl p-3">
                     <div class="action-panel__header px-1 pb-2">
                         <div class="action-panel__title-row">
                             <h3 class="action-panel__title">Actions</h3>
@@ -238,6 +262,7 @@ watch(() => route.path, () => {
                 <span class="bottom-nav__label text-xs font-semibold">Lists</span>
             </router-link>
             <button
+                ref="actionToggleRef"
                 type="button"
                 @click="toggleActionPicker"
                 class="bottom-nav__item bottom-nav__item--action group relative flex items-center justify-center gap-1 flex-1"
