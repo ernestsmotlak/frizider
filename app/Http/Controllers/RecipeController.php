@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
+use function PHPUnit\Framework\isEmpty;
+
 class RecipeController extends Controller
 {
     /**
@@ -28,11 +30,11 @@ class RecipeController extends Controller
             'id',
             'name',
             'description',
-            'image_url'
+            'image_url',
         ])
             ->where('user_id', auth()->id())
             ->when($searchTerm !== '', function ($q) use ($searchTerm) {
-                $escaped = addcslashes($searchTerm, "\\%_");
+                $escaped = addcslashes($searchTerm, '\\%_');
                 $like = "%{$escaped}%";
 
                 $q->where(function ($inner) use ($like) {
@@ -57,7 +59,7 @@ class RecipeController extends Controller
 
         return response()->json([
             'data' => $userRecipes,
-            'allRecipes' => $allRecipes
+            'allRecipes' => $allRecipes,
         ]);
     }
 
@@ -72,7 +74,7 @@ class RecipeController extends Controller
             'servings' => 'nullable|integer|min:1',
             'prep_time' => 'nullable|integer|min:0',
             'cook_time' => 'nullable|integer|min:0',
-            'image_url' => 'nullable|string|max:500'
+            'image_url' => 'nullable|string|max:500',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -81,7 +83,7 @@ class RecipeController extends Controller
 
         return response()->json([
             'message' => 'Recipe created.',
-            'data' => $recipe->fresh()
+            'data' => $recipe->fresh(),
         ], 201);
 
     }
@@ -121,7 +123,7 @@ class RecipeController extends Controller
 
         return response()->json([
             'message' => 'Recipe updated.',
-            'data' => $recipeToUpdate->fresh()
+            'data' => $recipeToUpdate->fresh(),
         ]);
     }
 
@@ -277,7 +279,7 @@ class RecipeController extends Controller
             ->where('id', $instruction)
             ->firstOrFail();
 
-        $instructionModel->completed = !$instructionModel->completed;
+        $instructionModel->completed = ! $instructionModel->completed;
         $instructionModel->save();
 
         $updatedRecipe = Recipe::where('user_id', auth()->id())
@@ -301,7 +303,7 @@ class RecipeController extends Controller
             ->where('id', $ingredient)
             ->firstOrFail();
 
-        $ingredientModel->completed = !$ingredientModel->completed;
+        $ingredientModel->completed = ! $ingredientModel->completed;
         $ingredientModel->save();
 
         return response()->json([
@@ -364,15 +366,31 @@ class RecipeController extends Controller
 
             return response()->json([
                 'message' => 'Recipe created.',
-                'data' => $recipe->fresh()->load(['recipeIngredients', 'recipeInstructions'])
+                'data' => $recipe->fresh()->load(['recipeIngredients', 'recipeInstructions']),
             ], 201);
         } catch (\Throwable $error) {
             DB::rollBack();
             report($error);
+
             return response()->json([
                 'message' => 'Failed to create recipe.',
-                'error' => $error->getMessage()
+                'error' => $error->getMessage(),
             ], 500);
         }
     }
+
+    public function generateAiRecipeFromIngredients(Request $request)
+    {
+
+    }
+
+    // public function turnRecipeVegetarian(Request $request)
+    // {
+
+    // }
+
+    // public function turnRecipeVegan(Request $request)
+    // {
+
+    // }
 }
