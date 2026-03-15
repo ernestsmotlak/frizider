@@ -20,7 +20,6 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var list<string>
      */
-
     public function me()
     {
         return response()->json([
@@ -80,5 +79,10 @@ class User extends Authenticatable implements JWTSubject
     public function cookingSession()
     {
         return $this->hasOne(CookingSession::class);
+    }
+
+    public function aiUserData()
+    {
+        return $this->hasOne(AiUserData::class);
     }
 }

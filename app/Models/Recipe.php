@@ -19,12 +19,14 @@ class Recipe extends Model
         'prep_time',
         'cook_time',
         'image_url',
+        'is_ai_generated',
     ];
 
     protected $casts = [
         'servings' => 'integer',
         'prep_time' => 'integer',
         'cook_time' => 'integer',
+        'is_ai_generated' => 'boolean',
     ];
 
     public function user()
@@ -40,5 +42,10 @@ class Recipe extends Model
     public function recipeInstructions()
     {
         return $this->hasMany(RecipeInstruction::class);
+    }
+
+    public function userAiRecipeLogs()
+    {
+        return $this->hasMany(UserAiRecipeLog::class, 'recipe_id');
     }
 }
