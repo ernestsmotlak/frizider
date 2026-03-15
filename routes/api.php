@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CookingSessionController;
+use App\Http\Controllers\CookingSessionTimerController;
 use App\Http\Controllers\GroceryListController;
 use App\Http\Controllers\GroceryListItemController;
 use App\Http\Controllers\PantryItemController;
@@ -8,11 +11,7 @@ use App\Http\Controllers\RecipeIngredientController;
 use App\Http\Controllers\ShoppingItemController;
 use App\Http\Controllers\SpaceStorageController;
 use App\Http\Controllers\UserController;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CookingSessionController;
-use App\Http\Controllers\CookingSessionTimerController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -37,6 +36,10 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::post('recipe/{recipe}/ingredient/{ingredient}/toggle-completed', [RecipeController::class, 'toggleIngredientCompleted']);
     Route::delete('recipe/{recipe}/instruction/{instruction}', [RecipeController::class, 'deleteInstructionFromRecipe']);
     Route::post('recipe/{recipe}/instruction/{instruction}/toggle-completed', [RecipeController::class, 'toggleInstructionCompleted']);
+
+    Route::post('/recipe/ai/generate-recipe', [RecipeController::class, 'generateAiRecipeFromIngredients']);
+    // Route::post('/recipe/ai/turn-vegetarian', [RecipeController::class, 'turnRecipeVegetarian']);
+    // Route::post('/recipe/ai/turn-vegan', [RecipeController::class, 'turnRecipeVegan']);
 
     Route::apiResource('grocery-lists', GroceryListController::class);
     Route::post('save-grocery-list-data', [GroceryListController::class, 'saveGroceryListWithData']);
