@@ -56,7 +56,7 @@ watch(() => route.path, () => {
     <div
         class="dashboard-shell relative z-0 min-h-screen transition-transform duration-300 ease-out"
         :class="isActionPickerOpen ? 'scale-[0.985] -translate-y-1' : ''"
-        style="padding-bottom: calc(4rem + env(safe-area-inset-bottom));"
+        style="padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));"
     >
         <div class="mesh-background" aria-hidden="true">
             <div class="mesh-background__blob mesh-background__blob--sage"></div>
@@ -91,7 +91,7 @@ watch(() => route.path, () => {
         <div
             v-if="isActionPickerOpen"
             class="fixed left-0 right-0 z-50 px-4"
-            style="bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
+            style="bottom: calc(5.5rem + env(safe-area-inset-bottom)); padding-bottom: max(0.5rem, env(safe-area-inset-bottom));"
         >
             <div class="mx-auto max-w-md">
                 <div class="action-panel rounded-2xl p-3">
@@ -139,20 +139,28 @@ watch(() => route.path, () => {
 
     <nav
         class="bottom-nav fixed bottom-0 left-0 right-0 z-20"
-        style="padding-bottom: env(safe-area-inset-bottom);"
+        style="padding-bottom: max(0.45rem, env(safe-area-inset-bottom));"
     >
-        <div class="flex justify-around items-center h-16">
+        <div class="bottom-nav__inner mx-auto max-w-md px-3">
+            <div class="bottom-nav__track">
             <router-link
                 to="/grocery-lists"
-                class="bottom-nav__item flex flex-col items-center justify-center flex-1 h-full transition-colors"
+                class="bottom-nav__item flex items-center justify-center gap-2 flex-1"
                 :class="isGroceryList ? 'bottom-nav__item--active' : '' "
             >
-                <span class="text-sm font-medium">Shopping lists</span>
+                <div class="bottom-nav__icon" aria-hidden="true">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 17h10"></path>
+                    </svg>
+                </div>
+                <span class="bottom-nav__label text-xs font-semibold">Lists</span>
             </router-link>
             <button
                 type="button"
                 @click="toggleActionPicker"
-                class="bottom-nav__item bottom-nav__item--action group relative flex flex-col items-center justify-center flex-1 h-full transition-colors"
+                class="bottom-nav__item bottom-nav__item--action group relative flex items-center justify-center gap-1 flex-1"
                 :class="[
                     isIngredientsTab ? 'bottom-nav__item--active' : '',
                     isActionPickerOpen ? 'bottom-nav__item--open' : '',
@@ -161,36 +169,34 @@ watch(() => route.path, () => {
                 :aria-expanded="isActionPickerOpen"
             >
                 <span class="sr-only">Go shopping or start cooking</span>
-                <div class="flex items-center gap-2">
-                    <div class="bottom-nav__mini-icon flex items-center justify-center w-9 h-9 rounded-xl transition-transform duration-200 group-hover:scale-105">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.2 11.2A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21 8H6"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 20a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
-                        </svg>
-                    </div>
-                    <div class="bottom-nav__mini-icon flex items-center justify-center w-9 h-9 rounded-xl transition-transform duration-200 group-hover:scale-105">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10V8a4 4 0 0 1 8 0v2"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h2"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12h2"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h4"></path>
-                        </svg>
-                    </div>
+                <div class="bottom-nav__action-orb transition-transform duration-200 group-hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                    </svg>
                 </div>
+                <span class="bottom-nav__label text-xs font-semibold">Quick action</span>
                 <span
                     v-if="isActionPickerOpen"
-                    class="absolute -top-1 w-2 h-2 rounded-full bg-[var(--accent)] shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
+                    class="absolute -top-1.5 right-[30%] w-2.5 h-2.5 rounded-full bg-[var(--accent)] shadow-[0_0_0_5px_rgba(16,185,129,0.14)]"
                 ></span>
             </button>
             <router-link
                 to="/recipes"
-                class="bottom-nav__item flex flex-col items-center justify-center flex-1 h-full transition-colors"
+                class="bottom-nav__item flex items-center justify-center gap-2 flex-1"
                 :class="isRecipesTab ? 'bottom-nav__item--active' : '' "
             >
-                <span class="text-sm font-medium">Recipes</span>
+                <div class="bottom-nav__icon" aria-hidden="true">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 16h4"></path>
+                    </svg>
+                </div>
+                <span class="bottom-nav__label text-xs font-semibold">Recipes</span>
             </router-link>
+        </div>
         </div>
     </nav>
 </template>
@@ -316,55 +322,118 @@ watch(() => route.path, () => {
 }
 
 .bottom-nav {
-    border-top: 1px solid var(--line-soft);
-    background: color-mix(in srgb, var(--surface-strong) 94%, white 6%);
-    box-shadow: 0 -8px 24px rgba(7, 82, 58, 0.1);
-    backdrop-filter: blur(10px);
+    background: linear-gradient(180deg, rgba(240, 250, 244, 0.08) 0%, rgba(240, 250, 244, 0.64) 100%);
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    isolation: isolate;
-}
-
-.bottom-nav::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 0.05;
-    background-image: var(--panel-grain);
-    background-size: 4px 4px;
     pointer-events: none;
 }
 
+.bottom-nav__track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 4.8rem;
+    border-radius: 1.6rem;
+    padding: 0.45rem;
+    border: 1px solid color-mix(in srgb, var(--line-soft) 85%, white 15%);
+    background:
+        linear-gradient(140deg, rgba(254, 255, 252, 0.96) 0%, rgba(238, 249, 242, 0.94) 100%);
+    box-shadow:
+        0 14px 36px rgba(6, 95, 70, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+}
+
 .bottom-nav__item {
+    position: relative;
+    min-height: 3.9rem;
+    border-radius: 1.2rem;
+    padding: 0.4rem 0.55rem;
     color: var(--text-muted);
+    transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
 .bottom-nav__item:hover {
     color: var(--accent);
+    transform: translateY(-1px);
 }
 
 .bottom-nav__item--active {
     color: var(--accent-strong);
-    background: color-mix(in srgb, var(--accent-soft) 72%, white 28%);
-    border-top: 2px solid var(--accent);
+    background: linear-gradient(180deg, rgba(168, 244, 198, 0.45) 0%, rgba(222, 251, 233, 0.78) 100%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, white 65%);
 }
 
 .bottom-nav__item--open {
     color: var(--accent-strong);
 }
 
-.bottom-nav__mini-icon {
-    background: rgba(251, 255, 251, 0.72);
-    border: 1px solid var(--line-soft);
-    box-shadow: 0 6px 14px rgba(7, 82, 58, 0.1);
+.bottom-nav__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--line-soft) 88%, white 12%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(247, 252, 248, 0.88) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
-.bottom-nav__item--active .bottom-nav__mini-icon,
-.bottom-nav__item--open .bottom-nav__mini-icon {
+.bottom-nav__action-orb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 9999px;
+    background: linear-gradient(140deg, #2dc18f 0%, #229f75 100%);
+    border: 1px solid color-mix(in srgb, var(--accent) 70%, white 30%);
+    color: white;
+    box-shadow:
+        0 8px 16px rgba(6, 95, 70, 0.26),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.bottom-nav__label {
+    letter-spacing: 0.01em;
+}
+
+.bottom-nav__item--active .bottom-nav__icon,
+.bottom-nav__item--open .bottom-nav__icon {
     border-color: color-mix(in srgb, var(--accent) 30%, white 70%);
-    background: color-mix(in srgb, var(--accent-soft) 52%, white 48%);
+    background: color-mix(in srgb, var(--accent-soft) 56%, white 44%);
+}
+
+.bottom-nav__item--active .bottom-nav__action-orb,
+.bottom-nav__item--open .bottom-nav__action-orb {
+    background: linear-gradient(140deg, #22b383 0%, #1f8f69 100%);
+}
+
+@media (max-width: 420px) {
+    .bottom-nav__item {
+        min-height: 3.65rem;
+        padding-inline: 0.35rem;
+    }
+
+    .bottom-nav__label {
+        font-size: 0.68rem;
+    }
+
+    .bottom-nav__icon {
+        width: 1.85rem;
+        height: 1.85rem;
+    }
+
+    .bottom-nav__action-orb {
+        width: 2rem;
+        height: 2rem;
+    }
 }
 
 @keyframes mesh-drift-sage {
