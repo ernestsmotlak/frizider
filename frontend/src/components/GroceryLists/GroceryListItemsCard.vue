@@ -390,7 +390,8 @@ const addItem = (addAnother: boolean = false) => {
                     role="checkbox"
                     :aria-checked="item.is_purchased"
                     :class="[
-                        'flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-hidden',
+                        'flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-visible',
+                        openDropdownId === item.id ? 'z-30' : 'z-0',
                         item.is_purchased
                             ? 'bg-green-50 border-green-200 ring-1 ring-green-100'
                             : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-blue-200'
@@ -438,7 +439,7 @@ const addItem = (addAnother: boolean = false) => {
                         </button>
                         <div
                             v-if="openDropdownId === item.id"
-                            class="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 opacity-100"
+                            class="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-40 opacity-100"
                         >
                             <button
                                 @click="openEditModal(item)"
