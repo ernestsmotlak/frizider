@@ -8,7 +8,25 @@
            bg-white hover:border-gray-400 transition-colors duration-200
            flex items-center justify-between"
         >
-            <span class="text-sm font-medium text-gray-700">{{ selectedLabel }}</span>
+            <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                <span
+                    v-if="selectedValue === 'completed'"
+                    class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-green-300 bg-green-100 text-green-700"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </span>
+                <span
+                    v-else-if="selectedValue === 'unfinished'"
+                    class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-amber-300 bg-amber-100 text-amber-600"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </span>
+                <span v-if="selectedValue === 'all'">{{ selectedLabel }}</span>
+            </span>
             <svg
                 class="w-5 h-5 text-gray-500 transition-transform duration-200"
                 :class="{ 'rotate-180': isOpen }"
@@ -48,14 +66,11 @@
                     class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-gray-100': selectedValue === 'completed' }"
                 >
-                    <svg
-                        class="w-5 h-5 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-green-300 bg-green-100 text-green-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </span>
                     <span>Completed</span>
                 </button>
                 <button
@@ -64,14 +79,11 @@
                     class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-gray-100': selectedValue === 'unfinished' }"
                 >
-                    <svg
-                        class="w-5 h-5 text-orange-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-amber-300 bg-amber-100 text-amber-600">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
                     <span>Unfinished</span>
                 </button>
             </div>
