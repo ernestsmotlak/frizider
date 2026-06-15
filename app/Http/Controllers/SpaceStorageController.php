@@ -26,6 +26,40 @@ class SpaceStorageController extends Controller
         ]);
     }
 
+    public function paginateSpaceStorages(Request $request)
+    {
+        $validated = $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'searchTerm' => 'nullable|string|max:100',
+        ]);
+
+        $perPage = (int) ($validated['per_page'] ?? 10);
+        $searchTerm = trim((string) ($validated['searchTerm'] ?? ''));
+
+        $query = SpaceStorage::where('user_id', $this->user()->id)
+            ->when($searchTerm !== '', function ($q) use ($searchTerm) {
+                $escaped = addcslashes($searchTerm, '\\%_');
+                $like = "%{$escaped}%";
+
+                $q->where(function ($inner) use ($like) {
+                    $inner
+                        ->where('name', 'like', $like)
+                        ->orWhere('description', 'like', $like);
+                });
+            })
+            ->orderBy('sort_order')
+            ->orderBy('name');
+
+        $countQuery = clone $query;
+        $spaces = $query->simplePaginate($perPage);
+        $allSpaces = $countQuery->count();
+
+        return response()->json([
+            'data' => $spaces,
+            'allRecipes' => $allSpaces,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
