@@ -54,3 +54,19 @@ Rows 1+2 are one endpoint ("convert to pantry item"), row 3 is one endpoint ("co
 5. Return shape: mirror existing patterns — `{ "message": "...", "data": <created row(s)> }`.
 
 Frontend wiring (buttons/UI on Shopping/Pantry/Recipe pages) is a **follow-up**, not part of this task — focus on the backend service + endpoints + cleanup migration first. Confirm the field-mapping table against the actual current schema (re-check migrations in `database/migrations/`) before implementing, since the schema has evolved across many migrations.
+
+## Frontend wiring plan (follow-up, not part of this task)
+
+Once the 3 endpoints above exist, wire them into the Pantry/Grocery List/Recipe item cards (`PantryItemsCard.vue`, `GroceryListItemsCard.vue`, the recipe ingredients equivalent, and the shopping session page) like this:
+
+1. **Selection mode, reused from `GroceryListCard.vue`/`GroceryListsPage.vue`.** Each items-card gets a toggle button (next to the existing "+" add button) that flips its list into select mode — same checkbox-overlay pattern already used for "save shopping session". Add a "select all" toggle in the same header area.
+
+2. **Convert action.** Once ≥1 item is selected, show a "Move to…" / "Add to…" button. Per the mapping table, every source type has **exactly 2** valid targets (pantry → grocery list item / recipe ingredient; grocery/shopping item → pantry item / recipe ingredient; recipe ingredient → pantry item / grocery list item), so this opens a small modal.
+
+3. **Wizard modal (single `Modal.vue`, multi-step via a local `step` ref):**
+   - **Step 1 — destination type:** a 2-card chooser, same visual pattern as the existing "Recipe Actions" modal (icon + title + subtitle per card), showing the 2 valid targets for the current source type.
+   - **Step 2 — destination instance:** a dropdown/list to pick *which* grocery list / recipe / storage space to copy into (the `grocery_list_id` / `recipe_id` / `space_id` the endpoint requires).
+   - **Step 3 — optional extra fields:** e.g. `expiry_date` when the target is a pantry item.
+   - Footer has Back / Next / Confirm buttons; body content swapped via `v-if="step === N"` — no routing or separate page needed.
+
+4. **Submit & feedback.** On confirm, call the matching `/api/convert/to-*` endpoint with `source_type`, `source_ids`, and the step 2/3 field(s). Show a success/error toast (existing `toastStore` pattern). Since conversions are copies, the source list doesn't need refreshing; the target list only needs refreshing if it happens to be the currently-open page (out of scope to wire cross-page refresh for v1 — a toast confirming what was created is enough).
