@@ -14,6 +14,9 @@ import GroceryListPage from "../pages/GroceryList/GroceryListPage.vue";
 import NewGroceryList from "../pages/NewGroceryList.vue";
 import Shopping from "../pages/Shopping.vue";
 import Cooking from "../pages/Cooking.vue";
+import StorageSpacesPage from "../pages/Pantry/StorageSpacesPage.vue";
+import StorageSpacePage from "../pages/Pantry/StorageSpacePage.vue";
+import NewStorageSpace from "../pages/NewStorageSpace.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -88,6 +91,24 @@ const router = createRouter({
             path: '/cooking',
             name: 'Cooking',
             component: Cooking,
+            meta: {requiresAuth: true}
+        },
+        {
+            path: '/storage-spaces',
+            name: 'Storage Spaces',
+            component: StorageSpacesPage,
+            meta: {requiresAuth: true}
+        },
+        {
+            path: '/storage-spaces/:id',
+            name: 'Storage Space',
+            component: StorageSpacePage,
+            meta: {requiresAuth: true}
+        },
+        {
+            path: '/new/storage-space',
+            name: 'New Storage Space',
+            component: NewStorageSpace,
             meta: {requiresAuth: true}
         },
         {

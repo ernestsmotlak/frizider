@@ -55,6 +55,12 @@ const isGroceryList = computed(() => {
     return false;
 });
 
+const isPantryTab = computed(() => {
+    if (route.path.startsWith('/storage-spaces')) return true;
+    if (route.path.includes('/storage-space')) return true;
+    return false;
+});
+
 const isIngredientsTab = computed(() => {
     if (route.path.startsWith('/ingredients')) return true;
     if (route.path.includes('/ingredient')) return true;
@@ -319,6 +325,20 @@ watch(() => route.path, () => {
                 </div>
                 <span class="bottom-nav__label text-xs font-semibold">Recipes</span>
             </router-link>
+            <router-link
+                to="/storage-spaces"
+                class="bottom-nav__item flex items-center justify-center gap-2 flex-1"
+                :class="isPantryTab ? 'bottom-nav__item--active' : '' "
+            >
+                <div class="bottom-nav__icon" aria-hidden="true">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l1-3h16l1 3"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11h6"></path>
+                    </svg>
+                </div>
+                <span class="bottom-nav__label text-xs font-semibold">Pantry</span>
+            </router-link>
         </div>
         </div>
     </nav>
@@ -544,7 +564,7 @@ watch(() => route.path, () => {
 .bottom-nav__track {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
     gap: 0.35rem;
     min-height: 4.8rem;

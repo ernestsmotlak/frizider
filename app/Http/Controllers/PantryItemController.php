@@ -8,11 +8,15 @@ use Illuminate\Http\Request;
 
 class PantryItemController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pantryItems = PantryItem::where('user_id', auth()->id())
-            ->orderBy('expiry_date')
-            ->get();
+        $query = PantryItem::where('user_id', auth()->id());
+
+        if ($request->filled('space_id')) {
+            $query->where('space_id', $request->input('space_id'));
+        }
+
+        $pantryItems = $query->orderBy('expiry_date')->get();
 
         return response()->json([
             'data' => $pantryItems
