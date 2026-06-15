@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onMounted, onUnmounted, ref} from "vue";
 import Modal from "../Modal.vue";
+import PantryItemStatusFilter, {type PantryStatusFilterValue} from "./PantryItemStatusFilter.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
@@ -50,15 +51,23 @@ const emptyItem = (): Omit<PantryItem, 'id' | 'user_id' | 'created_at' | 'update
 
 const newItem = ref(emptyItem());
 
+const statusFilter = ref<PantryStatusFilterValue>('all');
+const searchTerm = ref('');
+
 const sortedItems = computed(() => {
-    return [...props.pantryItems].sort((a, b) => {
-        if (a.expiry_date && b.expiry_date) {
-            return a.expiry_date.localeCompare(b.expiry_date);
-        }
-        if (a.expiry_date) return -1;
-        if (b.expiry_date) return 1;
-        return a.name.localeCompare(b.name);
-    });
+    const search = searchTerm.value.trim().toLowerCase();
+
+    return [...props.pantryItems]
+        .filter((item) => statusFilter.value === 'all' || expiryStatus(item) === statusFilter.value)
+        .filter((item) => !search || item.name.toLowerCase().includes(search))
+        .sort((a, b) => {
+            if (a.expiry_date && b.expiry_date) {
+                return a.expiry_date.localeCompare(b.expiry_date);
+            }
+            if (a.expiry_date) return -1;
+            if (b.expiry_date) return 1;
+            return a.name.localeCompare(b.name);
+        });
 });
 
 const toggleDropdown = (itemId: number | null) => {
@@ -260,9 +269,51 @@ const deleteItem = async (item: PantryItem) => {
                     Sorted by expiry date
                 </p>
                 <p class="text-xs text-gray-500 mt-1">
-                    <span class="font-medium text-gray-700 tabular-nums">{{ pantryItems.length }}</span>
-                    item{{ pantryItems.length !== 1 ? 's' : '' }}
+                    <span class="font-medium text-gray-700 tabular-nums">{{ sortedItems.length }}</span>
+                    item{{ sortedItems.length !== 1 ? 's' : '' }}
                 </p>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-stretch">
+            <label for="pantry-items-search" class="sr-only">Search pantry items</label>
+            <div class="relative w-full sm:w-[75%] h-full">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        />
+                    </svg>
+                </div>
+                <input
+                    id="pantry-items-search"
+                    v-model="searchTerm"
+                    type="text"
+                    inputmode="search"
+                    enterkeyhint="search"
+                    role="searchbox"
+                    placeholder="Search pantry items"
+                    autocomplete="off"
+                    class="relative z-0 w-full px-4 py-2.5 pl-10 pr-10 text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+                <button
+                    v-if="searchTerm"
+                    type="button"
+                    class="absolute inset-y-0 right-0 z-10 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                    @click="searchTerm = ''"
+                    aria-label="Clear search"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="w-full sm:w-[25%] sm:pl-3">
+                <PantryItemStatusFilter v-model="statusFilter"/>
             </div>
         </div>
 
