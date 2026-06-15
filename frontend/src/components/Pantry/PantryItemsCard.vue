@@ -273,22 +273,15 @@ const deleteItem = async (item: PantryItem) => {
                     :key="item.id"
                     @click="openEditModal(item)"
                     :class="[
-                        'flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-visible',
+                        'flex items-center gap-3 px-4 py-3 rounded-lg border border-l-4 transition-all duration-200 cursor-pointer relative overflow-visible',
                         openDropdownId === item.id ? 'z-30' : 'z-0',
                         expiryStatus(item) === 'expired'
-                            ? 'bg-red-50 border-red-200 ring-1 ring-red-100'
+                            ? 'bg-red-50 border-red-200 border-l-red-500 ring-1 ring-red-100'
                             : expiryStatus(item) === 'soon'
-                                ? 'bg-amber-50 border-amber-200 ring-1 ring-amber-100'
-                                : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-blue-200'
+                                ? 'bg-amber-50 border-amber-200 border-l-amber-500 ring-1 ring-amber-100'
+                                : 'bg-white border-gray-200 border-l-green-500 hover:bg-gray-50 hover:border-blue-200'
                     ]"
                 >
-                    <div
-                        v-if="expiryStatus(item) === 'expired' || expiryStatus(item) === 'soon'"
-                        :class="[
-                            'absolute left-0 top-0 h-full w-1',
-                            expiryStatus(item) === 'expired' ? 'bg-red-500' : 'bg-amber-500'
-                        ]"
-                    ></div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="leading-relaxed text-[15px] font-medium text-gray-800">
