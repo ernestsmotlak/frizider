@@ -130,8 +130,8 @@ const formatDate = (dateString: string | null): string => {
     return date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'});
 };
 
-const expiryStatus = (item: PantryItem): 'expired' | 'soon' | null => {
-    if (!item.expiry_date) return null;
+const expiryStatus = (item: PantryItem): 'expired' | 'soon' | 'ok' => {
+    if (!item.expiry_date) return 'expired';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -141,8 +141,8 @@ const expiryStatus = (item: PantryItem): 'expired' | 'soon' | null => {
     const diffDays = Math.round((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return 'expired';
-    if (diffDays <= 3) return 'soon';
-    return null;
+    if (diffDays < 2) return 'soon';
+    return 'ok';
 };
 
 const addItem = (addAnother: boolean = false) => {
@@ -283,7 +283,7 @@ const deleteItem = async (item: PantryItem) => {
                     ]"
                 >
                     <div
-                        v-if="expiryStatus(item)"
+                        v-if="expiryStatus(item) === 'expired' || expiryStatus(item) === 'soon'"
                         :class="[
                             'absolute left-0 top-0 h-full w-1',
                             expiryStatus(item) === 'expired' ? 'bg-red-500' : 'bg-amber-500'
@@ -296,15 +296,21 @@ const deleteItem = async (item: PantryItem) => {
                             </span>
                             <span
                                 v-if="expiryStatus(item) === 'expired'"
-                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200"
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-200 text-red-700"
                             >
                                 Expired
                             </span>
                             <span
                                 v-else-if="expiryStatus(item) === 'soon'"
-                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200"
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-200 text-orange-700"
                             >
                                 Expires soon
+                            </span>
+                            <span
+                                v-else
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-200 text-green-700"
+                            >
+                                Fresh
                             </span>
                         </div>
                         <p v-if="item.expiry_date || item.notes" class="text-xs text-gray-500 mt-0.5 line-clamp-1">
