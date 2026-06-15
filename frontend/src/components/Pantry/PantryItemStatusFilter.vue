@@ -55,8 +55,8 @@
                 <button
                     type="button"
                     @click="selectOption('all')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
-                    :class="{ 'bg-gray-100': selectedValue === 'all' }"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    :class="{ 'bg-blue-50': selectedValue ==='all' }"
                 >
                     <svg
                         class="w-5 h-5 text-gray-600"
@@ -71,8 +71,8 @@
                 <button
                     type="button"
                     @click="selectOption('expired')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
-                    :class="{ 'bg-gray-100': selectedValue === 'expired' }"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    :class="{ 'bg-blue-50': selectedValue ==='expired' }"
                 >
                     <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-200 text-red-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
@@ -84,8 +84,8 @@
                 <button
                     type="button"
                     @click="selectOption('soon')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
-                    :class="{ 'bg-gray-100': selectedValue === 'soon' }"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    :class="{ 'bg-blue-50': selectedValue ==='soon' }"
                 >
                     <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-orange-200 text-orange-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
@@ -97,8 +97,8 @@
                 <button
                     type="button"
                     @click="selectOption('ok')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 hover:bg-gray-50 transition-colors duration-150 flex items-center gap-2"
-                    :class="{ 'bg-gray-100': selectedValue === 'ok' }"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    :class="{ 'bg-blue-50': selectedValue ==='ok' }"
                 >
                     <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-200 text-green-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
