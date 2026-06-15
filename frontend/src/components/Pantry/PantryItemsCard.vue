@@ -279,7 +279,7 @@ const deleteItem = async (item: PantryItem) => {
                             ? 'bg-red-50 border-red-200 border-l-red-500 ring-1 ring-red-100'
                             : expiryStatus(item) === 'soon'
                                 ? 'bg-amber-50 border-amber-200 border-l-amber-500 ring-1 ring-amber-100'
-                                : 'bg-white border-gray-200 border-l-green-500 hover:bg-gray-50 hover:border-blue-200'
+                                : 'bg-green-50 border-gray-200 border-l-green-500 hover:bg-gray-50 hover:border-blue-200'
                     ]"
                 >
                     <div class="flex-1 min-w-0">
