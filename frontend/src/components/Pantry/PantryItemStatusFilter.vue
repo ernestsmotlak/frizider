@@ -11,29 +11,29 @@
             <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
                 <span
                     v-if="selectedValue === 'expired'"
-                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-200 text-red-700"
+                    class="inline-flex h-6 w-6 -ml-1 items-center justify-center rounded-full bg-red-200 text-red-700"
                 >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </span>
                 <span
                     v-else-if="selectedValue === 'soon'"
-                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-orange-200 text-orange-700"
+                    class="inline-flex h-6 w-6 -ml-1 items-center justify-center rounded-full bg-orange-200 text-orange-700"
                 >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </span>
                 <span
                     v-else-if="selectedValue === 'ok'"
-                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-200 text-green-700"
+                    class="inline-flex h-6 w-6 -ml-1 items-center justify-center rounded-full bg-green-200 text-green-700"
                 >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </span>
-                <span>{{ selectedLabel }}</span>
+                <span v-if="selectedValue === 'all'">{{ selectedLabel }}</span>
             </span>
             <svg
                 class="w-5 h-5 text-gray-500 transition-transform duration-200"
