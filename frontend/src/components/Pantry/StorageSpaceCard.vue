@@ -128,7 +128,7 @@ const deleteSpaceStorage = async (event: Event) => {
 <template>
     <div
         @click="handleClick"
-        class="rounded-xl shadow-sm transition-all duration-300 ease-out overflow-hidden border flex flex-row relative cursor-pointer border-slate-200/80 bg-white/85 hover:border-slate-300 hover:shadow-md md:hover:scale-[1.02] md:hover:-translate-y-0.5 active:scale-[0.98]"
+        class="rounded-xl shadow-sm transition-all duration-300 ease-out overflow-hidden border flex flex-row relative cursor-pointer border-slate-200/80 bg-white/85 hover:border-slate-300 hover:shadow-md md:hover:scale-[1.02] md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.98]"
     >
         <div class="relative w-20 h-full flex-shrink-0 overflow-hidden self-stretch bg-gradient-to-br from-gray-100 to-gray-200">
             <div class="w-full h-full flex items-center justify-center">
