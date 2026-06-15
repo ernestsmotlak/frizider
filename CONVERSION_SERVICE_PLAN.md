@@ -70,3 +70,26 @@ Once the 3 endpoints above exist, wire them into the Pantry/Grocery List/Recipe 
    - Footer has Back / Next / Confirm buttons; body content swapped via `v-if="step === N"` — no routing or separate page needed.
 
 4. **Submit & feedback.** On confirm, call the matching `/api/convert/to-*` endpoint with `source_type`, `source_ids`, and the step 2/3 field(s). Show a success/error toast (existing `toastStore` pattern). Since conversions are copies, the source list doesn't need refreshing; the target list only needs refreshing if it happens to be the currently-open page (out of scope to wire cross-page refresh for v1 — a toast confirming what was created is enough).
+
+## Frontend wiring — implemented
+
+The plan above has been implemented:
+
+1. **`frontend/src/components/ConvertItemsModal.vue`** (new, shared component) — implements the full 3-step wizard:
+   - Props: `isOpen: boolean`, `sourceType: ConvertSourceType` (`'pantry_item' | 'recipe_ingredient' | 'grocery_list_item' | 'shopping_item'`), `sourceIds: number[]`.
+   - Step 1: 2-card target-type chooser (`targetOptions` computed per `sourceType`, matching the mapping table exactly — verified against `ItemConversionController`'s `Rule::in([...])` validation for each endpoint).
+   - Step 2: destination picker — fetches `/api/space-storages` (pantry), `/api/grocery-lists` (grocery list), or `POST /api/get-recipes` with `{per_page: 100}` (recipe, reading `response.data.data.data`).
+   - Step 3: optional `expiry_date` field, only shown when target is `pantry_item`.
+   - On confirm, POSTs to `/api/convert/to-pantry-item` / `/api/convert/to-grocery-list-item` / `/api/convert/to-recipe-ingredient` with `source_type`, `source_ids`, and the step 2/3 fields; shows a success/error toast via `toastStore` and emits `converted`/`close`.
+
+2. **Selection mode wired into all 4 surfaces**, each with: a "select all" button (shown only in select mode), a select-mode toggle button (checkbox icon ↔ X icon, blue gradient when active) next to the existing "+" add button, blue ring/border + checkmark-circle styling on selected items, and a sticky "Move N item(s)" button (shown once ≥1 item is selected) that opens `ConvertItemsModal`:
+   - **`frontend/src/components/Pantry/PantryItemsCard.vue`** — `source-type="pantry_item"`. Dropdown ("..." edit/delete menu) hidden while in select mode.
+   - **`frontend/src/components/GroceryLists/GroceryListItemsCard.vue`** — `source-type="grocery_list_item"`. `VueDraggable` is `:disabled="selectMode"`; the drag handle is replaced by the selection checkbox while selecting.
+   - **`frontend/src/components/Recipes/RecipeIngredientCard.vue`** — `source-type="recipe_ingredient"`. Same `VueDraggable`/drag-handle treatment as the grocery list card.
+   - **`frontend/src/pages/Shopping.vue`** + **`frontend/src/components/Shopping/ShoppingItemCard.vue`** — `source-type="shopping_item"`. `ShoppingItemCard` gained `selectMode`/`isSelected` props and a `select` emit; the existing purchased-checkbox is swapped for a selection checkbox while selecting, and the edit button is hidden. `VueDraggable` on the page is additionally disabled (`selectMode || ...`).
+
+3. **Refresh on convert (deviation from "no refresh needed")**: since the action is presented to the user as "Move", each surface's `handleConverted` clears the selection, exits select mode, and re-fetches/refreshes its own list (`emit('refresh')` for Pantry, `GET /api/grocery-lists/{id}` for grocery list items, `GET /api/recipes/{id}` for recipe ingredients, `fetchShoppingSession()` for Shopping) so converted-away items disappear from the source list immediately. Cross-page refresh of the *target* list remains out of scope, per the original plan.
+
+## Cleanup — implemented
+
+`GroceryListItemsCard.vue`'s now-dead `pantry_item_id` references were removed: the `pantry_item_id: number | null` field from the `GroceryListItem` interface, and the `pantry_item_id: null` initializers in both `newItem` and `openAddModal()`. The backend column/relation was already dropped in a prior migration; this was purely a frontend cleanup.

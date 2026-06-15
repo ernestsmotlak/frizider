@@ -74,7 +74,9 @@ const destinationLabel = computed(() => {
     }
 });
 
-const totalSteps = computed(() => targetType.value === 'pantry_item' ? 3 : 2);
+const showExpiryStep = computed(() => targetType.value === 'pantry_item' && props.sourceIds.length === 1);
+
+const totalSteps = computed(() => showExpiryStep.value ? 3 : 2);
 
 const canGoNext = computed(() => {
     if (step.value === 1) {
@@ -187,7 +189,7 @@ const goNext = async () => {
         step.value = 2;
         await fetchDestinationOptions();
     } else if (step.value === 2) {
-        if (targetType.value === 'pantry_item') {
+        if (showExpiryStep.value) {
             step.value = 3;
         } else {
             await submit();
@@ -273,6 +275,9 @@ const handleClose = () => {
                             {{ option.name }}
                         </option>
                     </select>
+                    <p v-if="targetType === 'pantry_item' && !showExpiryStep" class="text-xs text-gray-500 mt-2">
+                        Expiry dates can be set individually in Pantry after moving.
+                    </p>
                 </template>
 
                 <template v-else-if="step === 3">
