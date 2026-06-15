@@ -55,7 +55,7 @@
                 <button
                     type="button"
                     @click="selectOption('all')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-200 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-blue-50': selectedValue ==='all' }"
                 >
                     <svg
@@ -71,7 +71,7 @@
                 <button
                     type="button"
                     @click="selectOption('expired')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-200 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-blue-50': selectedValue ==='expired' }"
                 >
                     <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-200 text-red-700">
@@ -84,7 +84,7 @@
                 <button
                     type="button"
                     @click="selectOption('soon')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-200 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-blue-50': selectedValue ==='soon' }"
                 >
                     <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-orange-200 text-orange-700">
@@ -97,7 +97,7 @@
                 <button
                     type="button"
                     @click="selectOption('ok')"
-                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                    class="w-full px-4 py-2.5 text-left text-base text-gray-900 cursor-pointer hover:bg-gray-200 transition-colors duration-150 flex items-center gap-2"
                     :class="{ 'bg-blue-50': selectedValue ==='ok' }"
                 >
                     <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-200 text-green-700">
