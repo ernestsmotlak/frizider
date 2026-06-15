@@ -28,11 +28,14 @@ const props = defineProps<{
     listName: string;
     listColor: string;
     isToggling: boolean;
+    selectMode?: boolean;
+    isSelected?: boolean;
 }>();
 
 const emit = defineEmits<{
     toggle: [item: ShoppingItem];
     edit: [item: ShoppingItem];
+    select: [item: ShoppingItem];
 }>();
 
 const showNotesTooltip = ref(false);
@@ -49,6 +52,10 @@ const quantityDisplay = computed(() => {
 });
 
 const handleToggle = () => {
+    if (props.selectMode) {
+        emit("select", props.item);
+        return;
+    }
     if (!props.isToggling) {
         emit("toggle", props.item);
     }
@@ -87,19 +94,42 @@ onUnmounted(() => {
         @click="handleToggle"
         :class="[
             'bg-white rounded-xl border-2 p-4 transition-all duration-200 cursor-pointer relative',
-            item.is_purchased
-                ? 'border-green-200 bg-green-50/50'
-                : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+            selectMode && isSelected
+                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-300'
+                : item.is_purchased
+                    ? 'border-green-200 bg-green-50/50'
+                    : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
         ]"
     >
         <div
-            v-if="item.is_purchased"
+            v-if="item.is_purchased && !(selectMode && isSelected)"
             class="absolute left-0 top-0 bottom-0 w-1 bg-green-500 rounded-l-xl"
         ></div>
 
         <div class="flex items-start gap-3">
             <div class="flex-shrink-0 pt-0.5">
                 <div
+                    v-if="selectMode"
+                    :class="[
+                        'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
+                        isSelected
+                            ? 'bg-blue-500 border-blue-600'
+                            : 'bg-white border-gray-300'
+                    ]"
+                >
+                    <svg
+                        v-if="isSelected"
+                        class="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div
+                    v-else
                     :class="[
                         'w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200',
                         item.is_purchased
@@ -188,7 +218,7 @@ onUnmounted(() => {
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2 flex-shrink-0">
+                    <div v-if="!selectMode" class="flex items-center gap-2 flex-shrink-0">
                         <button
                             @click="handleEdit"
                             class="w-11 h-11 -m-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center"

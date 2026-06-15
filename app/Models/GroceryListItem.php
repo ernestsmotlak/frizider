@@ -13,7 +13,6 @@ class GroceryListItem extends Model
 
     protected $fillable = [
         'grocery_list_id',
-        'pantry_item_id',
         'name',
         'quantity',
         'unit',
@@ -34,10 +33,4 @@ class GroceryListItem extends Model
     {
         return $this->belongsTo(GroceryList::class);
     }
-
-    public function pantryItem()
-    {
-        return $this->belongsTo(PantryItem::class);
-    }
-    
 }

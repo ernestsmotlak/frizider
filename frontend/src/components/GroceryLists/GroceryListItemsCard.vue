@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ref, watchEffect, onMounted, onUnmounted, computed} from "vue";
 import Modal from "../Modal.vue";
+import ConvertItemsModal from "../ConvertItemsModal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
@@ -9,7 +10,6 @@ import {VueDraggable} from 'vue-draggable-plus';
 export interface GroceryListItem {
     id: number;
     grocery_list_id: number;
-    pantry_item_id: number | null;
     name: string;
     quantity: number | null;
     unit: string | null;
@@ -49,12 +49,15 @@ const confirmStore = useConfirmStore();
 
 const isAddModalOpen = ref(false);
 const isEditModalOpen = ref(false);
+const isConvertModalOpen = ref(false);
 const openDropdownId = ref<number | null>(null);
 const editingItem = ref<GroceryListItem | null>(null);
 
+const selectMode = ref(false);
+const selectedIds = ref<number[]>([]);
+
 const newItem = ref<Omit<GroceryListItem, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>({
     grocery_list_id: props.groceryListId,
-    pantry_item_id: null,
     name: '',
     quantity: null,
     unit: null,
@@ -153,6 +156,59 @@ const closeDropdown = () => {
     openDropdownId.value = null;
 };
 
+const toggleSelectMode = () => {
+    selectMode.value = !selectMode.value;
+    if (!selectMode.value) {
+        selectedIds.value = [];
+    }
+};
+
+const toggleSelected = (itemId: number) => {
+    const index = selectedIds.value.indexOf(itemId);
+    if (index === -1) {
+        selectedIds.value.push(itemId);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = () => {
+    if (selectedIds.value.length === draggableItems.value.length) {
+        selectedIds.value = [];
+    } else {
+        selectedIds.value = draggableItems.value.map((item) => item.id);
+    }
+};
+
+const handleItemClick = (item: GroceryListItem) => {
+    if (selectMode.value) {
+        toggleSelected(item.id);
+    } else {
+        toggleItem(item);
+    }
+};
+
+const openConvertModal = () => {
+    isConvertModalOpen.value = true;
+};
+
+const closeConvertModal = () => {
+    isConvertModalOpen.value = false;
+};
+
+const handleConverted = () => {
+    selectedIds.value = [];
+    selectMode.value = false;
+
+    axios.get(`/api/grocery-lists/${props.groceryListId}`)
+        .then((response) => {
+            emit('updatedGroceryList', response.data.data);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+};
+
 const clearNewItem = () => {
     newItem.value.name = '';
     newItem.value.quantity = null;
@@ -167,7 +223,6 @@ const openAddModal = () => {
         : -1;
     newItem.value = {
         grocery_list_id: props.groceryListId,
-        pantry_item_id: null,
         name: '',
         quantity: null,
         unit: null,
@@ -351,7 +406,34 @@ const addItem = (addAnother: boolean = false) => {
 <template>
     <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-8 relative border-2 border-gray-200">
         <div class="absolute top-2 right-2 flex gap-2">
-            <button @click="openAddModal"
+            <button
+                v-if="selectMode && draggableItems.length > 0"
+                @click="toggleSelectAll"
+                class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                title="Select all"
+            >
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </button>
+            <button
+                @click="toggleSelectMode"
+                :class="[
+                    'p-2 border-2 rounded-lg shadow-md backdrop-blur-sm hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200',
+                    selectMode
+                        ? 'border-blue-300 bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:border-blue-400'
+                        : 'border-gray-200 bg-white/90 text-gray-700 hover:border-gray-300 hover:bg-white'
+                ]"
+                title="Select items"
+            >
+                <svg v-if="!selectMode" class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                </svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <button v-if="!selectMode" @click="openAddModal"
                     class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                      viewBox="0 0 24 24">
@@ -361,13 +443,13 @@ const addItem = (addAnother: boolean = false) => {
         </div>
         <div class="flex items-center gap-3 pb-4 mb-5 border-b border-gray-200">
             <div class="flex-1">
-                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900">
-                    Grocery List Items
+                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-blue-700' : ''">
+                    {{ selectMode ? 'Select Items' : 'Grocery List Items' }}
                 </h2>
-                <p class="text-xs text-gray-500">
-                    Drag to reorder • Tap to mark done
+                <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
+                    {{ selectMode ? `${selectedIds.length} selected` : 'Drag to reorder • Tap to mark done' }}
                 </p>
-                <p class="text-xs text-gray-500 mt-1">
+                <p v-if="!selectMode" class="text-xs text-gray-500 mt-1">
                     <span class="font-medium text-gray-700 tabular-nums">
                         {{ numberOfSelectedDraggableItems }}/{{ draggableItems.length }}
                     </span>
@@ -382,26 +464,41 @@ const addItem = (addAnother: boolean = false) => {
                 handle=".drag-handle"
                 tag="ul"
                 class="space-y-2.5"
+                :disabled="selectMode"
             >
                 <li
                     v-for="(item, index) in draggableItems"
                     :key="item.id ?? `tmp-${item.grocery_list_id}-${item.sort_order}-${index}`"
-                    @click="toggleItem(item)"
+                    @click="handleItemClick(item)"
                     role="checkbox"
                     :aria-checked="item.is_purchased"
                     :class="[
                         'flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-visible',
                         openDropdownId === item.id ? 'z-30' : 'z-0',
-                        item.is_purchased
-                            ? 'bg-green-50 border-green-200 ring-1 ring-green-100'
-                            : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-blue-200'
+                        selectMode && selectedIds.includes(item.id)
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-300'
+                            : item.is_purchased
+                                ? 'bg-green-50 border-green-200 ring-1 ring-green-100'
+                                : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-blue-200'
                     ]"
                 >
                     <div
-                        v-if="item.is_purchased"
+                        v-if="item.is_purchased && !(selectMode && selectedIds.includes(item.id))"
                         class="absolute left-0 top-0 h-full w-1 bg-green-500"
                     ></div>
-                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
+                    <div v-if="selectMode" class="flex-shrink-0">
+                        <div :class="[
+                            'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
+                            selectedIds.includes(item.id)
+                                ? 'bg-blue-500 border-blue-600'
+                                : 'bg-white border-gray-300'
+                        ]">
+                            <svg v-if="selectedIds.includes(item.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div v-else class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
                         <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                             <circle cx="6" cy="9" r="1.5"/>
                             <circle cx="12" cy="9" r="1.5"/>
@@ -412,6 +509,7 @@ const addItem = (addAnother: boolean = false) => {
                         </svg>
                     </div>
                     <input
+                        v-if="!selectMode"
                         type="checkbox"
                         :checked="item.is_purchased"
                         @click.stop="toggleItem(item)"
@@ -422,11 +520,11 @@ const addItem = (addAnother: boolean = false) => {
                     />
                     <span :class="[
                         'leading-relaxed text-[15px] font-medium flex-1',
-                        item.is_purchased ? 'text-gray-600 line-through' : 'text-gray-800'
+                        item.is_purchased && !selectMode ? 'text-gray-600 line-through' : 'text-gray-800'
                     ]">
                         {{ formatItem(item) }}
                     </span>
-                    <div class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
+                    <div v-if="!selectMode" class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
                         <button
                             @click="toggleDropdown(item.id)"
                             class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors opacity-100"
@@ -469,7 +567,27 @@ const addItem = (addAnother: boolean = false) => {
         <div v-else class="text-center py-2">
             <p class="text-gray-500 mb-4">No items yet. Click the + button to add your first item.</p>
         </div>
+
+        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200">
+            <button
+                @click="openConvertModal"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+                Move {{ selectedIds.length }} item{{ selectedIds.length !== 1 ? 's' : '' }}
+            </button>
+        </div>
     </div>
+
+    <ConvertItemsModal
+        :is-open="isConvertModalOpen"
+        source-type="grocery_list_item"
+        :source-ids="selectedIds"
+        @close="closeConvertModal"
+        @converted="handleConverted"
+    />
 
     <Modal :isOpen="isEditModalOpen" @close="closeEditModal">
         <template #header>

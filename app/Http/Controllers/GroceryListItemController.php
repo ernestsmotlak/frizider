@@ -38,7 +38,6 @@ class GroceryListItemController extends Controller
     {
         $validated = $request->validate([
             'grocery_list_id' => 'required|exists:grocery_lists,id',
-            'pantry_item_id' => 'nullable|exists:pantry_items,id',
             'name' => 'required|string|max:255',
             'quantity' => 'nullable|numeric',
             'unit' => 'nullable|string|max:50',
@@ -84,7 +83,6 @@ class GroceryListItemController extends Controller
             ->findOrFail($id);
 
         $validated = $request->validate([
-            'pantry_item_id' => 'nullable|exists:pantry_items,id',
             'name' => 'sometimes|string|max:255',
             'quantity' => 'nullable|numeric',
             'unit' => 'nullable|string|max:50',

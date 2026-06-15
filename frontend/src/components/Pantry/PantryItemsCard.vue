@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onMounted, onUnmounted, ref} from "vue";
 import Modal from "../Modal.vue";
+import ConvertItemsModal from "../ConvertItemsModal.vue";
 import PantryItemStatusFilter, {type PantryStatusFilterValue} from "./PantryItemStatusFilter.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
@@ -36,8 +37,12 @@ const confirmStore = useConfirmStore();
 
 const isAddModalOpen = ref(false);
 const isEditModalOpen = ref(false);
+const isConvertModalOpen = ref(false);
 const openDropdownId = ref<number | null>(null);
 const editingItem = ref<PantryItem | null>(null);
+
+const selectMode = ref(false);
+const selectedIds = ref<number[]>([]);
 
 const emptyItem = (): Omit<PantryItem, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'deleted_at'> => ({
     space_id: props.spaceId,
@@ -115,6 +120,52 @@ const openEditModal = (item: PantryItem) => {
 const closeEditModal = () => {
     isEditModalOpen.value = false;
     editingItem.value = null;
+};
+
+const toggleSelectMode = () => {
+    selectMode.value = !selectMode.value;
+    if (!selectMode.value) {
+        selectedIds.value = [];
+    }
+};
+
+const toggleSelected = (itemId: number) => {
+    const index = selectedIds.value.indexOf(itemId);
+    if (index === -1) {
+        selectedIds.value.push(itemId);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = () => {
+    if (selectedIds.value.length === sortedItems.value.length) {
+        selectedIds.value = [];
+    } else {
+        selectedIds.value = sortedItems.value.map((item) => item.id);
+    }
+};
+
+const handleItemClick = (item: PantryItem) => {
+    if (selectMode.value) {
+        toggleSelected(item.id);
+    } else {
+        openEditModal(item);
+    }
+};
+
+const openConvertModal = () => {
+    isConvertModalOpen.value = true;
+};
+
+const closeConvertModal = () => {
+    isConvertModalOpen.value = false;
+};
+
+const handleConverted = () => {
+    selectedIds.value = [];
+    selectMode.value = false;
+    emit('refresh');
 };
 
 const formatItem = (item: PantryItem): string => {
@@ -252,7 +303,34 @@ const deleteItem = async (item: PantryItem) => {
 <template>
     <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-8 relative border-2 border-slate-300">
         <div class="absolute top-2 right-2 flex gap-2">
-            <button @click="openAddModal"
+            <button
+                v-if="selectMode && sortedItems.length > 0"
+                @click="toggleSelectAll"
+                class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                title="Select all"
+            >
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </button>
+            <button
+                @click="toggleSelectMode"
+                :class="[
+                    'p-2 border-2 rounded-lg shadow-md hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200',
+                    selectMode
+                        ? 'border-blue-600 bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:border-blue-700'
+                        : 'border-gray-200 bg-white/90 backdrop-blur-sm hover:border-gray-300 hover:bg-white'
+                ]"
+                title="Select items"
+            >
+                <svg v-if="!selectMode" class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <button v-if="!selectMode" @click="openAddModal"
                     class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                      viewBox="0 0 24 24">
@@ -262,11 +340,11 @@ const deleteItem = async (item: PantryItem) => {
         </div>
         <div class="flex items-center gap-3 pb-4 mb-5 border-b border-gray-200">
             <div class="flex-1">
-                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900">
-                    Pantry Items
+                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-blue-700' : ''">
+                    {{ selectMode ? 'Select Items' : 'Pantry Items' }}
                 </h2>
-                <p class="text-xs text-gray-500">
-                    Sorted by expiry date
+                <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
+                    {{ selectMode ? `${selectedIds.length} selected` : 'Sorted by expiry date' }}
                 </p>
                 <p class="text-xs text-gray-500 mt-1">
                     <span class="font-medium text-gray-700 tabular-nums">{{ sortedItems.length }}</span>
@@ -322,17 +400,31 @@ const deleteItem = async (item: PantryItem) => {
                 <li
                     v-for="item in sortedItems"
                     :key="item.id"
-                    @click="openEditModal(item)"
+                    @click="handleItemClick(item)"
                     :class="[
                         'flex items-center gap-3 px-4 py-3 rounded-lg border border-l-4 transition-all duration-200 cursor-pointer relative overflow-visible',
                         openDropdownId === item.id ? 'z-30' : 'z-0',
-                        expiryStatus(item) === 'expired'
-                            ? 'bg-red-50 border-red-200 border-l-red-500 ring-1 ring-red-100'
-                            : expiryStatus(item) === 'soon'
-                                ? 'bg-amber-50 border-amber-200 border-l-amber-500 ring-1 ring-amber-100'
-                                : 'bg-green-50 border-gray-200 border-l-green-500 ring-1 ring-green-300 hover:bg-gray-50 hover:border-blue-200'
+                        selectMode && selectedIds.includes(item.id)
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-300 border-l-blue-500'
+                            : expiryStatus(item) === 'expired'
+                                ? 'bg-red-50 border-red-200 border-l-red-500 ring-1 ring-red-100'
+                                : expiryStatus(item) === 'soon'
+                                    ? 'bg-amber-50 border-amber-200 border-l-amber-500 ring-1 ring-amber-100'
+                                    : 'bg-green-50 border-gray-200 border-l-green-500 ring-1 ring-green-300 hover:bg-gray-50 hover:border-blue-200'
                     ]"
                 >
+                    <div v-if="selectMode" class="flex-shrink-0">
+                        <div :class="[
+                            'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
+                            selectedIds.includes(item.id)
+                                ? 'bg-blue-500 border-blue-600'
+                                : 'bg-white border-gray-300'
+                        ]">
+                            <svg v-if="selectedIds.includes(item.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="leading-relaxed text-[15px] font-medium text-gray-800">
@@ -363,7 +455,7 @@ const deleteItem = async (item: PantryItem) => {
                             <template v-if="item.notes">{{ item.notes }}</template>
                         </p>
                     </div>
-                    <div class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
+                    <div v-if="!selectMode" class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
                         <button
                             @click="toggleDropdown(item.id)"
                             class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-black/10 rounded transition-colors opacity-100"
@@ -406,7 +498,27 @@ const deleteItem = async (item: PantryItem) => {
         <div v-else class="text-center py-2">
             <p class="text-gray-500 mb-4">No items yet. Click the + button to add your first item.</p>
         </div>
+
+        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200">
+            <button
+                @click="openConvertModal"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+                Move {{ selectedIds.length }} item{{ selectedIds.length !== 1 ? 's' : '' }}
+            </button>
+        </div>
     </div>
+
+    <ConvertItemsModal
+        :is-open="isConvertModalOpen"
+        source-type="pantry_item"
+        :source-ids="selectedIds"
+        @close="closeConvertModal"
+        @converted="handleConverted"
+    />
 
     <Modal :isOpen="isEditModalOpen" @close="closeEditModal">
         <template #header>

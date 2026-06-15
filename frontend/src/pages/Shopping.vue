@@ -8,6 +8,7 @@ import ShoppingProgressBar from "../components/Shopping/ShoppingProgressBar.vue"
 import ShoppingListFilter from "../components/Shopping/ShoppingListFilter.vue";
 import ShoppingItemCard from "../components/Shopping/ShoppingItemCard.vue";
 import ShoppingItemEditModal from "../components/Shopping/ShoppingItemEditModal.vue";
+import ConvertItemsModal from "../components/ConvertItemsModal.vue";
 import type {ShoppingItem} from "../components/Shopping/ShoppingItemCard.vue";
 import type {GroceryListInfo} from "../components/Shopping/ShoppingListFilter.vue";
 import {VueDraggable} from "vue-draggable-plus";
@@ -25,6 +26,10 @@ const isTogglingItem = ref(false);
 const isEditModalOpen = ref(false);
 const editingItem = ref<ShoppingItem | null>(null);
 const isFridgeModalOpen = ref(false);
+const isConvertModalOpen = ref(false);
+
+const selectMode = ref(false);
+const selectedIds = ref<number[]>([]);
 
 const listColors = [
     "#fb7185",
@@ -203,6 +208,47 @@ const handleFilterSelect = (listId: number | null) => {
     selectedListId.value = listId;
 };
 
+const toggleSelectMode = () => {
+    selectMode.value = !selectMode.value;
+    if (!selectMode.value) {
+        selectedIds.value = [];
+    }
+};
+
+const toggleSelected = (item: ShoppingItem) => {
+    const index = selectedIds.value.indexOf(item.id);
+    if (index === -1) {
+        selectedIds.value.push(item.id);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = () => {
+    const visibleIds = filteredItems.value.map((item) => item.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.value.includes(id));
+
+    if (allSelected) {
+        selectedIds.value = selectedIds.value.filter((id) => !visibleIds.includes(id));
+    } else {
+        selectedIds.value = [...new Set([...selectedIds.value, ...visibleIds])];
+    }
+};
+
+const openConvertModal = () => {
+    isConvertModalOpen.value = true;
+};
+
+const closeConvertModal = () => {
+    isConvertModalOpen.value = false;
+};
+
+const handleConverted = () => {
+    selectedIds.value = [];
+    selectMode.value = false;
+    fetchShoppingSession();
+};
+
 const onDragEnd = async () => {
     const itemsToUpdate = shoppingItems.value.map((item) => ({
         id: item.id,
@@ -293,19 +339,50 @@ onMounted(() => {
                                     </svg>
 
                                 </div>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
-                                    Shopping
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-blue-700' : ''">
+                                    {{ selectMode ? 'Select Items' : 'Shopping' }}
                                 </h2>
                             </div>
-                            <button
-                                @click="toggleFridgeModal"
-                                class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
-                            >
-                                <img src="/fridge_icon.png" alt="Fridge" class="w-5 h-5" />
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    v-if="selectMode && filteredItems.length > 0"
+                                    @click="toggleSelectAll"
+                                    class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
+                                    title="Select all"
+                                >
+                                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </button>
+                                <button
+                                    v-if="shoppingItems.length > 0"
+                                    @click="toggleSelectMode"
+                                    :class="[
+                                        'w-11 h-11 border-2 rounded-lg shadow-md backdrop-blur-sm hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center',
+                                        selectMode
+                                            ? 'border-blue-300 bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:border-blue-400'
+                                            : 'border-gray-200 bg-white/90 text-gray-700 hover:border-gray-300 hover:bg-white'
+                                    ]"
+                                    title="Select items"
+                                >
+                                    <svg v-if="!selectMode" class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                                    </svg>
+                                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                <button
+                                    v-if="!selectMode"
+                                    @click="toggleFridgeModal"
+                                    class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
+                                >
+                                    <img src="/fridge_icon.png" alt="Fridge" class="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-500">
-                            Tap items to mark as purchased
+                        <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
+                            {{ selectMode ? `${selectedIds.length} selected` : 'Tap items to mark as purchased' }}
                         </p>
                     </div>
                     <hr class="border-gray-300 my-3">
@@ -407,7 +484,7 @@ onMounted(() => {
                             @end="onDragEnd"
                             tag="div"
                             class="space-y-3"
-                            :disabled="selectedListId !== null || searchTerm.trim() !== ''"
+                            :disabled="selectMode || selectedListId !== null || searchTerm.trim() !== ''"
                         >
                             <ShoppingItemCard
                                 v-for="item in filteredItems"
@@ -416,8 +493,11 @@ onMounted(() => {
                                 :list-name="getListName(item)"
                                 :list-color="getListColor(item.grocery_list_item?.grocery_list_id ?? 0)"
                                 :is-toggling="isTogglingItem"
+                                :select-mode="selectMode"
+                                :is-selected="selectedIds.includes(item.id)"
                                 @toggle="handleToggleItem"
                                 @edit="handleEditItem"
+                                @select="toggleSelected"
                             />
                         </VueDraggable>
 
@@ -425,6 +505,18 @@ onMounted(() => {
                              class="text-center py-8 text-gray-500">
                             <p v-if="searchTerm.trim()">No items found matching "{{ searchTerm }}"</p>
                             <p v-else>No items in this list</p>
+                        </div>
+
+                        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-4 mt-3 pt-3">
+                            <button
+                                @click="openConvertModal"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                                Move {{ selectedIds.length }} item{{ selectedIds.length !== 1 ? 's' : '' }}
+                            </button>
                         </div>
                     </template>
                 </div>
@@ -436,6 +528,14 @@ onMounted(() => {
             :item="editingItem"
             @close="handleCloseEditModal"
             @save="handleSaveItem"
+        />
+
+        <ConvertItemsModal
+            :is-open="isConvertModalOpen"
+            source-type="shopping_item"
+            :source-ids="selectedIds"
+            @close="closeConvertModal"
+            @converted="handleConverted"
         />
 
         <Transition name="action-picker-backdrop">

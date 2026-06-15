@@ -5,6 +5,7 @@ use App\Http\Controllers\CookingSessionController;
 use App\Http\Controllers\CookingSessionTimerController;
 use App\Http\Controllers\GroceryListController;
 use App\Http\Controllers\GroceryListItemController;
+use App\Http\Controllers\ItemConversionController;
 use App\Http\Controllers\PantryItemController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RecipeIngredientController;
@@ -68,4 +69,8 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::delete('cooking-session/timers', [CookingSessionTimerController::class, 'deleteTimer']);
 
     Route::post('reset-all-recipe-steps', [CookingSessionController::class, 'resetRecipeData']);
+
+    Route::post('convert/to-pantry-item', [ItemConversionController::class, 'toPantryItem']);
+    Route::post('convert/to-grocery-list-item', [ItemConversionController::class, 'toGroceryListItem']);
+    Route::post('convert/to-recipe-ingredient', [ItemConversionController::class, 'toRecipeIngredient']);
 });

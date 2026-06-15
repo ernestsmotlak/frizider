@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ref, watchEffect, onMounted, onUnmounted, computed} from "vue";
 import Modal from "../Modal.vue";
+import ConvertItemsModal from "../ConvertItemsModal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
@@ -44,8 +45,12 @@ const confirmStore = useConfirmStore();
 
 const isAddModalOpen = ref(false);
 const isEditModalOpen = ref(false);
+const isConvertModalOpen = ref(false);
 const openDropdownId = ref<number | null>(null);
 const editingIngredient = ref<RecipeIngredient | null>(null);
+
+const selectMode = ref(false);
+const selectedIds = ref<number[]>([]);
 
 const newIngredient = ref<Omit<RecipeIngredient, 'id'>>({
     recipe_id: props.recipeId,
@@ -145,6 +150,65 @@ const toggleDropdown = (ingredientId: number | null) => {
 
 const closeDropdown = () => {
     openDropdownId.value = null;
+};
+
+const toggleSelectMode = () => {
+    selectMode.value = !selectMode.value;
+    if (!selectMode.value) {
+        selectedIds.value = [];
+    }
+};
+
+const toggleSelected = (ingredientId: number) => {
+    const index = selectedIds.value.indexOf(ingredientId);
+    if (index === -1) {
+        selectedIds.value.push(ingredientId);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = () => {
+    const selectableIds = draggableIngredients.value
+        .map((ingredient) => ingredient.id)
+        .filter((id): id is number => id !== null);
+
+    if (selectedIds.value.length === selectableIds.length) {
+        selectedIds.value = [];
+    } else {
+        selectedIds.value = selectableIds;
+    }
+};
+
+const handleItemClick = (ingredient: RecipeIngredient) => {
+    if (selectMode.value) {
+        if (ingredient.id !== null) {
+            toggleSelected(ingredient.id);
+        }
+    } else {
+        toggleIngredient(ingredient);
+    }
+};
+
+const openConvertModal = () => {
+    isConvertModalOpen.value = true;
+};
+
+const closeConvertModal = () => {
+    isConvertModalOpen.value = false;
+};
+
+const handleConverted = () => {
+    selectedIds.value = [];
+    selectMode.value = false;
+
+    axios.get(`/api/recipes/${props.recipeId}`)
+        .then((response) => {
+            emit('updatedRecipe', response.data.data);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 };
 
 const openEditModal = (ingredient: RecipeIngredient) => {
@@ -347,7 +411,34 @@ const addIngredient = () => {
 <template>
     <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-8 relative border-2 border-gray-200">
         <div class="absolute top-2 right-2 flex gap-2">
-            <button @click="openAddModal"
+            <button
+                v-if="selectMode && draggableIngredients.length > 0"
+                @click="toggleSelectAll"
+                class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
+                title="Select all"
+            >
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </button>
+            <button
+                @click="toggleSelectMode"
+                :class="[
+                    'p-2 border-2 rounded-lg shadow-md backdrop-blur-sm hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200',
+                    selectMode
+                        ? 'border-blue-300 bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:border-blue-400'
+                        : 'border-gray-200 bg-white/90 text-gray-700 hover:border-gray-300 hover:bg-white'
+                ]"
+                title="Select ingredients"
+            >
+                <svg v-if="!selectMode" class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                </svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <button v-if="!selectMode" @click="openAddModal"
                     class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                      viewBox="0 0 24 24">
@@ -357,13 +448,13 @@ const addIngredient = () => {
         </div>
         <div class="flex items-center gap-3 pb-4 mb-5 border-b border-gray-200">
             <div class="flex-1">
-                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900">
-                    Ingredients
+                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-blue-700' : ''">
+                    {{ selectMode ? 'Select Ingredients' : 'Ingredients' }}
                 </h2>
-                <p class="text-xs text-gray-500">
-                    Drag to reorder • Tap to mark done
+                <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
+                    {{ selectMode ? `${selectedIds.length} selected` : 'Drag to reorder • Tap to mark done' }}
                 </p>
-                <p class="text-xs text-gray-500 mt-1">
+                <p v-if="!selectMode" class="text-xs text-gray-500 mt-1">
                     <span class="font-medium text-gray-700 tabular-nums">
                         {{ numberOfSelectedDraggableIngredients }}/{{ draggableIngredients.length }}
                     </span>
@@ -379,14 +470,32 @@ const addIngredient = () => {
                 handle=".drag-handle"
                 tag="ul"
                 class="space-y-2.5"
+                :disabled="selectMode"
             >
                 <li
                     v-for="(ingredient, index) in draggableIngredients"
                     :key="ingredient.id ?? `tmp-${ingredient.recipe_id}-${ingredient.sort_order}-${index}`"
-                    @click="toggleIngredient(ingredient)"
-                    class="flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-200 transition-all duration-250 cursor-pointer relative"
+                    @click="handleItemClick(ingredient)"
+                    :class="[
+                        'flex items-center gap-3 px-4 py-3 bg-white rounded-lg border transition-all duration-250 cursor-pointer relative',
+                        selectMode && ingredient.id !== null && selectedIds.includes(ingredient.id)
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-300'
+                            : 'border-gray-200 hover:bg-gray-50 hover:border-blue-200'
+                    ]"
                 >
-                    <div class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
+                    <div v-if="selectMode" class="flex-shrink-0">
+                        <div :class="[
+                            'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
+                            ingredient.id !== null && selectedIds.includes(ingredient.id)
+                                ? 'bg-blue-500 border-blue-600'
+                                : 'bg-white border-gray-300'
+                        ]">
+                            <svg v-if="ingredient.id !== null && selectedIds.includes(ingredient.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div v-else class="drag-handle cursor-move p-1 hover:bg-gray-100 rounded flex-shrink-0" @click.stop>
                         <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                             <circle cx="6" cy="9" r="1.5"/>
                             <circle cx="12" cy="9" r="1.5"/>
@@ -397,6 +506,7 @@ const addIngredient = () => {
                         </svg>
                     </div>
                     <input
+                        v-if="!selectMode"
                         type="checkbox"
                         :checked="ingredient.completed"
                         @click.stop="toggleIngredient(ingredient)"
@@ -404,11 +514,11 @@ const addIngredient = () => {
                     />
                     <span :class="[
                         'text-gray-800 leading-relaxed text-[15px] font-medium flex-1',
-                        ingredient.completed ? 'line-through opacity-60' : ''
+                        ingredient.completed && !selectMode ? 'line-through opacity-60' : ''
                     ]">
                         {{ formatIngredient(ingredient) }}
                     </span>
-                    <div class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
+                    <div v-if="!selectMode" class="relative flex-shrink-0 dropdown-container opacity-100" @click.stop>
                         <button
                             @click="toggleDropdown(ingredient.id)"
                             class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors opacity-100"
@@ -451,7 +561,27 @@ const addIngredient = () => {
         <div v-else class="text-center py-8">
             <p class="text-gray-500 mb-4">No ingredients yet. Click the + button to add your first ingredient.</p>
         </div>
+
+        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200">
+            <button
+                @click="openConvertModal"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+                Move {{ selectedIds.length }} item{{ selectedIds.length !== 1 ? 's' : '' }}
+            </button>
+        </div>
     </div>
+
+    <ConvertItemsModal
+        :is-open="isConvertModalOpen"
+        source-type="recipe_ingredient"
+        :source-ids="selectedIds"
+        @close="closeConvertModal"
+        @converted="handleConverted"
+    />
 
     <Modal :isOpen="isEditModalOpen" @close="closeEditModal">
         <template #header>
