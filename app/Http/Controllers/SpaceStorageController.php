@@ -52,6 +52,10 @@ class SpaceStorageController extends Controller
             ], 403);
         }
 
+        $space->load(['pantryItems' => function ($query) {
+            $query->orderBy('expiry_date');
+        }]);
+
         return response()->json([
             'data' => $space,
         ]);

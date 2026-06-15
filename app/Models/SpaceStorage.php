@@ -20,4 +20,9 @@ class SpaceStorage extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function pantryItems()
+    {
+        return $this->hasMany(PantryItem::class, 'space_id');
+    }
 }

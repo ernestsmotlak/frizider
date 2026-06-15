@@ -9,28 +9,21 @@ import PantryItemsCard from "../../components/Pantry/PantryItemsCard.vue";
 import type {SpaceStorage} from "./StorageSpacesPage.vue";
 import type {PantryItem} from "../../components/Pantry/PantryItemsCard.vue";
 
+interface SpaceStorageWithItems extends SpaceStorage {
+    pantry_items: PantryItem[];
+}
+
 const route = useRoute();
 const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
 
 const spaceStorageId = Number(route.params.id);
 const errorMessage = ref("");
-const spaceStorageData = ref<SpaceStorage | null>(null);
-const pantryItems = ref<PantryItem[]>([]);
+const spaceStorageData = ref<SpaceStorageWithItems | null>(null);
 
 const handleSpaceStorageUpdate = (updated: SpaceStorage) => {
-    spaceStorageData.value = updated;
-};
-
-const fetchPantryItems = () => {
-    axios.get('/api/pantry-items', {params: {space_id: spaceStorageId}})
-        .then((response) => {
-            pantryItems.value = response.data.data;
-        })
-        .catch((error) => {
-            console.error(error);
-            toastStore.show('error', 'Could not fetch pantry items.');
-        });
+    if (!spaceStorageData.value) return;
+    spaceStorageData.value = {...spaceStorageData.value, ...updated};
 };
 
 const fetchSpaceStorage = () => {
@@ -44,7 +37,6 @@ const fetchSpaceStorage = () => {
     axios.get(`/api/space-storages/${spaceStorageId}`)
         .then((response) => {
             spaceStorageData.value = response.data.data;
-            fetchPantryItems();
         })
         .catch((error) => {
             console.error(error);
@@ -75,9 +67,9 @@ onMounted(() => {
                 />
 
                 <PantryItemsCard
-                    :pantry-items="pantryItems"
+                    :pantry-items="spaceStorageData.pantry_items"
                     :space-id="spaceStorageId"
-                    @refresh="fetchPantryItems"
+                    @refresh="fetchSpaceStorage"
                 />
             </div>
 
