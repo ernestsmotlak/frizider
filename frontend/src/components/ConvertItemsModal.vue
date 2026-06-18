@@ -230,13 +230,13 @@ const handleClose = () => {
                             :class="[
                                 'flex flex-col items-center justify-center gap-2 rounded-xl border-2 px-3 py-5 transition-all duration-200 hover:-translate-y-1 active:translate-y-0 active:scale-[0.99]',
                                 targetType === option.type
-                                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                                    : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30'
+                                    ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-200'
+                                    : 'border-gray-200 bg-white hover:border-violet-300 hover:bg-violet-50/30'
                             ]"
                         >
                             <div :class="[
                                 'flex items-center justify-center w-12 h-12 rounded-2xl',
-                                targetType === option.type ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
+                                targetType === option.type ? 'bg-violet-100 text-violet-600' : 'bg-gray-100 text-gray-500'
                             ]">
                                 <svg v-if="option.type === 'pantry_item'" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7l1-3h16l1 3"></path>
@@ -314,7 +314,7 @@ const handleClose = () => {
                     :disabled="!canGoNext"
                     :class="[
                         'px-4 py-2 text-white rounded-lg transition-colors font-medium',
-                        canGoNext ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-300 cursor-not-allowed'
+                        canGoNext ? 'bg-violet-600 hover:bg-violet-700' : 'bg-violet-300 cursor-not-allowed'
                     ]"
                 >
                     {{ step === totalSteps ? 'Confirm' : 'Next' }}
