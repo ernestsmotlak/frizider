@@ -128,9 +128,10 @@ const deleteSpaceStorage = async (event: Event) => {
 <template>
     <div
         @click="handleClick"
-        class="rounded-xl shadow-sm transition-all duration-300 ease-out overflow-hidden border flex flex-row relative cursor-pointer border-slate-200/80 bg-white/85 hover:border-slate-300 hover:shadow-md md:hover:scale-[1.02] md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.98]"
+        class="rounded-xl shadow-sm transition-all duration-300 ease-out border flex flex-row relative cursor-pointer border-slate-200/80 bg-white/85 hover:border-slate-300 hover:shadow-md md:hover:scale-[1.02] md:hover:-translate-y-0.5 md:hover:shadow-lg active:scale-[0.98]"
+        :class="isMenuOpen ? 'z-10' : 'z-0'"
     >
-        <div class="relative w-20 h-full flex-shrink-0 overflow-hidden self-stretch bg-gradient-to-br from-gray-100 to-gray-200">
+        <div class="relative w-20 h-full flex-shrink-0 overflow-hidden self-stretch bg-gradient-to-br from-gray-100 to-gray-200 rounded-l-xl">
             <div class="w-full h-full flex items-center justify-center">
                 <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7l1-3h16l1 3"></path>
