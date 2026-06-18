@@ -78,7 +78,7 @@ The plan above has been implemented:
 1. **`frontend/src/components/ConvertItemsModal.vue`** (new, shared component) — implements the full 3-step wizard:
    - Props: `isOpen: boolean`, `sourceType: ConvertSourceType` (`'pantry_item' | 'recipe_ingredient' | 'grocery_list_item' | 'shopping_item'`), `sourceIds: number[]`.
    - Step 1: 2-card target-type chooser (`targetOptions` computed per `sourceType`, matching the mapping table exactly — verified against `ItemConversionController`'s `Rule::in([...])` validation for each endpoint).
-   - Step 2: destination picker — fetches `/api/space-storages` (pantry), `/api/grocery-lists` (grocery list), or `POST /api/get-recipes` with `{per_page: 100}` (recipe, reading `response.data.data.data`). Results are shown as a custom scrollable list (max-h-48) with a live search input that filters by name client-side; no native `<select>` used.
+   - Step 2: destination picker — fetches `/api/space-storages` (pantry), `/api/grocery-lists` (grocery list), or `POST /api/get-recipes` with `{per_page: 100}` (recipe, reading `response.data.data.data`). Results are shown as a custom scrollable list (max-h-48) with a live search input (with a clear ✕ button when non-empty) that filters by name client-side; no native `<select>` used. Grocery lists are tinted green with a green checkmark when `completed_at` is set.
    - Step 3: optional `expiry_date` field, only shown when target is `pantry_item`.
    - On confirm, POSTs to `/api/convert/to-pantry-item` / `/api/convert/to-grocery-list-item` / `/api/convert/to-recipe-ingredient` with `source_type`, `source_ids`, and the step 2/3 fields; shows a success/error toast via `toastStore` and emits `converted`/`close`.
 
