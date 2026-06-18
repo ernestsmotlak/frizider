@@ -1,5 +1,10 @@
+<script lang="ts">
+import {ref} from "vue";
+const openCardId = ref<number | null>(null);
+</script>
+
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from "vue";
+import {onMounted, onUnmounted, computed} from "vue";
 import Modal from "../Modal.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
@@ -20,7 +25,7 @@ const toastStore = useToastStore();
 const loadingStore = useLoadingStore();
 const confirmStore = useConfirmStore();
 
-const isMenuOpen = ref(false);
+const isMenuOpen = computed(() => openCardId.value === props.spaceStorage.id);
 const isEditModalOpen = ref(false);
 
 const formData = ref({
@@ -34,11 +39,11 @@ const handleClick = () => {
 
 const toggleMenu = (event: Event) => {
     event.stopPropagation();
-    isMenuOpen.value = !isMenuOpen.value;
+    openCardId.value = openCardId.value === props.spaceStorage.id ? null : props.spaceStorage.id;
 };
 
 const closeMenu = () => {
-    isMenuOpen.value = false;
+    if (openCardId.value === props.spaceStorage.id) openCardId.value = null;
 };
 
 const handleClickOutside = (event: MouseEvent) => {
