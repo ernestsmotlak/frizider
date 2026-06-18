@@ -10,6 +10,7 @@ export type ConvertTargetType = 'pantry_item' | 'grocery_list_item' | 'recipe_in
 interface DestinationOption {
     id: number;
     name: string;
+    completed?: boolean;
 }
 
 interface TargetOption {
@@ -126,7 +127,7 @@ const fetchDestinationOptions = async () => {
             destinationOptions.value = response.data.data.map((space: any) => ({id: space.id, name: space.name}));
         } else if (targetType.value === 'grocery_list_item') {
             const response = await axios.get('/api/grocery-lists');
-            destinationOptions.value = response.data.data.map((list: any) => ({id: list.id, name: list.name}));
+            destinationOptions.value = response.data.data.map((list: any) => ({id: list.id, name: list.name, completed: !!list.completed_at}));
         } else if (targetType.value === 'recipe_ingredient') {
             const response = await axios.post('/api/get-recipes', {per_page: 100});
             const recipes = response.data?.data?.data ?? [];
@@ -314,11 +315,16 @@ const handleClose = () => {
                                     'flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm text-left transition-all duration-150',
                                     selectedDestinationId === option.id
                                         ? 'bg-violet-50 border border-violet-400 text-violet-900 font-medium'
-                                        : 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 hover:border-gray-300'
+                                        : option.completed
+                                            ? 'bg-green-100/80 border border-green-200 text-gray-800 hover:bg-green-200/80 hover:border-green-300'
+                                            : 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 hover:border-gray-300'
                                 ]"
                             >
                                 <span class="truncate">{{ option.name }}</span>
                                 <svg v-if="selectedDestinationId === option.id" class="flex-shrink-0 w-4 h-4 text-violet-600 ml-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <svg v-else-if="option.completed" class="flex-shrink-0 w-4 h-4 text-green-600 ml-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                 </svg>
                             </button>

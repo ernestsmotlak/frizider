@@ -7,7 +7,7 @@ Based on `PLAN.md` vs. what's actually in the repo right now.
 - **"Go shopping" multi-list session** — fully built (`Shopping.vue`, `ShoppingItemCard.vue`, `ShoppingProgressBar.vue`, `ShoppingItemEditModal.vue`, `ShoppingListFilter.vue`, backend `ShoppingSessionController`/`ShoppingItemController`).
 - **Cooking mode + timers** — also built (`Cooking.vue`, `Cooking/Timers.vue`, `Cooking/FinishedTimer.vue`, `CookingModal.vue`, `RecipeCookingModal.vue`, backend `CookingSessionController`/`CookingSessionTimerController`, multiple migrations for timer percent/duration support).
 - **Register page** — exists (`Register.vue`).
-- **Conversion service + frontend wiring** — done (see `CONVERSION_SERVICE_PLAN.md`).
+- **Conversion service + frontend wiring** — done (see `CONVERSION_SERVICE_PLAN.md`). UI subsequently refined: all selection-mode chrome (toggle button, selected item cards, checkboxes, "Move" button, modal target cards, Next/Confirm button) uses violet instead of blue; ConvertItemsModal step 2 replaced native `<select>` with a custom searchable list picker.
 
 So a good chunk of "Phase 3" and the timer checklist is likely already complete. Worth a pass to update `PLAN.md` itself so it reflects reality — otherwise it'll keep suggesting work that's done.
 
