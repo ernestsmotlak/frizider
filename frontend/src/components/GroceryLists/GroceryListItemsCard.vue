@@ -421,7 +421,7 @@ const addItem = (addAnother: boolean = false) => {
                 :class="[
                     'p-2 border-2 rounded-lg shadow-md backdrop-blur-sm hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200',
                     selectMode
-                        ? 'border-blue-300 bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:border-blue-400'
+                        ? 'border-violet-300 bg-gradient-to-br from-violet-500 to-violet-600 text-white hover:border-violet-400'
                         : 'border-gray-200 bg-white/90 text-gray-700 hover:border-gray-300 hover:bg-white'
                 ]"
                 title="Select items"
@@ -443,10 +443,10 @@ const addItem = (addAnother: boolean = false) => {
         </div>
         <div class="flex items-center gap-3 pb-4 mb-5 border-b border-gray-200">
             <div class="flex-1">
-                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-blue-700' : ''">
+                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-violet-700' : ''">
                     {{ selectMode ? 'Select Items' : 'Grocery List Items' }}
                 </h2>
-                <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
+                <p class="text-xs" :class="selectMode ? 'text-violet-400' : 'text-gray-500'">
                     {{ selectMode ? `${selectedIds.length} selected` : 'Drag to reorder • Tap to mark done' }}
                 </p>
                 <p v-if="!selectMode" class="text-xs text-gray-500 mt-1">
@@ -476,10 +476,10 @@ const addItem = (addAnother: boolean = false) => {
                         'flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 cursor-pointer relative overflow-visible',
                         openDropdownId === item.id ? 'z-30' : 'z-0',
                         selectMode && selectedIds.includes(item.id)
-                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-300'
+                            ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-300'
                             : item.is_purchased
                                 ? 'bg-green-50 border-green-200 ring-1 ring-green-100'
-                                : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-blue-200'
+                                : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                     ]"
                 >
                     <div
@@ -490,7 +490,7 @@ const addItem = (addAnother: boolean = false) => {
                         <div :class="[
                             'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
                             selectedIds.includes(item.id)
-                                ? 'bg-blue-500 border-blue-600'
+                                ? 'bg-violet-500 border-violet-600'
                                 : 'bg-white border-gray-300'
                         ]">
                             <svg v-if="selectedIds.includes(item.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -571,7 +571,7 @@ const addItem = (addAnother: boolean = false) => {
         <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200">
             <button
                 @click="openConvertModal"
-                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

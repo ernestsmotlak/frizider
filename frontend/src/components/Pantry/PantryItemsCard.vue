@@ -318,7 +318,7 @@ const deleteItem = async (item: PantryItem) => {
                 :class="[
                     'p-2 border-2 rounded-lg shadow-md hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200',
                     selectMode
-                        ? 'border-blue-600 bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 hover:border-blue-700'
+                        ? 'border-violet-600 bg-gradient-to-b from-violet-500 to-violet-600 text-white hover:from-violet-600 hover:to-violet-700 hover:border-violet-700'
                         : 'border-gray-200 bg-white/90 backdrop-blur-sm hover:border-gray-300 hover:bg-white'
                 ]"
                 title="Select items"
@@ -340,10 +340,10 @@ const deleteItem = async (item: PantryItem) => {
         </div>
         <div class="flex items-center gap-3 pb-4 mb-5 border-b border-gray-200">
             <div class="flex-1">
-                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-blue-700' : ''">
+                <h2 class="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-violet-700' : ''">
                     {{ selectMode ? 'Select Items' : 'Pantry Items' }}
                 </h2>
-                <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
+                <p class="text-xs" :class="selectMode ? 'text-violet-400' : 'text-gray-500'">
                     {{ selectMode ? `${selectedIds.length} selected` : 'Sorted by expiry date' }}
                 </p>
                 <p class="text-xs text-gray-500 mt-1">
@@ -405,7 +405,7 @@ const deleteItem = async (item: PantryItem) => {
                         'flex items-center gap-3 px-4 py-3 rounded-lg border border-l-4 transition-all duration-200 cursor-pointer relative overflow-visible',
                         openDropdownId === item.id ? 'z-30' : 'z-0',
                         selectMode && selectedIds.includes(item.id)
-                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-300 border-l-blue-500'
+                            ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-300 border-l-violet-500'
                             : expiryStatus(item) === 'expired'
                                 ? 'bg-red-50 border-red-200 border-l-red-500 ring-1 ring-red-100'
                                 : expiryStatus(item) === 'soon'
@@ -417,7 +417,7 @@ const deleteItem = async (item: PantryItem) => {
                         <div :class="[
                             'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
                             selectedIds.includes(item.id)
-                                ? 'bg-blue-500 border-blue-600'
+                                ? 'bg-violet-500 border-violet-600'
                                 : 'bg-white border-gray-300'
                         ]">
                             <svg v-if="selectedIds.includes(item.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -502,7 +502,7 @@ const deleteItem = async (item: PantryItem) => {
         <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200">
             <button
                 @click="openConvertModal"
-                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

@@ -95,7 +95,7 @@ onUnmounted(() => {
         :class="[
             'bg-white rounded-xl border-2 p-4 transition-all duration-200 cursor-pointer relative',
             selectMode && isSelected
-                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-300'
+                ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-300'
                 : item.is_purchased
                     ? 'border-green-200 bg-green-50/50'
                     : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
@@ -113,7 +113,7 @@ onUnmounted(() => {
                     :class="[
                         'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200',
                         isSelected
-                            ? 'bg-blue-500 border-blue-600'
+                            ? 'bg-violet-500 border-violet-600'
                             : 'bg-white border-gray-300'
                     ]"
                 >

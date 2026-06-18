@@ -339,7 +339,7 @@ onMounted(() => {
                                     </svg>
 
                                 </div>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-blue-700' : ''">
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900" :class="selectMode ? 'text-violet-700' : ''">
                                     {{ selectMode ? 'Select Items' : 'Shopping' }}
                                 </h2>
                             </div>
@@ -360,7 +360,7 @@ onMounted(() => {
                                     :class="[
                                         'w-11 h-11 border-2 rounded-lg shadow-md backdrop-blur-sm hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center',
                                         selectMode
-                                            ? 'border-blue-300 bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:border-blue-400'
+                                            ? 'border-violet-300 bg-gradient-to-br from-violet-500 to-violet-600 text-white hover:border-violet-400'
                                             : 'border-gray-200 bg-white/90 text-gray-700 hover:border-gray-300 hover:bg-white'
                                     ]"
                                     title="Select items"
@@ -381,7 +381,7 @@ onMounted(() => {
                                 </button>
                             </div>
                         </div>
-                        <p class="text-xs" :class="selectMode ? 'text-blue-400' : 'text-gray-500'">
+                        <p class="text-xs" :class="selectMode ? 'text-violet-400' : 'text-gray-500'">
                             {{ selectMode ? `${selectedIds.length} selected` : 'Tap items to mark as purchased' }}
                         </p>
                     </div>
@@ -510,7 +510,7 @@ onMounted(() => {
                         <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-4 mt-3 pt-3">
                             <button
                                 @click="openConvertModal"
-                                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors shadow-lg"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
