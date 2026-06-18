@@ -38,6 +38,13 @@ const destinationOptions = ref<DestinationOption[]>([]);
 const isLoadingOptions = ref(false);
 const selectedDestinationId = ref<number | null>(null);
 const expiryDate = ref<string>('');
+const destinationSearch = ref<string>('');
+
+const filteredDestinationOptions = computed(() => {
+    const q = destinationSearch.value.trim().toLowerCase();
+    if (!q) return destinationOptions.value;
+    return destinationOptions.value.filter(o => o.name.toLowerCase().includes(q));
+});
 
 const targetOptions = computed<TargetOption[]>(() => {
     switch (props.sourceType) {
@@ -96,6 +103,7 @@ const resetState = () => {
     destinationOptions.value = [];
     selectedDestinationId.value = null;
     expiryDate.value = '';
+    destinationSearch.value = '';
 };
 
 watch(() => props.isOpen, (open) => {
@@ -202,6 +210,7 @@ const goNext = async () => {
 const goBack = () => {
     if (step.value > 1) {
         step.value -= 1;
+        destinationSearch.value = '';
     }
 };
 
@@ -258,26 +267,66 @@ const handleClose = () => {
                 </template>
 
                 <template v-else-if="step === 2">
-                    <p class="text-sm text-gray-600 mb-2">Choose a {{ destinationLabel }}:</p>
-                    <div v-if="isLoadingOptions" class="text-center py-6 text-sm text-gray-500">
-                        Loading {{ destinationLabel }}s...
+                    <p class="text-sm text-gray-600 mb-3">Choose a {{ destinationLabel }}:</p>
+                    <div v-if="isLoadingOptions" class="flex items-center justify-center gap-2 py-8 text-sm text-gray-400">
+                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Loading…
                     </div>
-                    <div v-else-if="destinationOptions.length === 0" class="text-center py-6 text-sm text-gray-500">
+                    <div v-else-if="destinationOptions.length === 0" class="text-center py-8 text-sm text-gray-400">
                         No {{ destinationLabel }}s found. Create one first.
                     </div>
-                    <select
-                        v-else
-                        v-model="selectedDestinationId"
-                        class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                    >
-                        <option :value="null" disabled>Select a {{ destinationLabel }}</option>
-                        <option v-for="option in destinationOptions" :key="option.id" :value="option.id">
-                            {{ option.name }}
-                        </option>
-                    </select>
-                    <p v-if="targetType === 'pantry_item' && !showExpiryStep" class="text-xs text-gray-500 mt-2">
-                        Expiry dates can be set individually in Pantry after moving.
-                    </p>
+                    <template v-else>
+                        <div class="relative mb-2">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                            </svg>
+                            <input
+                                v-model="destinationSearch"
+                                type="text"
+                                :placeholder="`Search ${destinationLabel}s…`"
+                                class="w-full pl-9 pr-9 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-400 focus:border-violet-400 outline-none bg-white transition-colors"
+                            />
+                            <button
+                                v-if="destinationSearch"
+                                type="button"
+                                @click="destinationSearch = ''"
+                                aria-label="Clear search"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex flex-col gap-1 max-h-48 overflow-y-auto pr-0.5">
+                            <div v-if="filteredDestinationOptions.length === 0" class="text-center py-5 text-sm text-gray-400">
+                                No results for "{{ destinationSearch }}"
+                            </div>
+                            <button
+                                v-for="option in filteredDestinationOptions"
+                                :key="option.id"
+                                type="button"
+                                @click="selectedDestinationId = option.id"
+                                :class="[
+                                    'flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm text-left transition-all duration-150',
+                                    selectedDestinationId === option.id
+                                        ? 'bg-violet-50 border border-violet-400 text-violet-900 font-medium'
+                                        : 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 hover:border-gray-300'
+                                ]"
+                            >
+                                <span class="truncate">{{ option.name }}</span>
+                                <svg v-if="selectedDestinationId === option.id" class="flex-shrink-0 w-4 h-4 text-violet-600 ml-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p v-if="targetType === 'pantry_item' && !showExpiryStep" class="text-xs text-gray-400 mt-2">
+                            Expiry dates can be set individually in Pantry after moving.
+                        </p>
+                    </template>
                 </template>
 
                 <template v-else-if="step === 3">
