@@ -8,7 +8,6 @@ const route = useRoute();
 const router = useRouter();
 
 const isActionPickerOpen = ref(false);
-const actionSearchQuery = ref('');
 const actionPanelRef = ref<HTMLElement | null>(null);
 const actionToggleRef = ref<HTMLElement | null>(null);
 
@@ -18,7 +17,6 @@ type DashboardAction = {
     description: string;
     route: string;
     featured: boolean;
-    keywords: string[];
     icon: 'cart' | 'pot';
 };
 
@@ -29,7 +27,6 @@ const dashboardActions: DashboardAction[] = [
         description: 'Check items and buy',
         route: '/shopping',
         featured: true,
-        keywords: ['buy', 'store', 'market', 'groceries', 'items'],
         icon: 'cart',
     },
     {
@@ -38,7 +35,6 @@ const dashboardActions: DashboardAction[] = [
         description: 'Follow steps and cook',
         route: '/cooking',
         featured: true,
-        keywords: ['cook', 'kitchen', 'steps', 'recipe'],
         icon: 'pot',
     },
 ];
@@ -71,7 +67,6 @@ const isIngredientsTab = computed(() => {
 
 const closeActionPicker = () => {
     isActionPickerOpen.value = false;
-    actionSearchQuery.value = '';
 };
 
 const toggleActionPicker = () => {
@@ -83,18 +78,9 @@ const openAction = (action: DashboardAction) => {
     router.push(action.route);
 };
 
-const normalizedActionQuery = computed(() => actionSearchQuery.value.trim().toLowerCase());
+const filteredActions = computed(() => dashboardActions);
 
-const filteredActions = computed(() => {
-    if (!normalizedActionQuery.value) return dashboardActions;
-
-    return dashboardActions.filter((action) => {
-        const haystack = `${action.label} ${action.description} ${action.keywords.join(' ')}`.toLowerCase();
-        return haystack.includes(normalizedActionQuery.value);
-    });
-});
-
-const featuredActions = computed(() => filteredActions.value.filter((action) => action.featured));
+const featuredActions = computed(() => dashboardActions.filter((action) => action.featured));
 
 const handleGlobalPointerDown = (event: PointerEvent) => {
     if (!isActionPickerOpen.value) return;
@@ -171,14 +157,6 @@ watch(() => route.path, () => {
                             <h3 class="action-panel__title">Actions</h3>
                             <span class="action-panel__count text-xs font-semibold">{{ filteredActions.length }} available</span>
                         </div>
-                        <label for="action-search" class="sr-only">Search actions</label>
-                        <input
-                            id="action-search"
-                            v-model="actionSearchQuery"
-                            type="text"
-                            placeholder="Search actions..."
-                            class="action-panel__search mt-2 w-full rounded-xl px-3 py-2 text-sm"
-                        />
                     </div>
 
                     <div class="action-panel__body">
@@ -401,21 +379,6 @@ watch(() => route.path, () => {
     color: var(--text-muted);
 }
 
-.action-panel__search {
-    border: 1px solid var(--line-soft);
-    background: color-mix(in srgb, var(--surface-stronger) 85%, white 15%);
-    color: var(--text-strong);
-}
-
-.action-panel__search::placeholder {
-    color: color-mix(in srgb, var(--text-muted) 92%, white 8%);
-}
-
-.action-panel__search:focus {
-    outline: none;
-    border-color: color-mix(in srgb, var(--accent) 38%, white 62%);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-soft) 75%, white 25%);
-}
 
 .action-panel__body {
     overflow-y: auto;
