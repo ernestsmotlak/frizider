@@ -191,8 +191,8 @@ const formatDate = (dateString: string | null): string => {
     return date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'});
 };
 
-const expiryStatus = (item: PantryItem): 'expired' | 'soon' | 'ok' => {
-    if (!item.expiry_date) return 'expired';
+const expiryStatus = (item: PantryItem): 'expired' | 'soon' | 'ok' | 'none' => {
+    if (!item.expiry_date) return 'none';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -411,7 +411,9 @@ const deleteItem = async (item: PantryItem) => {
                                 ? 'bg-red-50 border-red-200 border-l-red-500 ring-1 ring-red-100'
                                 : expiryStatus(item) === 'soon'
                                     ? 'bg-amber-50 border-amber-200 border-l-amber-500 ring-1 ring-amber-100'
-                                    : 'bg-green-50 border-gray-200 border-l-green-500 ring-1 ring-green-300 hover:bg-gray-50 hover:border-blue-200'
+                                    : expiryStatus(item) === 'ok'
+                                        ? 'bg-green-50 border-gray-200 border-l-green-500 ring-1 ring-green-300 hover:bg-gray-50 hover:border-blue-200'
+                                        : 'bg-white border-gray-200 border-l-gray-400 ring-1 ring-gray-100 hover:bg-gray-50 hover:border-blue-200'
                     ]"
                 >
                     <div v-if="selectMode" class="flex-shrink-0">
@@ -444,10 +446,16 @@ const deleteItem = async (item: PantryItem) => {
                                 Expires soon
                             </span>
                             <span
-                                v-else
+                                v-else-if="expiryStatus(item) === 'ok'"
                                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-200 text-green-700"
                             >
                                 Fresh
+                            </span>
+                            <span
+                                v-else
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-200 text-gray-600"
+                            >
+                                No expiry
                             </span>
                         </div>
                         <p v-if="item.expiry_date || item.notes" class="text-xs text-gray-500 mt-0.5 line-clamp-1">
