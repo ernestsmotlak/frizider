@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Unit;
 use App\Models\PantryItem;
 use App\Models\SpaceStorage;
+use App\Services\PantryIntakeService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PantryItemController extends Controller
 {
+    public function __construct(protected PantryIntakeService $pantryIntake)
+    {
+    }
+
     public function index(Request $request)
     {
         $query = PantryItem::where('user_id', auth()->id());
@@ -29,7 +36,7 @@ class PantryItemController extends Controller
             'space_id' => 'nullable|exists:space_storages,id',
             'name' => 'required|string|max:255',
             'quantity' => 'nullable|numeric',
-            'unit' => 'nullable|string|max:50',
+            'unit' => ['nullable', Rule::enum(Unit::class)],
             'expiry_date' => 'nullable|date',
             'purchase_date' => 'nullable|date',
             'notes' => 'nullable|string',
@@ -44,9 +51,7 @@ class PantryItemController extends Controller
             }
         }
 
-        $validated['user_id'] = auth()->id();
-
-        $pantryItem = PantryItem::create($validated);
+        $pantryItem = $this->pantryIntake->add(auth()->id(), $validated);
 
         return response()->json([
             'message' => 'Pantry item created.',
@@ -75,7 +80,7 @@ class PantryItemController extends Controller
             'space_id' => 'nullable|exists:space_storages,id',
             'name' => 'sometimes|string|max:255',
             'quantity' => 'nullable|numeric',
-            'unit' => 'nullable|string|max:50',
+            'unit' => ['nullable', Rule::enum(Unit::class)],
             'expiry_date' => 'nullable|date',
             'purchase_date' => 'nullable|date',
             'notes' => 'nullable|string',

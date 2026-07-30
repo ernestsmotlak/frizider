@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Unit;
 use App\Models\GroceryListItem;
 use App\Models\PantryItem;
 use App\Models\RecipeIngredient;
@@ -13,6 +14,10 @@ use Illuminate\Validation\ValidationException;
 
 class ItemConversionService
 {
+    public function __construct(protected PantryIntakeService $pantryIntake)
+    {
+    }
+
     /**
      * Convert source items (shopping_item, grocery_list_item, recipe_ingredient) into new pantry items.
      */
@@ -22,8 +27,7 @@ class ItemConversionService
 
         return DB::transaction(function () use ($sources, $userId, $spaceId, $expiryDate) {
             return $sources->map(function ($source) use ($userId, $spaceId, $expiryDate) {
-                return PantryItem::create([
-                    'user_id' => $userId,
+                return $this->pantryIntake->add($userId, [
                     'space_id' => $spaceId,
                     'name' => $source->name,
                     'quantity' => $source->quantity,
@@ -47,12 +51,14 @@ class ItemConversionService
             $nextSortOrder = $this->nextSortOrder(GroceryListItem::where('grocery_list_id', $groceryListId));
 
             return $sources->map(function ($source) use ($groceryListId, &$nextSortOrder) {
+                [$unit, $notes] = Unit::normalizeKeepingNotes($source->unit, $source->notes);
+
                 return GroceryListItem::create([
                     'grocery_list_id' => $groceryListId,
                     'name' => $source->name,
                     'quantity' => $source->quantity,
-                    'unit' => $source->unit,
-                    'notes' => $this->truncateNotes($source->notes, 500),
+                    'unit' => $unit,
+                    'notes' => $this->truncateNotes($notes, 500),
                     'sort_order' => $nextSortOrder++,
                     'is_purchased' => false,
                     'completed' => false,
@@ -72,12 +78,16 @@ class ItemConversionService
             $nextSortOrder = $this->nextSortOrder(RecipeIngredient::where('recipe_id', $recipeId));
 
             return $sources->map(function ($source) use ($recipeId, &$nextSortOrder) {
+                [$unit, $notes] = Unit::normalizeKeepingNotes($source->unit, $source->notes);
+
                 return RecipeIngredient::create([
                     'recipe_id' => $recipeId,
+                    // Provenance link back to the pantry (the hub) when that's where the item came from.
+                    'pantry_item_id' => $source instanceof PantryItem ? $source->id : null,
                     'name' => $source->name,
                     'quantity' => $source->quantity,
-                    'unit' => $source->unit,
-                    'notes' => $this->truncateNotes($source->notes, 500),
+                    'unit' => $unit,
+                    'notes' => $this->truncateNotes($notes, 500),
                     'sort_order' => $nextSortOrder++,
                     'completed' => false,
                 ]);

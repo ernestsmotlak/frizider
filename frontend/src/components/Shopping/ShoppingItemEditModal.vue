@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ref, watch} from "vue";
 import Modal from "../Modal.vue";
+import UnitSelect from "../UnitSelect.vue";
 import type {ShoppingItem} from "./ShoppingItemCard.vue";
 
 const props = defineProps<{
@@ -64,11 +65,9 @@ const handleClose = () => {
                     </div>
                     <div>
                         <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
-                        <input
+                        <UnitSelect
                             v-model="editingItem.unit"
-                            type="text"
                             class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                            placeholder="L"
                         />
                     </div>
                 </div>

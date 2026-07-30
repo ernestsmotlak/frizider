@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Unit;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
 use App\Models\RecipeInstruction;
@@ -157,7 +158,7 @@ class RecipeController extends Controller
             ],
             'ingredients.*.name' => ['required', 'string', 'max:255'],
             'ingredients.*.quantity' => ['nullable', 'numeric', 'min:0'],
-            'ingredients.*.unit' => ['nullable', 'string', 'max:50'],
+            'ingredients.*.unit' => ['nullable', Rule::enum(Unit::class)],
             'ingredients.*.notes' => ['nullable', 'string', 'max:500'],
             'ingredients.*.sort_order' => ['nullable', 'integer', 'min:0'],
             'ingredients.*.completed' => ['nullable', 'boolean'],
@@ -324,7 +325,7 @@ class RecipeController extends Controller
             'ingredients' => 'nullable|array',
             'ingredients.*.name' => 'required|string|max:255',
             'ingredients.*.quantity' => 'nullable|numeric|min:0',
-            'ingredients.*.unit' => 'nullable|string|max:50',
+            'ingredients.*.unit' => ['nullable', Rule::enum(Unit::class)],
             'ingredients.*.notes' => 'nullable|string|max:500',
             'ingredients.*.sort_order' => 'nullable|integer|min:0',
             'instructions' => 'nullable|array',

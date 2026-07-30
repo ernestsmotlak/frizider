@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Unit;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ShoppingItemController extends Controller
 {
@@ -22,7 +24,7 @@ class ShoppingItemController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'quantity' => 'nullable|numeric',
-            'unit' => 'nullable|string|max:50',
+            'unit' => ['nullable', Rule::enum(Unit::class)],
             'notes' => 'nullable|string|max:500',
             'is_purchased' => 'nullable|boolean',
         ]);

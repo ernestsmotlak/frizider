@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Unit;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class GroceryListItemController extends Controller
 {
@@ -40,7 +42,7 @@ class GroceryListItemController extends Controller
             'grocery_list_id' => 'required|exists:grocery_lists,id',
             'name' => 'required|string|max:255',
             'quantity' => 'nullable|numeric',
-            'unit' => 'nullable|string|max:50',
+            'unit' => ['nullable', Rule::enum(Unit::class)],
             'notes' => 'nullable|string',
             'sort_order' => 'nullable|integer',
             'is_purchased' => 'nullable|boolean',
@@ -85,7 +87,7 @@ class GroceryListItemController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'quantity' => 'nullable|numeric',
-            'unit' => 'nullable|string|max:50',
+            'unit' => ['nullable', Rule::enum(Unit::class)],
             'notes' => 'nullable|string',
             'sort_order' => 'nullable|integer',
             'is_purchased' => 'nullable|boolean',

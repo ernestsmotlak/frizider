@@ -13,6 +13,7 @@ class RecipeIngredient extends Model
 
     protected $fillable = [
         'recipe_id',
+        'pantry_item_id',
         'name',
         'quantity',
         'unit',
@@ -30,5 +31,10 @@ class RecipeIngredient extends Model
     public function recipe()
     {
         return $this->belongsTo(Recipe::class);
+    }
+
+    public function pantryItem()
+    {
+        return $this->belongsTo(PantryItem::class);
     }
 }

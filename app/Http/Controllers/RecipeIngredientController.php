@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Unit;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class RecipeIngredientController extends Controller
 {
@@ -48,7 +50,7 @@ class RecipeIngredientController extends Controller
             'recipe_id' => 'required|exists:recipes,id',
             'name' => 'required|string|max:255',
             'quantity' => 'nullable|numeric',
-            'unit' => 'nullable|string|max:50',
+            'unit' => ['nullable', Rule::enum(Unit::class)],
             'notes' => 'nullable|string|max:500',
             'sort_order' => 'nullable|integer',
         ]);
@@ -103,7 +105,7 @@ class RecipeIngredientController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'quantity' => 'nullable|numeric',
-            'unit' => 'nullable|string|max:50',
+            'unit' => ['nullable', Rule::enum(Unit::class)],
             'notes' => 'nullable|string|max:500',
             'sort_order' => 'nullable|integer',
         ]);

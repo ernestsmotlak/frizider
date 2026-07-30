@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DashboardLayout from "../layouts/DashboardLayout.vue";
+import UnitSelect from "../components/UnitSelect.vue";
 import {ref} from "vue";
 import {useRouter} from "vue-router";
 import {useToastStore} from "../stores/toast.ts";
@@ -334,11 +335,9 @@ const removeInstruction = (index: number) => {
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                                        <input
+                                        <UnitSelect
                                             v-model="ingredient.unit"
-                                            type="text"
                                             class="ingredient-input w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
-                                            placeholder="cups"
                                         />
                                     </div>
                                 </div>

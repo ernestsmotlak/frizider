@@ -12,11 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Truncate existing unit values longer than 10 characters
-        DB::statement('UPDATE pantry_items SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
-        DB::statement('UPDATE recipe_ingredients SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
-        DB::statement('UPDATE grocery_list_items SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
-        DB::statement('UPDATE shopping_items SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
+        // Truncate existing unit values longer than 10 characters.
+        // MySQL-only syntax; on sqlite (fresh test databases) there is no data to fix.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('UPDATE pantry_items SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
+            DB::statement('UPDATE recipe_ingredients SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
+            DB::statement('UPDATE grocery_list_items SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
+            DB::statement('UPDATE shopping_items SET unit = SUBSTRING(unit, 1, 10) WHERE CHAR_LENGTH(unit) > 10');
+        }
 
         Schema::table('pantry_items', function (Blueprint $table) {
             $table->string('unit', 10)->nullable()->change();

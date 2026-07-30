@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Unit;
 use App\Models\GroceryList;
 use App\Models\GroceryListItem;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class GroceryListController extends Controller
 {
@@ -170,7 +172,7 @@ class GroceryListController extends Controller
             'items' => 'nullable|array',
             'items.*.name' => 'required|string|max:255',
             'items.*.quantity' => 'nullable|numeric|min:0',
-            'items.*.unit' => 'nullable|string|max:50',
+            'items.*.unit' => ['nullable', Rule::enum(Unit::class)],
             'items.*.notes' => 'nullable|string|max:500',
             'items.*.sort_order' => 'nullable|integer|min:0',
         ]);
@@ -281,13 +283,15 @@ class GroceryListController extends Controller
 
             $sortOrder = 0;
             foreach ($allListsItems as $item) {
+                [$unit, $notes] = Unit::normalizeKeepingNotes($item->unit, $item->notes);
+
                 ShoppingItem::create([
                     'shopping_session_id' => $session->id,
                     'grocery_list_item_id' => $item->id,
                     'name' => $item->name,
                     'quantity' => $item->quantity,
-                    'unit' => $item->unit,
-                    'notes' => $item->notes,
+                    'unit' => $unit,
+                    'notes' => $notes,
                     'sort_order' => $sortOrder,
                     'is_purchased' => $item->is_purchased,
                 ]);

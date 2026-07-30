@@ -2,6 +2,7 @@
 import {ref, watchEffect, onMounted, onUnmounted, computed} from "vue";
 import Modal from "../Modal.vue";
 import ConvertItemsModal from "../ConvertItemsModal.vue";
+import UnitSelect from "../UnitSelect.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
@@ -619,11 +620,9 @@ const addItem = (addAnother: boolean = false) => {
                         </div>
                         <div>
                             <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
-                            <input
+                            <UnitSelect
                                 v-model="editingItem.unit"
-                                type="text"
                                 class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                placeholder="gallons"
                             />
                         </div>
                     </div>
@@ -698,11 +697,9 @@ const addItem = (addAnother: boolean = false) => {
                         </div>
                         <div>
                             <label class="block text-xs text-gray-500 font-medium mb-1">Unit</label>
-                            <input
+                            <UnitSelect
                                 v-model="newItem.unit"
-                                type="text"
                                 class="w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                                placeholder="gallons"
                             />
                         </div>
                     </div>
