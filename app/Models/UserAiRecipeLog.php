@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Enums\AiGenerationStatus;
 
 class UserAiRecipeLog extends Model
 {
@@ -14,17 +15,19 @@ class UserAiRecipeLog extends Model
         'recipe_id',
         'source_recipe_id',
         'action',
+        'status',
         'request_meta',
-        'success',
         'error_message',
         'tokens_used',
         'idempotency_key',
+        'completed_at',
     ];
 
     protected $casts = [
         'request_meta' => 'array',
-        'success' => 'boolean',
+        'status' => AiGenerationStatus::class,
         'tokens_used' => 'integer',
+        'completed_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

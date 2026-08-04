@@ -85,4 +85,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(AiUserData::class);
     }
+    
+    public function aiCreditTransactions()
+    {
+        return $this->hasMany(AiCreditTransaction::class);
+    }
 }

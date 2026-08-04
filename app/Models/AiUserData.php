@@ -11,10 +11,10 @@ class AiUserData extends Model
     protected $guarded = ['*'];
 
     protected $casts = [
-        'can_generate_ai_calls' => 'boolean',
-        'ai_calls_remaining' => 'integer',
+        'can_use_ai' => 'boolean',
+        'credit_balance' => 'integer',
     ];
-
+    
     public function user()
     {
         return $this->belongsTo(User::class);
