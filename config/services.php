@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'ai' => [
+        'driver' => env('AI_RECIPE_DRIVER', 'fake'),
+        'fake_delay' => env('AI_FAKE_DELAY', 3),
+        'fake_failure_rate' => env('AI_FAKE_FAILURE_RATE', 0),
+    ],
+
 ];

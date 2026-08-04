@@ -9,6 +9,12 @@ use App\Models\RecipeInstruction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Enums\AiGenerationStatus;
+use App\Enums\AiOperation;
+use App\Jobs\GenerateAiRecipe;
+use App\Models\AiUserData;
+use App\Models\UserAiRecipeLog;
+use App\Services\AiCreditService;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -24,8 +30,8 @@ class RecipeController extends Controller
             'searchTerm' => 'nullable|string|max:100',
         ]);
 
-        $perPage = (int) ($validated['per_page'] ?? 10);
-        $searchTerm = trim((string) ($validated['searchTerm'] ?? ''));
+        $perPage = (int)($validated['per_page'] ?? 10);
+        $searchTerm = trim((string)($validated['searchTerm'] ?? ''));
 
         $query = Recipe::select([
             'id',
@@ -280,7 +286,7 @@ class RecipeController extends Controller
             ->where('id', $instruction)
             ->firstOrFail();
 
-        $instructionModel->completed = ! $instructionModel->completed;
+        $instructionModel->completed = !$instructionModel->completed;
         $instructionModel->save();
 
         $updatedRecipe = Recipe::where('user_id', auth()->id())
@@ -304,7 +310,7 @@ class RecipeController extends Controller
             ->where('id', $ingredient)
             ->firstOrFail();
 
-        $ingredientModel->completed = ! $ingredientModel->completed;
+        $ingredientModel->completed = !$ingredientModel->completed;
         $ingredientModel->save();
 
         return response()->json([
@@ -380,9 +386,75 @@ class RecipeController extends Controller
         }
     }
 
-    public function generateAiRecipeFromIngredients(Request $request)
+    public function generateAiRecipeFromIngredients(Request $request, AiCreditService $credits)
     {
+        $userId = $request->user()->id;
+        $aiData = AiUserData::where('user_id', $userId)->first();
 
+        abort_if($aiData === null || !$aiData->can_use_ai, 403, 'AI generation is not enabled for this account.');
+
+        $validated = $request->validate([
+            'ingredients' => 'required|array|min:1|max:30',
+            'ingredients.*' => 'required|string|max:120',
+            'idempotency_key' => 'required|string|max:64',
+        ]);
+
+        // Same key already submitted — hand back the run that is already going.
+        $existing = UserAiRecipeLog::where('user_id', $userId)
+            ->where('idempotency_key', $validated['idempotency_key'])
+            ->first();
+
+        if ($existing !== null) {
+            return response()->json([
+                'generation_id' => $existing->id,
+                'status' => $existing->status,
+            ], 202);
+        }
+
+        $operation = AiOperation::GenerateRecipeFromIngredients;
+
+        $log = DB::transaction(function () use ($credits, $userId, $operation, $validated) {
+            $log = UserAiRecipeLog::create([
+                'user_id' => $userId,
+                'action' => $operation->value,
+                'status' => AiGenerationStatus::Pending,
+                'request_meta' => ['ingredients' => $validated['ingredients']],
+                'idempotency_key' => $validated['idempotency_key'],
+            ]);
+
+            $charge = $credits->spend(
+                $userId,
+                $operation->creditCost(),
+                $log,
+                $validated['idempotency_key'],
+                ['operation' => $operation->value],
+            );
+
+            GenerateAiRecipe::dispatch($log, $charge)->afterCommit();
+
+            return $log;
+        });
+
+        return response()->json([
+            'generation_id' => $log->id,
+            'status' => AiGenerationStatus::Pending,
+            'credits_remaining' => $credits->balance($userId),
+        ], 202);
+    }
+
+    public function generationStatus(Request $request, UserAiRecipeLog $log)
+    {
+        abort_if($log->user_id !== $request->user()->id, 404);
+
+        return response()->json([
+            'generation_id' => $log->id,
+            'status' => $log->status,
+            'recipe_id' => $log->recipe_id,
+            'error' => $log->error_message,
+            'recipe' => $log->status === AiGenerationStatus::Completed
+                ? $log->recipe?->load(['recipeIngredients', 'recipeInstructions'])
+                : null,
+        ]);
     }
 
     // public function turnRecipeVegetarian(Request $request)

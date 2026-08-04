@@ -41,7 +41,10 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::delete('recipe/{recipe}/instruction/{instruction}', [RecipeController::class, 'deleteInstructionFromRecipe']);
     Route::post('recipe/{recipe}/instruction/{instruction}/toggle-completed', [RecipeController::class, 'toggleInstructionCompleted']);
 
-    Route::post('/recipe/ai/generate-recipe', [RecipeController::class, 'generateAiRecipeFromIngredients']);
+    Route::post('/recipe/ai/generate-recipe', [RecipeController::class, 'generateAiRecipeFromIngredients'])
+        ->middleware('throttle:10,1');
+    Route::get('/recipe/ai/generations/{log}', [RecipeController::class, 'generationStatus'])
+        ->middleware('throttle:120,1');
     // Route::post('/recipe/ai/turn-vegetarian', [RecipeController::class, 'turnRecipeVegetarian']);
     // Route::post('/recipe/ai/turn-vegan', [RecipeController::class, 'turnRecipeVegan']);
 
