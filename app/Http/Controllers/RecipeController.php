@@ -457,6 +457,33 @@ class RecipeController extends Controller
         ], 202);
     }
 
+    /**
+     * Everything still running, plus recently finished runs so a refreshed
+     * client can announce results it missed. The client remembers what it
+     * already showed.
+     */
+    public function activeGenerations(Request $request)
+    {
+        $logs = UserAiRecipeLog::where('user_id', $request->user()->id)
+            ->where(function ($query) {
+                $query->whereIn('status', [AiGenerationStatus::Pending, AiGenerationStatus::Processing])
+                    ->orWhere('completed_at', '>=', now()->subMinutes(15));
+            })
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'generations' => $logs->map(fn(UserAiRecipeLog $log) => [
+                'generation_id' => $log->id,
+                'status' => $log->status,
+                'recipe_id' => $log->recipe_id,
+                'error' => $log->error_message,
+                'created_at' => $log->created_at,
+            ]),
+        ]);
+    }
+
     public function generationStatus(Request $request, UserAiRecipeLog $log)
     {
         abort_if($log->user_id !== $request->user()->id, 404);

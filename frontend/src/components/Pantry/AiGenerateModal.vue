@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
+import {computed, onUnmounted, ref, watch} from "vue";
 import {useRouter} from "vue-router";
 import Modal from "../Modal.vue";
-import {useToastStore} from "../../stores/toast.ts";
-import {useAiGeneration} from "../../composables/useAiGeneration.ts";
+import {useAiGenerationStore} from "../../stores/aiGeneration.ts";
 
 export interface SelectedPantryItem {
     id: number;
@@ -25,18 +24,24 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const toastStore = useToastStore();
-const {state, isBusy, recipeId, error, submit, reset} = useAiGeneration();
+const store = useAiGenerationStore();
 
 const removedIds = ref<number[]>([]);
 
 // A fresh selection is a fresh start — unless a generation is still running,
-// in which case reopening shows its progress.
+// in which case reopening shows its progress. The pill stays quiet while the
+// modal is the one talking.
 watch(() => props.isOpen, (open) => {
-    if (open && !isBusy.value) {
+    store.modalOpen = open;
+
+    if (open && !store.isBusy) {
         removedIds.value = [];
-        reset();
+        store.reset();
     }
+});
+
+onUnmounted(() => {
+    store.modalOpen = false;
 });
 
 const chips = computed(() => props.items.filter((item) => !removedIds.value.includes(item.id)));
@@ -54,9 +59,9 @@ const formatAmount = (item: SelectedPantryItem): string => {
 };
 
 const generate = () => {
-    if (chips.value.length === 0 || overLimit.value || isBusy.value) return;
+    if (chips.value.length === 0 || overLimit.value || store.isBusy) return;
 
-    submit(chips.value.map((item) => ({
+    store.submit(chips.value.map((item) => ({
         id: item.id,
         name: item.name,
         quantity: item.quantity,
@@ -65,23 +70,18 @@ const generate = () => {
 };
 
 const tryAgain = () => {
-    reset();
+    store.reset();
     generate();
 };
 
-watch(state, (newState) => {
-    if (newState === "completed" && recipeId.value !== null) {
+// Completion while the modal is open takes the user straight to the recipe;
+// while it is closed, the pill announces it instead.
+watch(() => store.status, (status) => {
+    if (status === "completed" && store.recipeId !== null && props.isOpen) {
+        const id = store.recipeId;
         emit("done");
-
-        if (props.isOpen) {
-            router.push(`/recipe/${recipeId.value}`);
-        } else {
-            toastStore.show("success", "Your AI recipe is ready — find it in your recipes.");
-        }
-    }
-
-    if (newState === "failed" && !props.isOpen) {
-        toastStore.show("error", error.value || "Recipe generation failed. Your credit was refunded.");
+        store.acknowledge();
+        router.push(`/recipe/${id}`);
     }
 });
 </script>
@@ -94,7 +94,7 @@ watch(state, (newState) => {
 
         <template #body>
             <!-- Pick & confirm -->
-            <div v-if="state === 'idle'" class="space-y-4">
+            <div v-if="store.status === 'idle'" class="space-y-4">
                 <p class="text-sm text-gray-600">
                     The recipe will use only these ingredients, plus basic staples like water, salt, pepper, oil, and sugar.
                 </p>
@@ -129,7 +129,7 @@ watch(state, (newState) => {
             </div>
 
             <!-- In flight -->
-            <div v-else-if="isBusy" class="py-6 text-center space-y-3">
+            <div v-else-if="store.isBusy" class="py-6 text-center space-y-3">
                 <svg class="w-10 h-10 mx-auto text-violet-600 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -139,9 +139,9 @@ watch(state, (newState) => {
             </div>
 
             <!-- Failed -->
-            <div v-else-if="state === 'failed'" class="space-y-3">
+            <div v-else-if="store.status === 'failed'" class="space-y-3">
                 <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p class="text-sm text-red-700">{{ error }}</p>
+                    <p class="text-sm text-red-700">{{ store.error }}</p>
                 </div>
                 <p class="text-xs text-gray-400">If a generation fails, the credit is refunded automatically.</p>
             </div>
@@ -153,11 +153,11 @@ watch(state, (newState) => {
                     @click="emit('close')"
                     class="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
                 >
-                    {{ isBusy ? "Continue in background" : "Close" }}
+                    {{ store.isBusy ? "Continue in background" : "Close" }}
                 </button>
 
                 <button
-                    v-if="state === 'idle'"
+                    v-if="store.status === 'idle'"
                     @click="generate"
                     :disabled="chips.length === 0 || overLimit"
                     class="flex items-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -169,7 +169,7 @@ watch(state, (newState) => {
                 </button>
 
                 <button
-                    v-if="state === 'failed'"
+                    v-if="store.status === 'failed'"
                     @click="tryAgain"
                     class="px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
                 >

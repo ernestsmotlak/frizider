@@ -3,9 +3,12 @@ import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import BackButton from "../components/BackButton.vue";
 import LogoComponent from "../components/LogoComponent.vue";
+import AiGenerationPill from "../components/AiGenerationPill.vue";
+import {useAiGenerationStore} from "../stores/aiGeneration.ts";
 
 const route = useRoute();
 const router = useRouter();
+const aiGenerationStore = useAiGenerationStore();
 
 const isActionPickerOpen = ref(false);
 const actionPanelRef = ref<HTMLElement | null>(null);
@@ -98,6 +101,9 @@ const handleGlobalPointerDown = (event: PointerEvent) => {
 
 onMounted(() => {
     document.addEventListener('pointerdown', handleGlobalPointerDown, true);
+    // Once per app load: pick up any generation left running (or finished
+    // unseen) before a refresh.
+    aiGenerationStore.bootCheck();
 });
 
 onBeforeUnmount(() => {
@@ -224,6 +230,8 @@ watch(() => route.path, () => {
             </div>
         </div>
     </Transition>
+
+    <AiGenerationPill/>
 
     <nav
         class="bottom-nav fixed bottom-0 left-0 right-0 z-20"
