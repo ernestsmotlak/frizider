@@ -25,7 +25,7 @@ class GenerateAiRecipe implements ShouldQueue
 
     public array $backoff = [10, 30];
 
-    public int $timeout = 120;
+    public int $timeout = 60;
 
     public bool $failOnTimeout = true;
 
