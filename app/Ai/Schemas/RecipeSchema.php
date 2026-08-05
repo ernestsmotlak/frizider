@@ -11,8 +11,27 @@ use App\Enums\Unit;
  */
 class RecipeSchema
 {
-    public static function get(): array
+    /**
+     * Always-available basics a recipe may add on top of the user's own
+     * ingredients. This list is the single authority — the prompt only ever
+     * refers to staples categorically.
+     */
+    public const STAPLES = ['water', 'salt', 'pepper', 'oil', 'sugar'];
+
+    /**
+     * @param string[]|null $allowedIngredients when given, the ingredient
+     *                      name becomes an enum of exactly these names plus
+     *                      STAPLES — constrained decoding makes any other
+     *                      ingredient impossible, not just discouraged.
+     */
+    public static function get(?array $allowedIngredients = null): array
     {
+        $name = ['type' => 'string'];
+
+        if ($allowedIngredients !== null) {
+            $name['enum'] = array_values(array_unique(array_merge($allowedIngredients, self::STAPLES)));
+        }
+
         return [
             'type' => 'object',
             'properties' => [
@@ -46,9 +65,7 @@ class RecipeSchema
                     'items' => [
                         'type' => 'object',
                         'properties' => [
-                            'name' => [
-                                'type' => 'string',
-                            ],
+                            'name' => $name,
                             'quantity' => [
                                 'type' => 'number',
                                 'nullable' => true,

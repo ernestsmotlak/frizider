@@ -39,14 +39,15 @@ class FakeAiClient implements AiClient
         );
     }
 
-    private function fabricate(array $schema, string $name = 'value'): mixed
+    private function fabricate(array $schema, string $name = 'value', int $seed = 0): mixed
     {
         if (isset($schema['enum'])) {
-            return $schema['enum'][0];
+            // Rotate by array position so sibling items get distinct values.
+            return $schema['enum'][$seed % count($schema['enum'])];
         }
 
         return match ($schema['type'] ?? null) {
-            'object' => $this->fabricateObject($schema),
+            'object' => $this->fabricateObject($schema, $seed),
             'array' => $this->fabricateArray($schema, $name),
             'string' => str_contains($name, 'date') ? '2027-01-01' : "Fake {$name}",
             'number' => 100,
@@ -56,12 +57,12 @@ class FakeAiClient implements AiClient
         };
     }
 
-    private function fabricateObject(array $schema): array
+    private function fabricateObject(array $schema, int $seed = 0): array
     {
         $out = [];
 
         foreach ($schema['properties'] ?? [] as $key => $property) {
-            $out[$key] = $this->fabricate($property, $key);
+            $out[$key] = $this->fabricate($property, $key, $seed);
         }
 
         return $out;
@@ -74,7 +75,7 @@ class FakeAiClient implements AiClient
         $count = min(max(2, $schema['minItems'] ?? 0), $schema['maxItems'] ?? PHP_INT_MAX);
 
         return array_map(
-            fn($i) => $this->fabricate($items, "{$name} {$i}"),
+            fn($i) => $this->fabricate($items, "{$name} {$i}", $i - 1),
             range(1, $count),
         );
     }

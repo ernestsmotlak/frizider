@@ -40,11 +40,22 @@ final readonly class GeneratedRecipe
         }
 
         $ingredients = [];
+        $seen = [];
 
         foreach ((array)($data['ingredients'] ?? []) as $ingredient) {
             if (!is_array($ingredient) || trim((string)($ingredient['name'] ?? '')) === '') {
                 continue;
             }
+
+            // The schema cannot forbid the model repeating an ingredient;
+            // first occurrence wins.
+            $key = mb_strtolower(trim((string)$ingredient['name']));
+
+            if (isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
 
             $quantity = $ingredient['quantity'] ?? null;
             $unit = trim((string)($ingredient['unit'] ?? ''));

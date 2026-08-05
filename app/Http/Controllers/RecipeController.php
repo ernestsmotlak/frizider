@@ -13,10 +13,9 @@ use App\Enums\AiGenerationStatus;
 use App\Enums\AiOperation;
 use App\Jobs\GenerateAiRecipe;
 use App\Models\AiUserData;
+use App\Models\PantryItem;
 use App\Models\UserAiRecipeLog;
 use App\Services\AiCreditService;
-
-use function PHPUnit\Framework\isEmpty;
 
 class RecipeController extends Controller
 {
@@ -395,9 +394,25 @@ class RecipeController extends Controller
 
         $validated = $request->validate([
             'ingredients' => 'required|array|min:1|max:30',
-            'ingredients.*' => 'required|string|max:120',
+            'ingredients.*.id' => 'nullable|integer',
+            'ingredients.*.name' => 'required|string|max:120',
+            'ingredients.*.quantity' => 'nullable|numeric|min:0',
+            'ingredients.*.unit' => ['nullable', Rule::enum(Unit::class)],
             'idempotency_key' => 'required|string|max:64',
         ]);
+
+        // Every referenced pantry item must be the user's own.
+        $pantryItemIds = array_values(array_unique(array_filter(array_column($validated['ingredients'], 'id'))));
+
+        if ($pantryItemIds !== []) {
+            $owned = PantryItem::whereIn('id', $pantryItemIds)->where('user_id', $userId)->count();
+
+            if ($owned !== count($pantryItemIds)) {
+                return response()->json([
+                    'message' => 'You do not have permission to use one or more of these pantry items.',
+                ], 403);
+            }
+        }
 
         // Same key already submitted — hand back the run that is already going.
         $existing = UserAiRecipeLog::where('user_id', $userId)

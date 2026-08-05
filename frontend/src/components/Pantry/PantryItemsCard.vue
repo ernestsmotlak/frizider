@@ -2,6 +2,7 @@
 import {computed, onMounted, onUnmounted, ref} from "vue";
 import Modal from "../Modal.vue";
 import ConvertItemsModal from "../ConvertItemsModal.vue";
+import AiGenerateModal from "./AiGenerateModal.vue";
 import UnitSelect from "../UnitSelect.vue";
 import PantryItemStatusFilter, {type PantryStatusFilterValue} from "./PantryItemStatusFilter.vue";
 import {useToastStore} from "../../stores/toast.ts";
@@ -167,6 +168,22 @@ const handleConverted = () => {
     selectedIds.value = [];
     selectMode.value = false;
     emit('refresh');
+};
+
+const isAiModalOpen = ref(false);
+
+const selectedItems = computed(() =>
+    props.pantryItems.filter((item) => selectedIds.value.includes(item.id))
+);
+
+const openAiModal = () => {
+    isAiModalOpen.value = true;
+};
+
+const handleAiDone = () => {
+    // The pantry itself is untouched by a generation — just clear the selection.
+    selectedIds.value = [];
+    selectMode.value = false;
 };
 
 const formatItem = (item: PantryItem): string => {
@@ -508,15 +525,24 @@ const deleteItem = async (item: PantryItem) => {
             <p class="text-gray-500 mb-4">No items yet. Click the + button to add your first item.</p>
         </div>
 
-        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200">
+        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200 flex gap-2">
             <button
                 @click="openConvertModal"
-                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
+                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
-                Move {{ selectedIds.length }} item{{ selectedIds.length !== 1 ? 's' : '' }}
+                Move {{ selectedIds.length }}
+            </button>
+            <button
+                @click="openAiModal"
+                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-lg font-semibold hover:from-violet-700 hover:to-fuchsia-700 transition-colors"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"></path>
+                </svg>
+                Generate recipe
             </button>
         </div>
     </div>
@@ -527,6 +553,13 @@ const deleteItem = async (item: PantryItem) => {
         :source-ids="selectedIds"
         @close="closeConvertModal"
         @converted="handleConverted"
+    />
+
+    <AiGenerateModal
+        :is-open="isAiModalOpen"
+        :items="selectedItems"
+        @close="isAiModalOpen = false"
+        @done="handleAiDone"
     />
 
     <Modal :isOpen="isEditModalOpen" @close="closeEditModal">
