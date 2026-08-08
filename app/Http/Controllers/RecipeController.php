@@ -496,6 +496,56 @@ class RecipeController extends Controller
         ]);
     }
 
+    /**
+     * The full record of everything this user has generated, newest first.
+     *
+     * Deliberately the opposite of activeGenerations(): that one answers "what
+     * is news right now" and hides anything acknowledged, this one answers
+     * "what have I ever run" and hides nothing. Read-only — reading your
+     * history must never count as being told about a result, or opening this
+     * page would silently empty the pill.
+     */
+    public function generationHistory(Request $request)
+    {
+        $validated = $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:50',
+        ]);
+
+        $userId = $request->user()->id;
+        $perPage = (int)($validated['per_page'] ?? 20);
+
+        $logs = UserAiRecipeLog::query()
+            ->select(['id', 'action', 'status', 'recipe_id', 'created_at', 'completed_at'])
+            // Soft-deleted recipes do not load, which is what we want: the run
+            // still happened, but there is nothing left to link to.
+            ->with('recipe:id,name')
+            ->where('user_id', $userId)
+            ->orderByDesc('id')
+            ->simplePaginate($perPage);
+
+        return response()->json([
+            'generations' => collect($logs->items())->map(fn(UserAiRecipeLog $log) => [
+                'generation_id' => $log->id,
+                'action' => $log->action,
+                'status' => $log->status,
+                // Both read through the relation, so a deleted recipe yields
+                // null for each and the row renders without a dead link.
+                'recipe_id' => $log->recipe?->id,
+                'recipe_name' => $log->recipe?->name,
+                'error' => $this->clientError($log),
+                'created_at' => $log->created_at,
+                'completed_at' => $log->completed_at,
+            ])->values(),
+            'has_more' => $logs->hasMorePages(),
+            'totals' => [
+                'all' => UserAiRecipeLog::where('user_id', $userId)->count(),
+                'completed' => UserAiRecipeLog::where('user_id', $userId)
+                    ->where('status', AiGenerationStatus::Completed)
+                    ->count(),
+            ],
+        ]);
+    }
+
     public function generationStatus(Request $request, UserAiRecipeLog $log)
     {
         abort_if($log->user_id !== $request->user()->id, 404);

@@ -17,6 +17,7 @@ import Cooking from "../pages/Cooking.vue";
 import StorageSpacesPage from "../pages/Pantry/StorageSpacesPage.vue";
 import StorageSpacePage from "../pages/Pantry/StorageSpacePage.vue";
 import NewStorageSpace from "../pages/NewStorageSpace.vue";
+import Profile from "../pages/Profile.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -109,6 +110,12 @@ const router = createRouter({
             path: '/new/storage-space',
             name: 'New Storage Space',
             component: NewStorageSpace,
+            meta: {requiresAuth: true}
+        },
+        {
+            path: '/profile',
+            name: 'Profile',
+            component: Profile,
             meta: {requiresAuth: true}
         },
         {

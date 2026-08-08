@@ -45,6 +45,8 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
         ->middleware('throttle:10,1');
     Route::get('/recipe/ai/active-generations', [RecipeController::class, 'activeGenerations'])
         ->middleware('throttle:60,1');
+    Route::get('/recipe/ai/generations', [RecipeController::class, 'generationHistory'])
+        ->middleware('throttle:60,1');
     Route::get('/recipe/ai/generations/{log}', [RecipeController::class, 'generationStatus'])
         ->middleware('throttle:120,1');
     // Before the {log} route so "acknowledge" is not read as a generation id.

@@ -60,6 +60,8 @@ const isPantryTab = computed(() => {
     return false;
 });
 
+const isProfileTab = computed(() => route.path.startsWith('/profile'));
+
 const isIngredientsTab = computed(() => {
     if (route.path.startsWith('/ingredients')) return true;
     if (route.path.includes('/ingredient')) return true;
@@ -241,7 +243,7 @@ watch(() => route.path, () => {
             <div class="bottom-nav__track">
             <router-link
                 to="/grocery-lists"
-                class="bottom-nav__item flex items-center justify-center gap-2 flex-1"
+                class="bottom-nav__item flex flex-col items-center justify-center gap-1 flex-1"
                 :class="isGroceryList ? 'bottom-nav__item--active' : '' "
             >
                 <div class="bottom-nav__icon" aria-hidden="true">
@@ -257,7 +259,7 @@ watch(() => route.path, () => {
                 ref="actionToggleRef"
                 type="button"
                 @click="toggleActionPicker"
-                class="bottom-nav__item bottom-nav__item--action group relative flex items-center justify-center gap-1 flex-1"
+                class="bottom-nav__item bottom-nav__item--action group relative flex flex-col items-center justify-center gap-1 flex-1"
                 :class="[
                     isIngredientsTab ? 'bottom-nav__item--active' : '',
                     isActionPickerOpen ? 'bottom-nav__item--open' : '',
@@ -298,7 +300,7 @@ watch(() => route.path, () => {
             </button>
             <router-link
                 to="/recipes"
-                class="bottom-nav__item flex items-center justify-center gap-2 flex-1"
+                class="bottom-nav__item flex flex-col items-center justify-center gap-1 flex-1"
                 :class="isRecipesTab ? 'bottom-nav__item--active' : '' "
             >
                 <div class="bottom-nav__icon" aria-hidden="true">
@@ -313,7 +315,7 @@ watch(() => route.path, () => {
             </router-link>
             <router-link
                 to="/storage-spaces"
-                class="bottom-nav__item flex items-center justify-center gap-2 flex-1"
+                class="bottom-nav__item flex flex-col items-center justify-center gap-1 flex-1"
                 :class="isPantryTab ? 'bottom-nav__item--active' : '' "
             >
                 <div class="bottom-nav__icon" aria-hidden="true">
@@ -324,6 +326,19 @@ watch(() => route.path, () => {
                     </svg>
                 </div>
                 <span class="bottom-nav__label text-xs font-semibold">Pantry</span>
+            </router-link>
+            <router-link
+                to="/profile"
+                class="bottom-nav__item flex flex-col items-center justify-center gap-1 flex-1"
+                :class="isProfileTab ? 'bottom-nav__item--active' : '' "
+            >
+                <div class="bottom-nav__icon" aria-hidden="true">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 20a7 7 0 0 1 14 0"></path>
+                    </svg>
+                </div>
+                <span class="bottom-nav__label text-xs font-semibold">Profile</span>
             </router-link>
         </div>
         </div>
@@ -535,9 +550,11 @@ watch(() => route.path, () => {
 .bottom-nav__track {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* Five destinations no longer fit with the icon beside the label, so the
+       items stack instead — which gives each one more room than it had at four. */
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.25rem;
     min-height: 4.8rem;
     border-radius: 1.6rem;
     padding: 0.45rem;
@@ -555,7 +572,7 @@ watch(() => route.path, () => {
     position: relative;
     min-height: 3.9rem;
     border-radius: 1.2rem;
-    padding: 0.4rem 0.55rem;
+    padding: 0.4rem 0.3rem;
     color: var(--text-muted);
     transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
@@ -620,11 +637,11 @@ watch(() => route.path, () => {
 @media (max-width: 420px) {
     .bottom-nav__item {
         min-height: 3.65rem;
-        padding-inline: 0.35rem;
+        padding-inline: 0.18rem;
     }
 
     .bottom-nav__label {
-        font-size: 0.68rem;
+        font-size: 0.66rem;
     }
 
     .bottom-nav__icon {
