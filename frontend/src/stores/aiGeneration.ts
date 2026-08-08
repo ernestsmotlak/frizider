@@ -1,7 +1,18 @@
 import {defineStore} from "pinia";
 import {computed, ref} from "vue";
 
-export type AiGenerationStatus = "idle" | "submitting" | "generating" | "completed" | "failed";
+export type AiJobStatus = "pending" | "processing" | "completed" | "failed";
+
+/** How the modal sees the one generation it started. */
+export type AiSubmissionStatus = "idle" | "submitting" | "generating" | "completed" | "failed";
+
+export interface AiJob {
+    id: number;
+    action: string;
+    status: AiJobStatus;
+    recipeId: number | null;
+    error: string | null;
+}
 
 export interface AiIngredientInput {
     id: number | null;
@@ -16,195 +27,291 @@ const POLL_CEILING_MS = 3 * 60 * 1000;
 const MAX_CONSECUTIVE_ERRORS = 5;
 
 /**
- * App-wide watcher for the current AI generation. The modal and the pill are
- * both just viewers of this store — the generation itself always completes
- * (or refunds) server-side, whether or not anyone is watching.
+ * Wording per operation. An action with no entry falls back to neutral copy,
+ * so the server can ship a new operation before the frontend knows its name.
+ */
+const ACTION_COPY: Record<string, { running: string; done: string; failed: string }> = {
+    generate_recipe_from_ingredients: {
+        running: "Cooking…",
+        done: "Recipe ready",
+        failed: "Recipe generation failed",
+    },
+    turn_vegetarian: {
+        running: "Turning vegetarian…",
+        done: "Vegetarian version ready",
+        failed: "Vegetarian conversion failed",
+    },
+    turn_vegan: {
+        running: "Turning vegan…",
+        done: "Vegan version ready",
+        failed: "Vegan conversion failed",
+    },
+};
+
+const FALLBACK_COPY = {running: "Working…", done: "Ready", failed: "Something went wrong"};
+
+export const actionCopy = (action: string) => ACTION_COPY[action] ?? FALLBACK_COPY;
+
+export const isRunning = (job: AiJob) => job.status === "pending" || job.status === "processing";
+
+const toJob = (row: any): AiJob => ({
+    id: row.generation_id,
+    action: row.action ?? "",
+    status: row.status,
+    recipeId: row.recipe_id ?? null,
+    error: row.error ?? null,
+});
+
+/**
+ * App-wide watcher for the user's AI jobs. The pill and the modal are both
+ * viewers — the work always completes (or refunds) server-side, whether or not
+ * anyone is watching, and the server alone decides what is still worth
+ * announcing.
  */
 export const useAiGenerationStore = defineStore("aiGeneration", () => {
-    const status = ref<AiGenerationStatus>("idle");
-    const recipeId = ref<number | null>(null);
-    const error = ref<string | null>(null);
+    /** Everything the server is announcing: running, plus finished-but-unacknowledged. */
+    const jobs = ref<AiJob[]>([]);
+    /** A submit request is in flight. The only thing that blocks another submit. */
+    const submitting = ref(false);
+    /** A submission that never became a job — distinct from a job that failed. */
+    const submitError = ref<string | null>(null);
+    /** Set when we stop watching before the work finished. */
+    const stalled = ref<string | null>(null);
     const creditsRemaining = ref<number | null>(null);
     const modalOpen = ref(false);
+    const expanded = ref(false);
 
-    let generationId: number | null = null;
+    /** The job this session started, so the modal can follow its own work. */
+    const submittedId = ref<number | null>(null);
+
     let idempotencyKey: string | null = null;
     let pollTimer: ReturnType<typeof setTimeout> | null = null;
-    let abortController: AbortController | null = null;
-    let startedAt = 0;
+    let pollingSince = 0;
     let consecutiveErrors = 0;
+    let inFlight = false;
     let booted = false;
 
-    const isBusy = computed(() => status.value === "submitting" || status.value === "generating");
+    // Dismissed here but not yet confirmed by the server. Without this, a poll
+    // already in flight when the user taps would put the row straight back.
+    const dismissed = new Set<number>();
+
+    const running = computed(() => jobs.value.filter(isRunning));
+    const finished = computed(() => jobs.value.filter((job) => !isRunning(job)));
+    const hasFailure = computed(() => finished.value.some((job) => job.status === "failed"));
+    const isBusy = computed(() => submitting.value || running.value.length > 0);
+
+    const submission = computed(() => jobs.value.find((job) => job.id === submittedId.value) ?? null);
+
+    const submissionStatus = computed<AiSubmissionStatus>(() => {
+        if (submitting.value) return "submitting";
+        if (submitError.value !== null) return "failed";
+
+        const job = submission.value;
+
+        if (job === null) return "idle";
+
+        return job.status === "completed" || job.status === "failed" ? job.status : "generating";
+    });
+
+    const submissionRecipeId = computed(() => submission.value?.recipeId ?? null);
+    const submissionError = computed(() => submitError.value ?? submission.value?.error ?? null);
+
+    const applyRows = (rows: any[]) => {
+        const incoming = rows.map(toJob);
+
+        jobs.value = incoming.filter((job) => !dismissed.has(job.id));
+
+        // Once the server agrees a row is gone, stop holding it back.
+        const present = new Set(incoming.map((job) => job.id));
+        dismissed.forEach((id) => {
+            if (!present.has(id)) dismissed.delete(id);
+        });
+    };
+
+    const refresh = (): Promise<void> => {
+        if (inFlight) return Promise.resolve();
+        inFlight = true;
+
+        return axios.get("/api/recipe/ai/active-generations")
+            .then((response) => {
+                consecutiveErrors = 0;
+                applyRows(response.data.generations ?? []);
+            })
+            .finally(() => {
+                inFlight = false;
+            });
+    };
 
     const submit = (ingredients: AiIngredientInput[]) => {
-        if (isBusy.value) return;
+        // Only an outstanding request blocks — a running job does not, or
+        // starting a second generation would be impossible.
+        if (submitting.value) return;
 
-        // Reused on retry after a network error (same intent, no double
-        // charge); cleared once a generation reaches a terminal state, so a
-        // fresh attempt is a fresh generation.
+        // A key per submission, held only across a failed submit so retrying a
+        // request that may already have landed cannot charge twice. Cleared on
+        // success, so the next submission is genuinely a new generation rather
+        // than a duplicate of the last one.
         idempotencyKey = idempotencyKey ?? crypto.randomUUID();
-        status.value = "submitting";
-        error.value = null;
+
+        submitting.value = true;
+        submitError.value = null;
 
         axios.post("/api/recipe/ai/generate-recipe", {
             ingredients,
             idempotency_key: idempotencyKey,
         })
             .then((response) => {
-                generationId = response.data.generation_id;
+                idempotencyKey = null;
                 creditsRemaining.value = response.data.credits_remaining ?? null;
-                startWatching();
+
+                const id = response.data.generation_id;
+                submittedId.value = id;
+
+                // Show it now rather than at the first poll.
+                jobs.value = [
+                    {
+                        id,
+                        action: response.data.action ?? "",
+                        status: "pending",
+                        recipeId: null,
+                        error: null,
+                    },
+                    ...jobs.value.filter((job) => job.id !== id),
+                ];
+
+                startPolling();
             })
             .catch((err) => {
-                status.value = "failed";
-                error.value = err?.response?.data?.message || "Could not start the generation.";
+                submitError.value = err?.response?.data?.message || "Could not start the generation.";
+            })
+            .finally(() => {
+                submitting.value = false;
             });
     };
 
-    /** Pick up a generation this session did not start (e.g. after a refresh). */
-    const resume = (id: number) => {
-        generationId = id;
-        startWatching();
-    };
-
     /**
-     * Once per app load: ask the server whether anything is running or
-     * finished while nobody was watching, and pick up where things stand.
+     * Once per app load: ask what is running or waiting to be announced, and
+     * pick up from there. Nothing is stored client-side between loads — the
+     * server is asked who the user is and answers with their work.
      */
     const bootCheck = () => {
-        if (booted || status.value !== "idle") return;
+        if (booted) return;
         booted = true;
 
-        axios.get("/api/recipe/ai/active-generations")
-            .then((response) => {
-                const rows = response.data.generations ?? [];
-
-                const running = rows.find((row: any) => row.status === "pending" || row.status === "processing");
-
-                if (running) {
-                    resume(running.generation_id);
-                    return;
-                }
-
-                // Anything the server still returns is by definition news —
-                // acknowledged results never come back. Newest first.
-                const unseen = rows[0];
-
-                if (!unseen) return;
-
-                generationId = unseen.generation_id;
-
-                if (unseen.status === "completed" && unseen.recipe_id) {
-                    status.value = "completed";
-                    recipeId.value = unseen.recipe_id;
-                } else if (unseen.status === "failed") {
-                    status.value = "failed";
-                    error.value = unseen.error || "Recipe generation failed. Your credit was refunded.";
-                }
+        refresh()
+            .then(() => {
+                if (running.value.length > 0) startPolling();
             })
             .catch(() => {
                 // Best-effort — a failed boot check must never break the app.
             });
     };
 
-    /**
-     * The user has seen this result — never announce it again, here or on any
-     * other device. Best effort: if the call never lands, the worst case is
-     * being told once more, which beats the client keeping a private opinion
-     * the server cannot see.
-     */
-    const acknowledge = () => {
-        if (generationId !== null) {
-            axios.post(`/api/recipe/ai/generations/${generationId}/acknowledge`).catch(() => {
-            });
-        }
-
-        reset();
-    };
-
-    const startWatching = () => {
-        status.value = "generating";
-        startedAt = Date.now();
+    const startPolling = () => {
+        // New work earns a fresh ceiling.
+        pollingSince = Date.now();
         consecutiveErrors = 0;
-        schedulePoll(POLL_FIRST_MS);
+        stalled.value = null;
+
+        if (pollTimer === null) schedulePoll(POLL_FIRST_MS);
     };
 
     const poll = () => {
-        if (status.value !== "generating" || generationId === null) return;
+        pollTimer = null;
 
-        if (Date.now() - startedAt > POLL_CEILING_MS) {
-            finish("failed", null, "This is taking longer than expected. If it finishes, the recipe will appear in your recipes.");
+        if (running.value.length === 0) return;
+
+        if (Date.now() - pollingSince > POLL_CEILING_MS) {
+            stalled.value = "This is taking longer than expected. Anything that finishes will still appear in your recipes.";
             return;
         }
 
-        abortController = new AbortController();
-
-        axios.get(`/api/recipe/ai/generations/${generationId}`, {signal: abortController.signal})
-            .then((response) => {
-                consecutiveErrors = 0;
-                const data = response.data;
-
-                if (data.status === "completed") {
-                    finish("completed", data.recipe_id, null);
-                } else if (data.status === "failed") {
-                    finish("failed", null, data.error || "Generation failed. Your credit was refunded.");
-                } else {
-                    schedulePoll(POLL_INTERVAL_MS);
-                }
+        refresh()
+            .then(() => {
+                if (running.value.length > 0) schedulePoll(POLL_INTERVAL_MS);
             })
-            .catch((err) => {
-                if (err?.code === "ERR_CANCELED") return;
-
+            .catch(() => {
                 consecutiveErrors += 1;
 
                 if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                    finish("failed", null, "Lost connection while waiting. The recipe may still appear in your recipes.");
+                    stalled.value = "Lost connection while waiting. Anything that finishes will appear in your recipes.";
                 } else {
                     schedulePoll(POLL_INTERVAL_MS);
                 }
             });
     };
 
-    const finish = (result: "completed" | "failed", recipe: number | null, message: string | null) => {
-        status.value = result;
-        recipeId.value = recipe;
-        error.value = message;
-        idempotencyKey = null;
-    };
-
     const schedulePoll = (delay: number) => {
-        clearTimer();
+        if (pollTimer !== null) clearTimeout(pollTimer);
         pollTimer = setTimeout(poll, delay);
     };
 
-    const clearTimer = () => {
-        if (pollTimer !== null) {
-            clearTimeout(pollTimer);
-            pollTimer = null;
-        }
+    /**
+     * The user has been told about this one — never announce it again, here or
+     * on any other device. Best effort: if the call never lands the result is
+     * announced once more, which beats the client holding a private opinion
+     * the server cannot see.
+     */
+    const acknowledge = (id: number) => {
+        forget([id]);
+        axios.post(`/api/recipe/ai/generations/${id}/acknowledge`).catch(() => {
+        });
     };
 
-    const reset = () => {
-        clearTimer();
-        abortController?.abort();
-        status.value = "idle";
-        generationId = null;
-        idempotencyKey = null;
-        recipeId.value = null;
-        error.value = null;
+    /**
+     * The pill's clear button. The caller passes the ids it actually had on
+     * screen rather than asking to clear everything, so a run that finishes
+     * between render and tap is not dismissed unseen. The server ignores any
+     * that are still running.
+     */
+    const acknowledgeMany = (ids: number[]) => {
+        if (ids.length === 0) {
+            expanded.value = false;
+            return;
+        }
+
+        forget(ids);
+        axios.post("/api/recipe/ai/generations/acknowledge", {ids}).catch(() => {
+        });
+    };
+
+    const forget = (ids: number[]) => {
+        ids.forEach((id) => dismissed.add(id));
+
+        jobs.value = jobs.value.filter((job) => !ids.includes(job.id));
+
+        if (submittedId.value !== null && ids.includes(submittedId.value)) {
+            submittedId.value = null;
+        }
+
+        if (jobs.value.length === 0) expanded.value = false;
+    };
+
+    /** Drop the modal's view of its own submission. Watching continues. */
+    const clearSubmission = () => {
+        submittedId.value = null;
+        submitError.value = null;
     };
 
     return {
-        status,
+        jobs,
+        running,
+        finished,
+        hasFailure,
         isBusy,
-        recipeId,
-        error,
+        submitting,
+        stalled,
+        expanded,
         creditsRemaining,
         modalOpen,
+        submissionId: submittedId,
+        submissionStatus,
+        submissionRecipeId,
+        submissionError,
         submit,
         bootCheck,
         acknowledge,
-        reset,
+        acknowledgeMany,
+        clearSubmission,
     };
 });

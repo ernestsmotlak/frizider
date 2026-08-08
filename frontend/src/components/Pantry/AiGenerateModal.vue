@@ -28,15 +28,15 @@ const store = useAiGenerationStore();
 
 const removedIds = ref<number[]>([]);
 
-// A fresh selection is a fresh start — unless a generation is still running,
-// in which case reopening shows its progress. The pill stays quiet while the
-// modal is the one talking.
+// Opening is always a fresh start now that several generations can run at
+// once: the modal is for starting work, the pill is for watching it. The pill
+// stays quiet while the modal is the one talking.
 watch(() => props.isOpen, (open) => {
     store.modalOpen = open;
 
-    if (open && !store.isBusy) {
+    if (open) {
         removedIds.value = [];
-        store.reset();
+        store.clearSubmission();
     }
 });
 
@@ -59,7 +59,7 @@ const formatAmount = (item: SelectedPantryItem): string => {
 };
 
 const generate = () => {
-    if (chips.value.length === 0 || overLimit.value || store.isBusy) return;
+    if (chips.value.length === 0 || overLimit.value || store.submitting) return;
 
     store.submit(chips.value.map((item) => ({
         id: item.id,
@@ -70,17 +70,18 @@ const generate = () => {
 };
 
 const tryAgain = () => {
-    store.reset();
+    store.clearSubmission();
     generate();
 };
 
 // Completion while the modal is open takes the user straight to the recipe;
-// while it is closed, the pill announces it instead.
-watch(() => store.status, (status) => {
-    if (status === "completed" && store.recipeId !== null && props.isOpen) {
-        const id = store.recipeId;
+// while it is closed, the pill announces it instead. Only this modal's own
+// submission counts — another job finishing must not hijack the view.
+watch(() => store.submissionStatus, (status) => {
+    if (status === "completed" && store.submissionRecipeId !== null && props.isOpen) {
+        const id = store.submissionRecipeId;
         emit("done");
-        store.acknowledge();
+        store.acknowledge(store.submissionId!);
         router.push(`/recipe/${id}`);
     }
 });
@@ -94,7 +95,7 @@ watch(() => store.status, (status) => {
 
         <template #body>
             <!-- Pick & confirm -->
-            <div v-if="store.status === 'idle'" class="space-y-4">
+            <div v-if="store.submissionStatus === 'idle'" class="space-y-4">
                 <p class="text-sm text-gray-600">
                     The recipe will use only these ingredients, plus basic staples like water, salt, pepper, oil, and sugar.
                 </p>
@@ -129,7 +130,7 @@ watch(() => store.status, (status) => {
             </div>
 
             <!-- In flight -->
-            <div v-else-if="store.isBusy" class="py-6 text-center space-y-3">
+            <div v-else-if="store.submissionStatus === 'submitting' || store.submissionStatus === 'generating'" class="py-6 text-center space-y-3">
                 <svg class="w-10 h-10 mx-auto text-violet-600 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -139,9 +140,9 @@ watch(() => store.status, (status) => {
             </div>
 
             <!-- Failed -->
-            <div v-else-if="store.status === 'failed'" class="space-y-3">
+            <div v-else-if="store.submissionStatus === 'failed'" class="space-y-3">
                 <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p class="text-sm text-red-700">{{ store.error }}</p>
+                    <p class="text-sm text-red-700">{{ store.submissionError }}</p>
                 </div>
                 <p class="text-xs text-gray-400">If a generation fails, the credit is refunded automatically.</p>
             </div>
@@ -153,11 +154,11 @@ watch(() => store.status, (status) => {
                     @click="emit('close')"
                     class="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
                 >
-                    {{ store.isBusy ? "Continue in background" : "Close" }}
+                    {{ store.submissionStatus === 'generating' ? "Continue in background" : "Close" }}
                 </button>
 
                 <button
-                    v-if="store.status === 'idle'"
+                    v-if="store.submissionStatus === 'idle'"
                     @click="generate"
                     :disabled="chips.length === 0 || overLimit"
                     class="flex items-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -169,7 +170,7 @@ watch(() => store.status, (status) => {
                 </button>
 
                 <button
-                    v-if="store.status === 'failed'"
+                    v-if="store.submissionStatus === 'failed'"
                     @click="tryAgain"
                     class="px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
                 >

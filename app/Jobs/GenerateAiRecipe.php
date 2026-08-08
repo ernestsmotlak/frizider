@@ -38,8 +38,10 @@ class GenerateAiRecipe implements ShouldQueue
      */
     public function handle(RecipeFromIngredients $operation, AiClient $client): void
     {
-        // A previous attempt may have committed just before the worker died.
-        if ($this->log->status === AiGenerationStatus::Completed) {
+        // A previous attempt may have committed just before the worker died,
+        // or the sweep may have given up on this one and refunded it. Either
+        // way the answer is already settled.
+        if ($this->log->status->isTerminal()) {
             return;
         }
 
@@ -75,9 +77,18 @@ class GenerateAiRecipe implements ShouldQueue
         }
 
         DB::transaction(function () use ($operation, $response) {
+            // The sweep may have declared this abandoned and refunded it while
+            // the request was in flight. Honour that rather than racing it:
+            // the credit is already back, so the recipe is not ours to keep.
+            $settled = UserAiRecipeLog::whereKey($this->log->getKey())->lockForUpdate()->first();
+
+            if ($settled === null || $settled->status->isTerminal()) {
+                return;
+            }
+
             $recipeId = $operation->persist($response, $this->log);
 
-            $this->log->update([
+            $settled->update([
                 'recipe_id' => $recipeId,
                 'status' => AiGenerationStatus::Completed,
                 'tokens_used' => $response->tokensUsed,

@@ -452,6 +452,7 @@ class RecipeController extends Controller
 
         return response()->json([
             'generation_id' => $log->id,
+            'action' => $operation->value,
             'status' => AiGenerationStatus::Pending,
             'credits_remaining' => $credits->balance($userId),
         ], 202);
@@ -483,6 +484,10 @@ class RecipeController extends Controller
         return response()->json([
             'generations' => $logs->map(fn(UserAiRecipeLog $log) => [
                 'generation_id' => $log->id,
+                // Which operation this was. The client maps it to wording;
+                // an unknown value there falls back to neutral copy, so a new
+                // operation can ship server-first without breaking the pill.
+                'action' => $log->action,
                 'status' => $log->status,
                 'recipe_id' => $log->recipe_id,
                 'error' => $this->clientError($log),
@@ -515,11 +520,53 @@ class RecipeController extends Controller
     {
         abort_if($log->user_id !== $request->user()->id, 404);
 
-        if ($log->status->isTerminal() && $log->acknowledged_at === null) {
-            $log->update(['acknowledged_at' => now()]);
+        $this->markAcknowledged($request->user()->id, [$log->id]);
+
+        return response()->json(['acknowledged' => $log->refresh()->acknowledged_at !== null]);
+    }
+
+    /**
+     * Dismiss several at once — the pill's "clear" button.
+     *
+     * The client sends the ids it actually had on screen rather than asking to
+     * clear everything, so a run that finishes between render and tap is not
+     * silently dismissed unseen. Ids that are not the caller's, or not
+     * finished, are skipped rather than failing the batch: a partial list must
+     * still clear what it legitimately can.
+     */
+    public function acknowledgeGenerations(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array|max:25',
+            'ids.*' => 'integer',
+        ]);
+
+        return response()->json([
+            'acknowledged' => $this->markAcknowledged($request->user()->id, $validated['ids']),
+        ]);
+    }
+
+    /**
+     * Stamp the finished, not-yet-acknowledged rows among $ids that belong to
+     * $userId. Returns the ids actually stamped.
+     *
+     * @param  int[] $ids
+     * @return int[]
+     */
+    private function markAcknowledged(int $userId, array $ids): array
+    {
+        $settled = UserAiRecipeLog::where('user_id', $userId)
+            ->whereIn('id', $ids)
+            ->whereNull('acknowledged_at')
+            ->whereIn('status', [AiGenerationStatus::Completed, AiGenerationStatus::Failed])
+            ->pluck('id')
+            ->all();
+
+        if ($settled !== []) {
+            UserAiRecipeLog::whereIn('id', $settled)->update(['acknowledged_at' => now()]);
         }
 
-        return response()->json(['acknowledged' => $log->acknowledged_at !== null]);
+        return $settled;
     }
 
     /**
