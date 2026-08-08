@@ -1,29 +1,53 @@
-# Current Plan — What to Develop Next
+# Current Plan
 
-Based on `PLAN.md` vs. what's actually in the repo right now.
+_Last updated: 2026-08-08_
 
-## PLAN.md sections that are stale (already done, just not marked)
+## Done today
 
-- **"Go shopping" multi-list session** — fully built (`Shopping.vue`, `ShoppingItemCard.vue`, `ShoppingProgressBar.vue`, `ShoppingItemEditModal.vue`, `ShoppingListFilter.vue`, backend `ShoppingSessionController`/`ShoppingItemController`).
-- **Cooking mode + timers** — also built (`Cooking.vue`, `Cooking/Timers.vue`, `Cooking/FinishedTimer.vue`, `CookingModal.vue`, `RecipeCookingModal.vue`, backend `CookingSessionController`/`CookingSessionTimerController`, multiple migrations for timer percent/duration support).
-- **Register page** — exists (`Register.vue`).
-- **Conversion service + frontend wiring** — done (see `CONVERSION_SERVICE_PLAN.md`). UI subsequently refined: all selection-mode chrome (toggle button, selected item cards, checkboxes, "Move" button, modal target cards, Next/Confirm button) uses violet instead of blue; ConvertItemsModal step 2 replaced native `<select>` with a custom searchable list picker (with a clear ✕ button); grocery lists in the picker are tinted green with a checkmark when completed.
+Five commits, all on the AI recipe feature. Working tree clean.
 
-So a good chunk of "Phase 3" and the timer checklist is likely already complete. Worth a pass to update `PLAN.md` itself so it reflects reality — otherwise it'll keep suggesting work that's done.
+- **Fail fast on bad requests** (`3000cf5`) — `PermanentAiException`; a 4xx from Gemini (except 429)
+  skips the remaining retries and refunds immediately instead of spinning through the backoff.
+  The provider's raw error stays server-side; the user sees one plain sentence.
+- **Server-side "seen" state** (`3c3c9d8`) — `acknowledged_at` on `user_ai_recipe_logs`, replacing
+  the `localStorage` flag that broke whenever two generations finished out of order.
+- **Multi-job pill + stalled sweep** (`47aa9c6`) — the pill now handles several concurrent
+  generations (row tap acknowledges one, X acknowledges all visible). New `ai:sweep-stalled`
+  command, scheduled every 5 min, fails and refunds runs nothing is going to finish.
+  Job-side lock guards the race it creates, so a revived worker cannot keep a refunded recipe.
+- **Profile page + AI history** (`f8a9d7b`) — `GET /recipe/ai/generations`, read-only and
+  paginated. New `/profile` route with Account / AI history / Credits tabs, plus a fifth bottom-nav
+  item. History shows every run regardless of acknowledgement — it is the "elsewhere" the pill
+  deliberately isn't.
+- **Split the profile tabs into components** (`21f8937`) — each panel owns its own fetching.
 
-## Confirmed NOT implemented yet
+Tests: 24 passing across fail-fast, acknowledgement, sweep and history.
 
-- **Recipe Usage Tracking & Rating System** — grepped for `times_cooked`, `rating`, `mark-cooked` etc. in `Recipe.php` and `routes/api.php`: nothing found. This is a real gap. It's a self-contained feature (2 migration columns + 2 small endpoints + star-rating UI + "Most Cooked"/"Top Rated" sections) and pairs naturally with the cooking-mode flow that already exists — when a cooking session finishes, that'd be the natural trigger to increment `times_cooked`/`last_cooked_at`.
+## Next: the remaining AI operations
 
-## Small, concrete ❌ TODOs explicitly listed in PLAN.md
+Prerequisite first — `GenerateAiRecipe` still typehints `RecipeFromIngredients` directly, so it
+can only ever run one operation. Needs the handler interface + registry from
+`AI_PROMPT_LAYER_PLAN.md` before any of the below can exist.
 
-1. **Recipe edit/delete buttons overlap/opacity bug** — "edit and delete buttons going under the components and having opacity not set to full." Quick visual bug fix.
-2. **RecipePage.vue responsive/small-screen alignment** — listed twice in PLAN.md, so likely a recurring annoyance.
-3. **Grocery list seeder** — "make a seeder to add grocery_list_items to grocery lists" — pure dev-convenience, low priority but trivial.
+Then, cheapest first:
 
-## Priority recommendation
+1. **`turn_vegetarian`** — recipe in, recipe out. `source_recipe_id` already exists.
+2. **`turn_vegan`** — same shape.
+3. **`recipe_from_description`** — free text in, recipe out.
+4. **`pantry_from_receipt`** — receipt photo → pantry items.
+5. **`pantry_from_photo`** — fridge/shelf photo → pantry items.
+6. **`pantry_from_voice`** — spoken list → pantry items.
 
-- **Quick wins first**: the recipe card button overlap bug and RecipePage responsive fix — both are small, visible polish issues that affect daily use of an already-built page.
-- **Biggest "new feature" value**: Recipe Usage Tracking & Rating — it's scoped clearly in the plan, touches a part of the app (recipes + cooking) that's otherwise feature-complete, and gives you actually useful data (top-rated/most-cooked recipes) for relatively little surface area.
-- **Housekeeping**: update `PLAN.md` to strike the sections that are done (shopping session, cooking/timers, conversion service) so it stops misrepresenting the project's current state.
-- **Lowest priority**: the grocery list seeder — only matters for local dev/demo data, doesn't affect the real app.
+1–3 reuse everything that already works. 4–6 are a separate project: file uploads (path in the job
+payload, never the bytes), a cleanup story, `PantryItemsSchema`, a review screen before anything
+lands in the pantry, and real per-operation credit costs.
+
+## Also still open
+
+- Credits tab is a placeholder — needs a balance + ledger `GET`. There is currently **no** endpoint
+  that tells a user their balance; they find out by hitting a 402.
+- Panel header CSS is duplicated across the three profile panels; promote to `main.css` if it grows.
+- Recipe card edit/delete buttons overlap with wrong opacity.
+- `RecipePage.vue` alignment on small screens.
+- Recipe usage tracking + ratings (`times_cooked`, `last_cooked_at`, stars) — still unbuilt.
+- Grocery list items seeder.
