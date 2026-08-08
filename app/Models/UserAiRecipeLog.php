@@ -10,6 +10,13 @@ class UserAiRecipeLog extends Model
 {
     protected $table = 'user_ai_recipe_logs';
 
+    /**
+     * What a client is told about a failure. The provider's own message is
+     * operator detail — it stays in error_message and never leaves the server.
+     * Every failure path refunds, so this is true for all of them.
+     */
+    public const CLIENT_FAILURE_MESSAGE = 'Recipe generation failed. Your credit was refunded.';
+
     protected $fillable = [
         'user_id',
         'recipe_id',

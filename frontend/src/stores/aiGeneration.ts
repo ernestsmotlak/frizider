@@ -14,7 +14,15 @@ const POLL_FIRST_MS = 600;
 const POLL_INTERVAL_MS = 2000;
 const POLL_CEILING_MS = 3 * 60 * 1000;
 const MAX_CONSECUTIVE_ERRORS = 5;
-const DISMISSED_KEY = "ai-generation-dismissed";
+
+/**
+ * Highest generation id the user has already been shown — a watermark, not a
+ * single id. Generation ids only ever go up, so burying one buries everything
+ * older with it and a stale failure can never resurface after a newer success.
+ */
+const SEEN_KEY = "ai-generation-dismissed";
+
+const seenWatermark = () => Number(localStorage.getItem(SEEN_KEY) ?? 0) || 0;
 
 /**
  * App-wide watcher for the current AI generation. The modal and the pill are
@@ -80,7 +88,6 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
         axios.get("/api/recipe/ai/active-generations")
             .then((response) => {
                 const rows = response.data.generations ?? [];
-                const dismissed = localStorage.getItem(DISMISSED_KEY);
 
                 const running = rows.find((row: any) => row.status === "pending" || row.status === "processing");
 
@@ -89,7 +96,8 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
                     return;
                 }
 
-                const unseen = rows.find((row: any) => String(row.generation_id) !== dismissed);
+                const seen = seenWatermark();
+                const unseen = rows.find((row: any) => Number(row.generation_id) > seen);
 
                 if (!unseen) return;
 
@@ -108,10 +116,10 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
             });
     };
 
-    /** The user has seen this result — never announce it again. */
+    /** The user has seen this result — never announce it, or anything older, again. */
     const acknowledge = () => {
         if (generationId !== null) {
-            localStorage.setItem(DISMISSED_KEY, String(generationId));
+            localStorage.setItem(SEEN_KEY, String(Math.max(seenWatermark(), generationId)));
         }
 
         reset();

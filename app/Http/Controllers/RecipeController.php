@@ -478,7 +478,7 @@ class RecipeController extends Controller
                 'generation_id' => $log->id,
                 'status' => $log->status,
                 'recipe_id' => $log->recipe_id,
-                'error' => $log->error_message,
+                'error' => $this->clientError($log),
                 'created_at' => $log->created_at,
             ]),
         ]);
@@ -492,11 +492,22 @@ class RecipeController extends Controller
             'generation_id' => $log->id,
             'status' => $log->status,
             'recipe_id' => $log->recipe_id,
-            'error' => $log->error_message,
+            'error' => $this->clientError($log),
             'recipe' => $log->status === AiGenerationStatus::Completed
                 ? $log->recipe?->load(['recipeIngredients', 'recipeInstructions'])
                 : null,
         ]);
+    }
+
+    /**
+     * Never the stored error_message — that is the provider's raw response,
+     * written for us and not for the user.
+     */
+    private function clientError(UserAiRecipeLog $log): ?string
+    {
+        return $log->status === AiGenerationStatus::Failed
+            ? UserAiRecipeLog::CLIENT_FAILURE_MESSAGE
+            : null;
     }
 
     // public function turnRecipeVegetarian(Request $request)

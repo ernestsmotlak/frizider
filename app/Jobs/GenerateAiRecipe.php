@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Ai\Operations\RecipeFromIngredients;
+use App\Ai\PermanentAiException;
 use App\Contracts\AiClient;
 use App\Enums\AiGenerationStatus;
 use App\Models\AiCreditTransaction;
@@ -55,7 +56,23 @@ class GenerateAiRecipe implements ShouldQueue
             ]),
         ]);
 
-        $response = $client->send($request);
+        try {
+            $response = $client->send($request);
+        } catch (PermanentAiException $error) {
+            // Skip the remaining attempts and go straight to failed(), which
+            // still refunds. Retrying a rejected request only makes the user
+            // watch a spinner for the length of the backoff.
+            $this->fail($error);
+
+            // fail() quietly does nothing without a queue job instance. Left
+            // alone that would return as if all was well, stranding the log on
+            // Processing and keeping the credit — so let it throw instead.
+            if ($this->job === null) {
+                throw $error;
+            }
+
+            return;
+        }
 
         DB::transaction(function () use ($operation, $response) {
             $recipeId = $operation->persist($response, $this->log);

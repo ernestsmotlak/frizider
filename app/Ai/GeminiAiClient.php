@@ -33,9 +33,14 @@ class GeminiAiClient implements AiClient
             ]);
 
         if ($response->failed()) {
-            throw new RuntimeException(
-                "Gemini request failed ({$response->status()}): ".substr($response->body(), 0, 500)
-            );
+            $message = "Gemini request failed ({$response->status()}): ".substr($response->body(), 0, 500);
+
+            // 4xx means we sent something wrong, and the same bytes will be
+            // just as wrong in ten seconds. 429 is the exception — that one
+            // is about timing, which is exactly what a retry fixes.
+            throw $response->clientError() && $response->status() !== 429
+                ? new PermanentAiException($message)
+                : new RuntimeException($message);
         }
 
         $text = $response->json('candidates.0.content.parts.0.text');
