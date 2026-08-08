@@ -28,6 +28,7 @@ class UserAiRecipeLog extends Model
         'tokens_used',
         'idempotency_key',
         'completed_at',
+        'acknowledged_at',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class UserAiRecipeLog extends Model
         'status' => AiGenerationStatus::class,
         'tokens_used' => 'integer',
         'completed_at' => 'datetime',
+        'acknowledged_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

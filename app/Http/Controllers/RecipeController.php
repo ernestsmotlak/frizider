@@ -466,8 +466,15 @@ class RecipeController extends Controller
     {
         $logs = UserAiRecipeLog::where('user_id', $request->user()->id)
             ->where(function ($query) {
+                // Still running: always, so a refreshed client can reattach.
                 $query->whereIn('status', [AiGenerationStatus::Pending, AiGenerationStatus::Processing])
-                    ->orWhere('completed_at', '>=', now()->subMinutes(15));
+                    // Finished, recent, and the user has not been told yet.
+                    // The server decides what is still news — the client keeps
+                    // no opinion of its own about what it has already shown.
+                    ->orWhere(function ($unannounced) {
+                        $unannounced->whereNull('acknowledged_at')
+                            ->where('completed_at', '>=', now()->subMinutes(15));
+                    });
             })
             ->orderByDesc('id')
             ->limit(5)
@@ -497,6 +504,22 @@ class RecipeController extends Controller
                 ? $log->recipe?->load(['recipeIngredients', 'recipeInstructions'])
                 : null,
         ]);
+    }
+
+    /**
+     * The user has been told how this run ended — stop announcing it, on this
+     * device and every other. Idempotent, and safe to call on a run that is
+     * still going: there is nothing to acknowledge until it finishes.
+     */
+    public function acknowledgeGeneration(Request $request, UserAiRecipeLog $log)
+    {
+        abort_if($log->user_id !== $request->user()->id, 404);
+
+        if ($log->status->isTerminal() && $log->acknowledged_at === null) {
+            $log->update(['acknowledged_at' => now()]);
+        }
+
+        return response()->json(['acknowledged' => $log->acknowledged_at !== null]);
     }
 
     /**

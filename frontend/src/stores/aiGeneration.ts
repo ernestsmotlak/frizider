@@ -16,15 +16,6 @@ const POLL_CEILING_MS = 3 * 60 * 1000;
 const MAX_CONSECUTIVE_ERRORS = 5;
 
 /**
- * Highest generation id the user has already been shown — a watermark, not a
- * single id. Generation ids only ever go up, so burying one buries everything
- * older with it and a stale failure can never resurface after a newer success.
- */
-const SEEN_KEY = "ai-generation-dismissed";
-
-const seenWatermark = () => Number(localStorage.getItem(SEEN_KEY) ?? 0) || 0;
-
-/**
  * App-wide watcher for the current AI generation. The modal and the pill are
  * both just viewers of this store — the generation itself always completes
  * (or refunds) server-side, whether or not anyone is watching.
@@ -96,8 +87,9 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
                     return;
                 }
 
-                const seen = seenWatermark();
-                const unseen = rows.find((row: any) => Number(row.generation_id) > seen);
+                // Anything the server still returns is by definition news —
+                // acknowledged results never come back. Newest first.
+                const unseen = rows[0];
 
                 if (!unseen) return;
 
@@ -116,10 +108,16 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
             });
     };
 
-    /** The user has seen this result — never announce it, or anything older, again. */
+    /**
+     * The user has seen this result — never announce it again, here or on any
+     * other device. Best effort: if the call never lands, the worst case is
+     * being told once more, which beats the client keeping a private opinion
+     * the server cannot see.
+     */
     const acknowledge = () => {
         if (generationId !== null) {
-            localStorage.setItem(SEEN_KEY, String(Math.max(seenWatermark(), generationId)));
+            axios.post(`/api/recipe/ai/generations/${generationId}/acknowledge`).catch(() => {
+            });
         }
 
         reset();
