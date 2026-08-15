@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Ai\Operations\RecipeFromIngredients;
+use App\Ai\OperationRegistry;
 use App\Ai\PermanentAiException;
 use App\Contracts\AiClient;
 use App\Enums\AiGenerationStatus;
@@ -36,7 +36,7 @@ class GenerateAiRecipe implements ShouldQueue
     /**
      * One attempt. Throws on failure — Laravel decides whether to retry.
      */
-    public function handle(RecipeFromIngredients $operation, AiClient $client): void
+    public function handle(OperationRegistry $registry, AiClient $client): void
     {
         // A previous attempt may have committed just before the worker died,
         // or the sweep may have given up on this one and refunded it. Either
@@ -44,6 +44,10 @@ class GenerateAiRecipe implements ShouldQueue
         if ($this->log->status->isTerminal()) {
             return;
         }
+
+        // Which operation this row is. The job does the charging, retrying and
+        // refunding; the handler is the only part that differs per operation.
+        $operation = $registry->forLog($this->log);
 
         $this->log->update(['status' => AiGenerationStatus::Processing]);
 
@@ -86,10 +90,11 @@ class GenerateAiRecipe implements ShouldQueue
                 return;
             }
 
-            $recipeId = $operation->persist($response, $this->log);
-
+            // The handler says what the log should record — a recipe id, or a
+            // list held for review. Merged inside the same transaction as the
+            // status, so a run cannot be half-committed.
             $settled->update([
-                'recipe_id' => $recipeId,
+                ...$operation->persist($response, $this->log),
                 'status' => AiGenerationStatus::Completed,
                 'tokens_used' => $response->tokensUsed,
                 'completed_at' => now(),
@@ -111,5 +116,13 @@ class GenerateAiRecipe implements ShouldQueue
             'error_message' => $error?->getMessage(),
             'completed_at' => now(),
         ]);
+
+        // Nothing will read the uploaded photo now. Last, and guarded: the
+        // refund above is the part that must not be lost to a disk error, and
+        // an unregistered action reaches this method too.
+        try {
+            app(OperationRegistry::class)->forLog($this->log)->releaseInputs($this->log);
+        } catch (Throwable) {
+        }
     }
 }

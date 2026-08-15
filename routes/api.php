@@ -7,6 +7,7 @@ use App\Http\Controllers\GroceryListController;
 use App\Http\Controllers\GroceryListItemController;
 use App\Http\Controllers\ItemConversionController;
 use App\Http\Controllers\PantryItemController;
+use App\Http\Controllers\PantryScanController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RecipeIngredientController;
 use App\Http\Controllers\ShoppingItemController;
@@ -56,6 +57,20 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
         ->middleware('throttle:60,1');
     // Route::post('/recipe/ai/turn-vegetarian', [RecipeController::class, 'turnRecipeVegetarian']);
     // Route::post('/recipe/ai/turn-vegan', [RecipeController::class, 'turnRecipeVegan']);
+
+    // Scans share the generations table with recipes but not their endpoints —
+    // each controller 404s on the other's rows, so an id cannot be walked
+    // sideways from one shape of result into another.
+    Route::post('/pantry/ai/from-photo', [PantryScanController::class, 'store'])
+        ->middleware('throttle:6,1');
+    Route::get('/pantry/ai/generations/{log}', [PantryScanController::class, 'show'])
+        ->middleware('throttle:120,1');
+    Route::get('/pantry/ai/generations/{log}/photo', [PantryScanController::class, 'photo'])
+        ->middleware('throttle:120,1');
+    Route::post('/pantry/ai/generations/{log}/confirm', [PantryScanController::class, 'confirm'])
+        ->middleware('throttle:30,1');
+    Route::delete('/pantry/ai/generations/{log}', [PantryScanController::class, 'destroy'])
+        ->middleware('throttle:30,1');
 
     Route::apiResource('grocery-lists', GroceryListController::class);
     Route::post('save-grocery-list-data', [GroceryListController::class, 'saveGroceryListWithData']);

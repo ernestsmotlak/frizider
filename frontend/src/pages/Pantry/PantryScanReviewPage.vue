@@ -214,7 +214,17 @@ const confirm = () => {
         });
 };
 
+/**
+ * Leaving without adding anything. The server is told so the photo goes now
+ * rather than waiting for the sweep — best effort, because a failed cleanup
+ * call is no reason to trap someone on this page.
+ */
 const discard = () => {
+    if (showList.value && !confirmed.value) {
+        axios.delete(`/api/pantry/ai/generations/${generationId}`).catch(() => {
+        });
+    }
+
     router.push("/storage-spaces");
 };
 

@@ -58,10 +58,18 @@ load-bearing: "Fridge — dairy, leftovers" assigns far better than "Fridge".
 - Verify the returned `space_id` belongs to the user server-side anyway. The enum should make it
   impossible; one query means a provider quirk can't cross a user boundary.
 
-## API contract (frontend is built, backend is not)
+## Status: built
 
-The frontend for all of this exists and calls these three endpoints. None of them are implemented
-yet — build them to this shape and the UI works unchanged.
+Frontend and backend are both in. 35 tests pass, 9 of them covering the scan flow. What is left is
+the real-world part: nobody has pointed it at Gemini with an actual shelf photo, so the prompt and
+the space-assignment quality are unproven. `AI_RECIPE_DRIVER=fake` walks the schema and returns
+plausible nonsense, which is enough to exercise every path but says nothing about accuracy.
+
+Not done: a separate `ai-vision` queue (one line plus a worker flag, deliberately skipped so a
+worker started without `--queue` does not silently stop processing scans), and a longer retry
+backoff for vision calls than for text.
+
+## API contract
 
 **`POST /api/pantry/ai/from-photo`** — multipart: `photo` (jpeg blob, already ≤1200px), plus
 `idempotency_key`. Same 202 body as the recipe endpoint:

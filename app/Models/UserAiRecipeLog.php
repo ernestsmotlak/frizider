@@ -20,6 +20,7 @@ class UserAiRecipeLog extends Model
     protected $fillable = [
         'user_id',
         'recipe_id',
+        'result_json',
         'source_recipe_id',
         'action',
         'status',
@@ -29,14 +30,17 @@ class UserAiRecipeLog extends Model
         'idempotency_key',
         'completed_at',
         'acknowledged_at',
+        'confirmed_at',
     ];
 
     protected $casts = [
         'request_meta' => 'array',
+        'result_json' => 'array',
         'status' => AiGenerationStatus::class,
         'tokens_used' => 'integer',
         'completed_at' => 'datetime',
         'acknowledged_at' => 'datetime',
+        'confirmed_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

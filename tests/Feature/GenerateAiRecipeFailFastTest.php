@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Ai\GeminiAiClient;
-use App\Ai\Operations\RecipeFromIngredients;
+use App\Ai\OperationRegistry;
 use App\Contracts\AiClient;
 use App\Enums\AiCreditTransactionType;
 use App\Enums\AiGenerationStatus;
@@ -49,7 +49,7 @@ class GenerateAiRecipeFailFastTest extends TestCase
 
         $this->expectException(RuntimeException::class);
 
-        (new GenerateAiRecipe($log, $charge))->handle(app(RecipeFromIngredients::class), app(AiClient::class));
+        (new GenerateAiRecipe($log, $charge))->handle(app(OperationRegistry::class), app(AiClient::class));
     }
 
     public function test_the_client_never_sees_the_providers_error_body(): void

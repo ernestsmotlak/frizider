@@ -7,6 +7,7 @@ use App\Ai\AiRequest;
 use App\Ai\AiResponse;
 use App\Ai\PromptRepository;
 use App\Ai\Schemas\RecipeSchema;
+use App\Contracts\AiOperationHandler;
 use App\Data\GeneratedRecipe;
 use App\Enums\Unit;
 use App\Models\PantryItem;
@@ -20,7 +21,7 @@ use App\Models\UserAiRecipeLog;
  * what happens with the answer. The job stays generic — future operations
  * are new classes with this same shape, not edits to existing code.
  */
-class RecipeFromIngredients
+class RecipeFromIngredients implements AiOperationHandler
 {
     public function __construct(protected PromptRepository $prompts)
     {
@@ -45,9 +46,9 @@ class RecipeFromIngredients
 
     /**
      * Write the answer through the recipe path. Mirrors
-     * RecipeController::saveRecipeWithData(). Returns the new recipe id.
+     * RecipeController::saveRecipeWithData().
      */
-    public function persist(AiResponse $response, UserAiRecipeLog $log): int
+    public function persist(AiResponse $response, UserAiRecipeLog $log): array
     {
         $generated = GeneratedRecipe::fromArray($response->data);
         $pantryIds = $this->pantryIdsByName($log);
@@ -90,7 +91,7 @@ class RecipeFromIngredients
             ]);
         }
 
-        return $recipe->id;
+        return ['recipe_id' => $recipe->id];
     }
 
     /**
@@ -101,6 +102,11 @@ class RecipeFromIngredients
     {
         return $this->prompts->version('system')
             .'.'.$this->prompts->version('recipe_from_ingredients');
+    }
+
+    /** Nothing to release — the request was JSON that travelled in the log. */
+    public function releaseInputs(UserAiRecipeLog $log): void
+    {
     }
 
     /**

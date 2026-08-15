@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Ai\OperationRegistry;
 use App\Enums\AiCreditTransactionType;
 use App\Enums\AiGenerationStatus;
 use App\Models\AiCreditTransaction;
@@ -55,6 +56,13 @@ class SweepStalledAiGenerations extends Command
                 'error_message' => "Abandoned after {$minutes} minutes: no worker finished this run.",
                 'completed_at' => now(),
             ]);
+
+            // This path never reaches the job's failed(), so it owes the same
+            // cleanup: an abandoned run's uploaded photo has nothing left to do.
+            try {
+                app(OperationRegistry::class)->forLog($log)->releaseInputs($log);
+            } catch (\Throwable) {
+            }
         }
 
         $this->info($stalled->isEmpty()

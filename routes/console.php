@@ -12,3 +12,7 @@ Artisan::command('inspire', function () {
 // would be harmless — the refund is idempotent — but there is no reason to
 // have two sweeps competing for the same rows.
 Schedule::command('ai:sweep-stalled')->everyFiveMinutes()->withoutOverlapping();
+
+// Reviews get abandoned — someone opens the list, gets interrupted, never comes
+// back. Hourly is often enough for a job whose threshold is a day.
+Schedule::command('ai:sweep-scan-photos')->hourly()->withoutOverlapping();
