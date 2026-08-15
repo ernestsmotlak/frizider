@@ -9,6 +9,8 @@ import ShoppingListFilter from "../components/Shopping/ShoppingListFilter.vue";
 import ShoppingItemCard from "../components/Shopping/ShoppingItemCard.vue";
 import ShoppingItemEditModal from "../components/Shopping/ShoppingItemEditModal.vue";
 import ConvertItemsModal from "../components/ConvertItemsModal.vue";
+import ActionSheet, {type SheetAction} from "../components/ActionSheet.vue";
+import SelectionDock from "../components/SelectionDock.vue";
 import type {ShoppingItem} from "../components/Shopping/ShoppingItemCard.vue";
 import type {GroceryListInfo} from "../components/Shopping/ShoppingListFilter.vue";
 import {VueDraggable} from "vue-draggable-plus";
@@ -30,6 +32,7 @@ const isConvertModalOpen = ref(false);
 
 const selectMode = ref(false);
 const selectedIds = ref<number[]>([]);
+const isActionSheetOpen = ref(false);
 
 const listColors = [
     "#fb7185",
@@ -249,6 +252,103 @@ const handleConverted = () => {
     fetchShoppingSession();
 };
 
+const exitSelectMode = () => {
+    selectMode.value = false;
+    selectedIds.value = [];
+    isActionSheetOpen.value = false;
+};
+
+const selectedItems = computed(() =>
+    shoppingItems.value.filter((item) => selectedIds.value.includes(item.id))
+);
+
+const selectionActions = computed<SheetAction[]>(() => {
+    const count = selectedIds.value.length;
+    const unpurchased = selectedItems.value.filter((item) => !item.is_purchased).length;
+    const purchased = count - unpurchased;
+
+    return [
+        {
+            id: 'move',
+            label: 'Move',
+            description: 'To a pantry or recipe',
+            icon: 'move',
+            featured: true,
+        },
+        {
+            id: 'mark-purchased',
+            label: 'Mark as bought',
+            description: `${unpurchased} still to buy`,
+            icon: 'check',
+            featured: true,
+            disabled: unpurchased === 0,
+            disabledReason: 'All already bought',
+        },
+        {
+            id: 'mark-unpurchased',
+            label: 'Mark as not bought',
+            description: `${purchased} marked bought`,
+            icon: 'list',
+            disabled: purchased === 0,
+            disabledReason: 'None marked bought',
+        },
+    ];
+});
+
+const handleSelectionAction = (action: SheetAction) => {
+    isActionSheetOpen.value = false;
+
+    switch (action.id) {
+        case 'move':
+            openConvertModal();
+            break;
+        case 'mark-purchased':
+            setPurchasedForSelected(true);
+            break;
+        case 'mark-unpurchased':
+            setPurchasedForSelected(false);
+            break;
+    }
+};
+
+/**
+ * One request per item — there is no bulk endpoint. Unlike the single-item
+ * toggle this does not update optimistically: a partial failure would leave
+ * the list lying about itself, so it refetches the session instead.
+ */
+const setPurchasedForSelected = async (isPurchased: boolean) => {
+    const targets = selectedItems.value.filter((item) => item.is_purchased !== isPurchased);
+
+    if (targets.length === 0) {
+        return;
+    }
+
+    loadingStore.start();
+
+    try {
+        const results = await Promise.allSettled(targets.map((item) => axios.patch(`/api/shopping-items/${item.id}`, {
+            is_purchased: isPurchased,
+        })));
+
+        const failed = results.filter((result) => result.status === "rejected").length;
+        const done = targets.length - failed;
+        const verb = isPurchased ? "marked as bought" : "marked as not bought";
+
+        if (failed === 0) {
+            toastStore.show("success", `${done} item${done !== 1 ? 's' : ''} ${verb}.`);
+        } else if (done > 0) {
+            toastStore.show("error", `${done} ${verb}, ${failed} could not be updated.`);
+        } else {
+            toastStore.show("error", "Could not update the selected items.");
+        }
+
+        exitSelectMode();
+        await fetchShoppingSession();
+    } finally {
+        loadingStore.stop();
+    }
+};
+
 const onDragEnd = async () => {
     const itemsToUpdate = shoppingItems.value.map((item) => ({
         id: item.id,
@@ -344,16 +444,7 @@ onMounted(() => {
                                 </h2>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button
-                                    v-if="selectMode && filteredItems.length > 0"
-                                    @click="toggleSelectAll"
-                                    class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
-                                    title="Select all"
-                                >
-                                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </button>
+                                <!-- Select-all lives on the dock now, next to the count it changes. -->
                                 <button
                                     v-if="shoppingItems.length > 0"
                                     @click="toggleSelectMode"
@@ -507,17 +598,6 @@ onMounted(() => {
                             <p v-else>No items in this list</p>
                         </div>
 
-                        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-4 mt-3 pt-3">
-                            <button
-                                @click="openConvertModal"
-                                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors shadow-lg"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                                Move {{ selectedIds.length }} item{{ selectedIds.length !== 1 ? 's' : '' }}
-                            </button>
-                        </div>
                     </template>
                 </div>
             </div>
@@ -536,6 +616,25 @@ onMounted(() => {
             :source-ids="selectedIds"
             @close="closeConvertModal"
             @converted="handleConverted"
+        />
+
+        <SelectionDock
+            v-if="selectMode"
+            :count="selectedIds.length"
+            :total="filteredItems.length"
+            noun="item"
+            @cancel="exitSelectMode"
+            @select-all="toggleSelectAll"
+            @open-actions="isActionSheetOpen = true"
+        />
+
+        <ActionSheet
+            :is-open="isActionSheetOpen"
+            title="Actions"
+            :subtitle="`${selectedIds.length} item${selectedIds.length !== 1 ? 's' : ''}`"
+            :actions="selectionActions"
+            @close="isActionSheetOpen = false"
+            @select="handleSelectionAction"
         />
 
         <Transition name="action-picker-backdrop">

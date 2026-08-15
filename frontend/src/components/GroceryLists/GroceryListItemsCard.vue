@@ -2,6 +2,8 @@
 import {ref, watchEffect, onMounted, onUnmounted, computed} from "vue";
 import Modal from "../Modal.vue";
 import ConvertItemsModal from "../ConvertItemsModal.vue";
+import ActionSheet, {type SheetAction} from "../ActionSheet.vue";
+import SelectionDock from "../SelectionDock.vue";
 import UnitSelect from "../UnitSelect.vue";
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
@@ -56,6 +58,7 @@ const editingItem = ref<GroceryListItem | null>(null);
 
 const selectMode = ref(false);
 const selectedIds = ref<number[]>([]);
+const isActionSheetOpen = ref(false);
 
 const newItem = ref<Omit<GroceryListItem, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>({
     grocery_list_id: props.groceryListId,
@@ -197,16 +200,160 @@ const closeConvertModal = () => {
     isConvertModalOpen.value = false;
 };
 
-const handleConverted = () => {
-    selectedIds.value = [];
-    selectMode.value = false;
-
-    axios.get(`/api/grocery-lists/${props.groceryListId}`)
+const refreshList = () => {
+    return axios.get(`/api/grocery-lists/${props.groceryListId}`)
         .then((response) => {
             emit('updatedGroceryList', response.data.data);
         })
         .catch((error) => {
             console.error(error);
+        });
+};
+
+const handleConverted = () => {
+    selectedIds.value = [];
+    selectMode.value = false;
+
+    refreshList();
+};
+
+const exitSelectMode = () => {
+    selectMode.value = false;
+    selectedIds.value = [];
+    isActionSheetOpen.value = false;
+};
+
+const selectedItems = computed(() =>
+    draggableItems.value.filter((item) => selectedIds.value.includes(item.id))
+);
+
+const selectionActions = computed<SheetAction[]>(() => {
+    const count = selectedIds.value.length;
+    const noun = `${count} item${count !== 1 ? 's' : ''}`;
+    const unpurchased = selectedItems.value.filter((item) => !item.is_purchased).length;
+    const purchased = count - unpurchased;
+
+    return [
+        {
+            id: 'move',
+            label: 'Move',
+            description: 'To a pantry or recipe',
+            icon: 'move',
+            featured: true,
+        },
+        {
+            id: 'mark-purchased',
+            label: 'Mark as bought',
+            description: `${unpurchased} still to buy`,
+            icon: 'check',
+            featured: true,
+            disabled: unpurchased === 0,
+            disabledReason: 'All already bought',
+        },
+        {
+            id: 'mark-unpurchased',
+            label: 'Mark as not bought',
+            description: `${purchased} marked bought`,
+            icon: 'list',
+            disabled: purchased === 0,
+            disabledReason: 'None marked bought',
+        },
+        {
+            id: 'delete',
+            label: `Delete ${noun}`,
+            description: 'Remove from this list',
+            icon: 'trash',
+            danger: true,
+        },
+    ];
+});
+
+const handleSelectionAction = (action: SheetAction) => {
+    isActionSheetOpen.value = false;
+
+    switch (action.id) {
+        case 'move':
+            openConvertModal();
+            break;
+        case 'mark-purchased':
+            setPurchasedForSelected(true);
+            break;
+        case 'mark-unpurchased':
+            setPurchasedForSelected(false);
+            break;
+        case 'delete':
+            deleteSelected();
+            break;
+    }
+};
+
+/**
+ * No bulk endpoint exists, so both of these are one request per item. Settled
+ * rather than all, so one failure still applies the rest and the toast says how
+ * many actually went through.
+ */
+const setPurchasedForSelected = (isPurchased: boolean) => {
+    const targets = selectedItems.value.filter((item) => item.is_purchased !== isPurchased);
+
+    if (targets.length === 0) {
+        return;
+    }
+
+    loadingStore.start();
+
+    Promise.allSettled(targets.map((item) => axios.patch(`/api/grocery-list-items/${item.id}`, {
+        is_purchased: isPurchased,
+    })))
+        .then((results) => {
+            const failed = results.filter((result) => result.status === 'rejected').length;
+            const done = targets.length - failed;
+            const verb = isPurchased ? 'marked as bought' : 'marked as not bought';
+
+            if (failed === 0) {
+                toastStore.show('success', `${done} item${done !== 1 ? 's' : ''} ${verb}.`);
+            } else if (done > 0) {
+                toastStore.show('error', `${done} ${verb}, ${failed} could not be updated.`);
+            } else {
+                toastStore.show('error', 'Could not update the selected items.');
+            }
+
+            exitSelectMode();
+            return refreshList();
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
+};
+
+const deleteSelected = async () => {
+    const ids = selectedItems.value.map((item) => item.id);
+    const noun = `${ids.length} item${ids.length !== 1 ? 's' : ''}`;
+
+    const confirmed = await confirmStore.show(`Are you sure you want to delete ${noun}?`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    loadingStore.start();
+
+    Promise.allSettled(ids.map((id) => axios.delete(`/api/grocery-list-items/${id}`)))
+        .then((results) => {
+            const failed = results.filter((result) => result.status === 'rejected').length;
+
+            if (failed === 0) {
+                toastStore.show('success', `${noun} removed.`);
+            } else if (failed < ids.length) {
+                toastStore.show('error', `${ids.length - failed} removed, ${failed} could not be deleted.`);
+            } else {
+                toastStore.show('error', 'Could not delete the selected items.');
+            }
+
+            exitSelectMode();
+            return refreshList();
+        })
+        .finally(() => {
+            loadingStore.stop();
         });
 };
 
@@ -407,16 +554,7 @@ const addItem = (addAnother: boolean = false) => {
 <template>
     <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-8 relative border-2 border-gray-200">
         <div class="absolute top-2 right-2 flex gap-2">
-            <button
-                v-if="selectMode && draggableItems.length > 0"
-                @click="toggleSelectAll"
-                class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
-                title="Select all"
-            >
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </button>
+            <!-- Select-all lives on the dock now, next to the count it changes. -->
             <button
                 @click="toggleSelectMode"
                 :class="[
@@ -569,18 +707,26 @@ const addItem = (addAnother: boolean = false) => {
             <p class="text-gray-500 mb-4">No items yet. Click the + button to add your first item.</p>
         </div>
 
-        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200">
-            <button
-                @click="openConvertModal"
-                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-                Move {{ selectedIds.length }} item{{ selectedIds.length !== 1 ? 's' : '' }}
-            </button>
-        </div>
     </div>
+
+    <SelectionDock
+        v-if="selectMode"
+        :count="selectedIds.length"
+        :total="draggableItems.length"
+        noun="item"
+        @cancel="exitSelectMode"
+        @select-all="toggleSelectAll"
+        @open-actions="isActionSheetOpen = true"
+    />
+
+    <ActionSheet
+        :is-open="isActionSheetOpen"
+        title="Actions"
+        :subtitle="`${selectedIds.length} item${selectedIds.length !== 1 ? 's' : ''}`"
+        :actions="selectionActions"
+        @close="isActionSheetOpen = false"
+        @select="handleSelectionAction"
+    />
 
     <ConvertItemsModal
         :is-open="isConvertModalOpen"
