@@ -54,6 +54,7 @@ const isGroceryList = computed(() => {
 const isPantryTab = computed(() => {
     if (route.path.startsWith('/storage-spaces')) return true;
     if (route.path.includes('/storage-space')) return true;
+    if (route.path.startsWith('/pantry/')) return true;
     return false;
 });
 

@@ -17,6 +17,7 @@ import Cooking from "../pages/Cooking.vue";
 import StorageSpacesPage from "../pages/Pantry/StorageSpacesPage.vue";
 import StorageSpacePage from "../pages/Pantry/StorageSpacePage.vue";
 import NewStorageSpace from "../pages/NewStorageSpace.vue";
+import PantryScanReviewPage from "../pages/Pantry/PantryScanReviewPage.vue";
 import Profile from "../pages/Profile.vue";
 
 const router = createRouter({
@@ -104,6 +105,12 @@ const router = createRouter({
             path: '/storage-spaces/:id',
             name: 'Storage Space',
             component: StorageSpacePage,
+            meta: {requiresAuth: true}
+        },
+        {
+            path: '/pantry/scan/:id',
+            name: 'Review Scan',
+            component: PantryScanReviewPage,
             meta: {requiresAuth: true}
         },
         {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {computed} from "vue";
 import {useRouter} from "vue-router";
-import {actionCopy, isRunning, useAiGenerationStore, type AiJob} from "../stores/aiGeneration.ts";
+import {actionCopy, isRunning, resultRoute, useAiGenerationStore, type AiJob} from "../stores/aiGeneration.ts";
 import {useToastStore} from "../stores/toast.ts";
 
 const store = useAiGenerationStore();
@@ -49,11 +49,12 @@ function rowLabel(job: AiJob): string {
 }
 
 const act = (job: AiJob) => {
-    if (job.status === "completed" && job.recipeId !== null) {
-        const id = job.recipeId;
+    const route = resultRoute(job);
+
+    if (route !== null) {
         store.acknowledge(job.id);
         store.expanded = false;
-        router.push(`/recipe/${id}`);
+        router.push(route);
         return;
     }
 

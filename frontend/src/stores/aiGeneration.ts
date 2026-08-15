@@ -27,6 +27,13 @@ const POLL_CEILING_MS = 3 * 60 * 1000;
 const MAX_CONSECUTIVE_ERRORS = 5;
 
 /**
+ * Operations whose result is a list to review rather than a recipe to open.
+ * They land on their own page keyed by generation id, because the items do not
+ * exist anywhere yet — there is nothing else to link to.
+ */
+const REVIEW_ACTIONS = new Set(["pantry_from_photo"]);
+
+/**
  * Wording per operation. An action with no entry falls back to neutral copy,
  * so the server can ship a new operation before the frontend knows its name.
  */
@@ -46,6 +53,11 @@ const ACTION_COPY: Record<string, { running: string; done: string; failed: strin
         done: "Vegan version ready",
         failed: "Vegan conversion failed",
     },
+    pantry_from_photo: {
+        running: "Reading the photo…",
+        done: "Scan ready to review",
+        failed: "Could not read the photo",
+    },
 };
 
 const FALLBACK_COPY = {running: "Working…", done: "Ready", failed: "Something went wrong"};
@@ -53,6 +65,19 @@ const FALLBACK_COPY = {running: "Working…", done: "Ready", failed: "Something 
 export const actionCopy = (action: string) => ACTION_COPY[action] ?? FALLBACK_COPY;
 
 export const isRunning = (job: AiJob) => job.status === "pending" || job.status === "processing";
+
+/**
+ * Where a finished job wants to be looked at, or null if there is nothing to
+ * show. Every viewer asks this rather than reading recipeId itself, so adding
+ * an operation is an entry here and nowhere else.
+ */
+export const resultRoute = (job: AiJob): string | null => {
+    if (job.status !== "completed") return null;
+
+    if (REVIEW_ACTIONS.has(job.action)) return `/pantry/scan/${job.id}`;
+
+    return job.recipeId === null ? null : `/recipe/${job.recipeId}`;
+};
 
 const toJob = (row: any): AiJob => ({
     id: row.generation_id,
@@ -142,24 +167,23 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
             });
     };
 
-    const submit = (ingredients: AiIngredientInput[]) => {
+    /**
+     * Every submit path ends here: take the 202, adopt the new job as this
+     * session's own, and start watching. The operations differ only in what
+     * they post.
+     *
+     * @param request the POST, already built by the caller
+     * @param failure what to say if it never lands
+     */
+    const start = (request: Promise<any>, failure: string) => {
         // Only an outstanding request blocks — a running job does not, or
         // starting a second generation would be impossible.
         if (submitting.value) return;
 
-        // A key per submission, held only across a failed submit so retrying a
-        // request that may already have landed cannot charge twice. Cleared on
-        // success, so the next submission is genuinely a new generation rather
-        // than a duplicate of the last one.
-        idempotencyKey = idempotencyKey ?? crypto.randomUUID();
-
         submitting.value = true;
         submitError.value = null;
 
-        axios.post("/api/recipe/ai/generate-recipe", {
-            ingredients,
-            idempotency_key: idempotencyKey,
-        })
+        request
             .then((response) => {
                 idempotencyKey = null;
                 creditsRemaining.value = response.data.credits_remaining ?? null;
@@ -182,11 +206,53 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
                 startPolling();
             })
             .catch((err) => {
-                submitError.value = err?.response?.data?.message || "Could not start the generation.";
+                submitError.value = err?.response?.data?.message || failure;
             })
             .finally(() => {
                 submitting.value = false;
             });
+    };
+
+    /**
+     * A key per submission, held only across a failed submit so retrying a
+     * request that may already have landed cannot charge twice. Cleared on
+     * success, so the next submission is genuinely a new generation rather than
+     * a duplicate of the last one.
+     */
+    const nextKey = () => {
+        idempotencyKey = idempotencyKey ?? crypto.randomUUID();
+
+        return idempotencyKey;
+    };
+
+    const submit = (ingredients: AiIngredientInput[]) => {
+        if (submitting.value) return;
+
+        start(
+            axios.post("/api/recipe/ai/generate-recipe", {
+                ingredients,
+                idempotency_key: nextKey(),
+            }),
+            "Could not start the generation.",
+        );
+    };
+
+    /**
+     * A shelf photo, already downscaled by the caller. Multipart rather than
+     * JSON — the bytes are the request, and base64 would inflate them by a
+     * third for no gain.
+     */
+    const submitPhoto = (photo: Blob) => {
+        if (submitting.value) return;
+
+        const body = new FormData();
+        body.append("photo", photo, "shelf.jpg");
+        body.append("idempotency_key", nextKey());
+
+        start(
+            axios.post("/api/pantry/ai/from-photo", body),
+            "Could not upload the photo.",
+        );
     };
 
     /**
@@ -309,6 +375,7 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
         submissionRecipeId,
         submissionError,
         submit,
+        submitPhoto,
         bootCheck,
         acknowledge,
         acknowledgeMany,

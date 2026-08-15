@@ -3,6 +3,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.vue";
 import {onUnmounted, ref, watch} from "vue";
 import router from "../../router";
 import StorageSpaceCard from "../../components/Pantry/StorageSpaceCard.vue";
+import AiScanModal from "../../components/Pantry/AiScanModal.vue";
 import {usePagination} from "../../composables/usePagination.ts";
 
 export interface SpaceStorage {
@@ -59,6 +60,30 @@ const handleStorageSpaceDeleted = (id: number) => {
 const handleAddStorageSpace = () => {
     router.push('/new/storage-space');
 };
+
+// The scan starts from a real tap on a file input — a picker opened from a
+// watcher gets blocked — so the photo is chosen here and the modal opens
+// already holding it.
+const pendingPhoto = ref<File | null>(null);
+const isScanModalOpen = ref(false);
+
+const handlePhotoPicked = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+
+    if (file !== null) {
+        pendingPhoto.value = file;
+        isScanModalOpen.value = true;
+    }
+
+    // The same photo twice in a row must still fire a change event.
+    input.value = "";
+};
+
+const closeScanModal = () => {
+    isScanModalOpen.value = false;
+    pendingPhoto.value = null;
+};
 </script>
 
 <template>
@@ -78,6 +103,7 @@ const handleAddStorageSpace = () => {
                         <button
                             @click="handleAddStorageSpace"
                             class="w-11 h-11 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200 flex items-center justify-center"
+                            title="Add a storage space"
                         >
                             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2"
                                  viewBox="0 0 24 24">
@@ -130,6 +156,36 @@ const handleAddStorageSpace = () => {
                         </div>
                     </div>
 
+                    <!-- Labelled rather than an icon: a camera glyph beside the
+                         plus reads as "attach a photo", and an icon has nowhere
+                         to say that this one costs a credit. -->
+                    <label
+                        class="mt-3 flex items-center gap-3 w-full px-3.5 py-3 rounded-xl border-2 border-violet-200 bg-violet-50/70 cursor-pointer hover:border-violet-300 hover:bg-violet-100/70 active:scale-[0.99] transition-all duration-200"
+                    >
+                        <span class="w-9 h-9 shrink-0 rounded-lg bg-white border border-violet-200 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-violet-700" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h4l2-2h6l2 2h4v12H3z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path>
+                            </svg>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block text-sm font-semibold text-violet-900">Scan a shelf</span>
+                            <span class="block text-xs text-violet-700/80">Add items from a photo · 1 credit</span>
+                        </span>
+                        <svg class="w-5 h-5 shrink-0 text-violet-400" fill="none" stroke="currentColor" stroke-width="2"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        </svg>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            class="hidden"
+                            @change="handlePhotoPicked"
+                        />
+                    </label>
+
                     <p v-if="hasMore && spaceStorages.length > 0 && !isLoading" class="text-sm text-gray-500 mt-2">
                         Scroll down for more storage spaces
                     </p>
@@ -177,6 +233,12 @@ const handleAddStorageSpace = () => {
                 </div>
             </div>
         </div>
+
+        <AiScanModal
+            :is-open="isScanModalOpen"
+            :file="pendingPhoto"
+            @close="closeScanModal"
+        />
     </DashboardLayout>
 </template>
 
