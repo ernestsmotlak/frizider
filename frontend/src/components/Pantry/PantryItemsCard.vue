@@ -3,6 +3,8 @@ import {computed, onMounted, onUnmounted, ref} from "vue";
 import Modal from "../Modal.vue";
 import ConvertItemsModal from "../ConvertItemsModal.vue";
 import AiGenerateModal from "./AiGenerateModal.vue";
+import ActionSheet, {type SheetAction} from "../ActionSheet.vue";
+import SelectionDock from "../SelectionDock.vue";
 import UnitSelect from "../UnitSelect.vue";
 import PantryItemStatusFilter, {type PantryStatusFilterValue} from "./PantryItemStatusFilter.vue";
 import {useToastStore} from "../../stores/toast.ts";
@@ -45,6 +47,7 @@ const editingItem = ref<PantryItem | null>(null);
 
 const selectMode = ref(false);
 const selectedIds = ref<number[]>([]);
+const isActionSheetOpen = ref(false);
 
 const emptyItem = (): Omit<PantryItem, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'deleted_at'> => ({
     space_id: props.spaceId,
@@ -131,6 +134,12 @@ const toggleSelectMode = () => {
     }
 };
 
+const exitSelectMode = () => {
+    selectMode.value = false;
+    selectedIds.value = [];
+    isActionSheetOpen.value = false;
+};
+
 const toggleSelected = (itemId: number) => {
     const index = selectedIds.value.indexOf(itemId);
     if (index === -1) {
@@ -184,6 +193,93 @@ const handleAiDone = () => {
     // The pantry itself is untouched by a generation — just clear the selection.
     selectedIds.value = [];
     selectMode.value = false;
+};
+
+/**
+ * What the dock's Actions button offers. Data rather than buttons, so a new
+ * operation is a row here instead of another control fighting for width in a
+ * footer — which is what the AI operations still to come will need.
+ */
+const selectionActions = computed<SheetAction[]>(() => {
+    const count = selectedIds.value.length;
+    const noun = `${count} item${count !== 1 ? 's' : ''}`;
+
+    return [
+        {
+            id: 'move',
+            label: 'Move',
+            description: 'To a list or recipe',
+            icon: 'move',
+            featured: true,
+        },
+        {
+            id: 'generate-recipe',
+            label: 'Generate recipe',
+            description: 'Uses 1 AI credit',
+            icon: 'sparkles',
+            featured: true,
+        },
+        {
+            id: 'delete',
+            label: `Delete ${noun}`,
+            description: 'Remove from pantry',
+            icon: 'trash',
+            danger: true,
+        },
+    ];
+});
+
+const handleSelectionAction = (action: SheetAction) => {
+    isActionSheetOpen.value = false;
+
+    switch (action.id) {
+        case 'move':
+            openConvertModal();
+            break;
+        case 'generate-recipe':
+            openAiModal();
+            break;
+        case 'delete':
+            deleteSelected();
+            break;
+    }
+};
+
+/**
+ * There is no bulk delete endpoint, so this is one request per item. Settled
+ * rather than all, so a single failure still removes the rest and the toast
+ * says how many actually went.
+ */
+const deleteSelected = async () => {
+    const ids = [...selectedIds.value];
+    const noun = `${ids.length} item${ids.length !== 1 ? 's' : ''}`;
+
+    const confirmed = await confirmStore.show(`Are you sure you want to delete ${noun}?`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    loadingStore.start();
+
+    Promise.allSettled(ids.map((id) => axios.delete(`/api/pantry-items/${id}`)))
+        .then((results) => {
+            const failed = results.filter((result) => result.status === 'rejected').length;
+
+            if (failed === 0) {
+                toastStore.show('success', `${noun} removed.`);
+            } else if (failed < ids.length) {
+                toastStore.show('error', `${ids.length - failed} removed, ${failed} could not be deleted.`);
+            } else {
+                toastStore.show('error', 'Could not delete the selected items.');
+            }
+
+            exitSelectMode();
+            emit('refresh');
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
 };
 
 const formatItem = (item: PantryItem): string => {
@@ -321,16 +417,7 @@ const deleteItem = async (item: PantryItem) => {
 <template>
     <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-8 relative border-2 border-slate-300">
         <div class="absolute top-2 right-2 flex gap-2">
-            <button
-                v-if="selectMode && sortedItems.length > 0"
-                @click="toggleSelectAll"
-                class="p-2 border-2 border-gray-200 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:border-gray-300 hover:bg-white hover:shadow-xl hover:scale-110 active:scale-95 active:shadow-md transition-all duration-200"
-                title="Select all"
-            >
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </button>
+            <!-- Select-all lives on the dock now, next to the count it changes. -->
             <button
                 @click="toggleSelectMode"
                 :class="[
@@ -525,27 +612,26 @@ const deleteItem = async (item: PantryItem) => {
             <p class="text-gray-500 mb-4">No items yet. Click the + button to add your first item.</p>
         </div>
 
-        <div v-if="selectMode && selectedIds.length > 0" class="sticky bottom-0 left-0 right-0 mt-3 pt-3 border-t border-gray-200 flex gap-2">
-            <button
-                @click="openConvertModal"
-                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-                Move {{ selectedIds.length }}
-            </button>
-            <button
-                @click="openAiModal"
-                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-lg font-semibold hover:from-violet-700 hover:to-fuchsia-700 transition-colors"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"></path>
-                </svg>
-                Generate recipe
-            </button>
-        </div>
     </div>
+
+    <SelectionDock
+        v-if="selectMode"
+        :count="selectedIds.length"
+        :total="sortedItems.length"
+        noun="item"
+        @cancel="exitSelectMode"
+        @select-all="toggleSelectAll"
+        @open-actions="isActionSheetOpen = true"
+    />
+
+    <ActionSheet
+        :is-open="isActionSheetOpen"
+        title="Actions"
+        :subtitle="`${selectedIds.length} item${selectedIds.length !== 1 ? 's' : ''}`"
+        :actions="selectionActions"
+        @close="isActionSheetOpen = false"
+        @select="handleSelectionAction"
+    />
 
     <ConvertItemsModal
         :is-open="isConvertModalOpen"
