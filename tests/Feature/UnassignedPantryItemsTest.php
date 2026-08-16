@@ -81,6 +81,45 @@ class UnassignedPantryItemsTest extends TestCase
             ->assertJsonPath('unassigned_count', 2);
     }
 
+    /**
+     * The way out of the Unassigned page. The bulk move is one PATCH per item,
+     * so what it relies on is exactly this: a space_id on its own is enough.
+     */
+    public function test_giving_an_item_a_space_takes_it_off_the_unassigned_list(): void
+    {
+        [$user, $space] = $this->userWithItems();
+        $olives = PantryItem::where('name', 'Olives')->firstOrFail();
+
+        $this->actingAs($user, 'api')
+            ->patchJson("/api/pantry-items/{$olives->id}", ['space_id' => $space->id])
+            ->assertOk();
+
+        $this->assertSame($space->id, $olives->refresh()->space_id);
+        $this->assertSame('Olives', $olives->name, 'a move is not an edit');
+
+        $this->actingAs($user, 'api')
+            ->getJson('/api/pantry-items?unassigned=1')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
+
+    public function test_an_item_cannot_be_moved_into_a_strangers_space(): void
+    {
+        [$user] = $this->userWithItems();
+        $olives = PantryItem::where('name', 'Olives')->firstOrFail();
+
+        $theirs = SpaceStorage::create([
+            'user_id' => User::factory()->create()->id,
+            'name' => 'Their fridge',
+        ]);
+
+        $this->actingAs($user, 'api')
+            ->patchJson("/api/pantry-items/{$olives->id}", ['space_id' => $theirs->id])
+            ->assertForbidden();
+
+        $this->assertNull($olives->refresh()->space_id);
+    }
+
     /** @return array{0: User, 1: SpaceStorage} */
     private function userWithItems(): array
     {

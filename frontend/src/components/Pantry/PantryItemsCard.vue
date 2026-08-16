@@ -10,6 +10,7 @@ import PantryItemStatusFilter, {type PantryStatusFilterValue} from "./PantryItem
 import {useToastStore} from "../../stores/toast.ts";
 import {useLoadingStore} from "../../stores/loading.ts";
 import {useConfirmStore} from "../../stores/confirm.ts";
+import type {SpaceStorage} from "../../pages/Pantry/StorageSpacesPage.vue";
 
 export interface PantryItem {
     id: number;
@@ -50,6 +51,13 @@ const editingItem = ref<PantryItem | null>(null);
 const selectMode = ref(false);
 const selectedIds = ref<number[]>([]);
 const isActionSheetOpen = ref(false);
+
+// The spaces to move items into. Fetched when the picker is first opened
+// rather than on mount — most visits to this card never move anything, and
+// the card renders on every storage space page there is.
+const isSpacePickerOpen = ref(false);
+const spaces = ref<SpaceStorage[]>([]);
+const spacesLoaded = ref(false);
 
 const emptyItem = (): Omit<PantryItem, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'deleted_at'> => ({
     space_id: props.spaceId,
@@ -208,10 +216,20 @@ const selectionActions = computed<SheetAction[]>(() => {
 
     return [
         {
-            id: 'move',
-            label: 'Move',
-            description: 'To a list or recipe',
+            id: 'move-to-space',
+            label: 'Move to space',
+            description: 'Fridge, freezer, shelf',
             icon: 'move',
+            featured: true,
+        },
+        {
+            // Not the same "move" — this one converts to a grocery list or a
+            // recipe. Kept the id, changed the icon, so the two featured tiles
+            // are not the same glyph twice.
+            id: 'move',
+            label: 'Add to list',
+            description: 'Grocery list or recipe',
+            icon: 'cart',
             featured: true,
         },
         {
@@ -235,6 +253,9 @@ const handleSelectionAction = (action: SheetAction) => {
     isActionSheetOpen.value = false;
 
     switch (action.id) {
+        case 'move-to-space':
+            openSpacePicker();
+            break;
         case 'move':
             openConvertModal();
             break;
@@ -245,6 +266,78 @@ const handleSelectionAction = (action: SheetAction) => {
             deleteSelected();
             break;
     }
+};
+
+const openSpacePicker = () => {
+    isSpacePickerOpen.value = true;
+
+    if (spacesLoaded.value) {
+        return;
+    }
+
+    axios.get('/api/space-storages')
+        .then((response) => {
+            spaces.value = response.data.data;
+            spacesLoaded.value = true;
+        })
+        .catch((error) => {
+            console.error(error);
+            toastStore.show('error', 'Could not load your storage spaces.');
+            isSpacePickerOpen.value = false;
+        });
+};
+
+/**
+ * Where the selected items can go. The space they are already in stays on the
+ * list but disabled — saying "already here" is more use than quietly leaving
+ * it out and making the user wonder where the fridge went.
+ */
+const spaceActions = computed<SheetAction[]>(() =>
+    spaces.value.map((space) => ({
+        id: String(space.id),
+        label: space.name,
+        description: space.description ?? 'No description',
+        icon: 'move',
+        disabled: space.id === props.spaceId,
+        disabledReason: 'Already here',
+    }))
+);
+
+const handleSpacePick = (action: SheetAction) => {
+    isSpacePickerOpen.value = false;
+    moveSelectedToSpace(Number(action.id));
+};
+
+/**
+ * Same shape as deleteSelected below, and for the same reason: there is no
+ * bulk endpoint, so it is one PATCH per item, settled rather than all, and the
+ * toast says how many actually moved.
+ */
+const moveSelectedToSpace = (spaceId: number) => {
+    const ids = [...selectedIds.value];
+    const noun = `${ids.length} item${ids.length !== 1 ? 's' : ''}`;
+    const destination = spaces.value.find((space) => space.id === spaceId)?.name ?? 'the storage space';
+
+    loadingStore.start();
+
+    Promise.allSettled(ids.map((id) => axios.patch(`/api/pantry-items/${id}`, {space_id: spaceId})))
+        .then((results) => {
+            const failed = results.filter((result) => result.status === 'rejected').length;
+
+            if (failed === 0) {
+                toastStore.show('success', `${noun} moved to ${destination}.`);
+            } else if (failed < ids.length) {
+                toastStore.show('error', `${ids.length - failed} moved, ${failed} could not be.`);
+            } else {
+                toastStore.show('error', 'Could not move the selected items.');
+            }
+
+            exitSelectMode();
+            emit('refresh');
+        })
+        .finally(() => {
+            loadingStore.stop();
+        });
 };
 
 /**
@@ -633,6 +726,15 @@ const deleteItem = async (item: PantryItem) => {
         :actions="selectionActions"
         @close="isActionSheetOpen = false"
         @select="handleSelectionAction"
+    />
+
+    <ActionSheet
+        :is-open="isSpacePickerOpen"
+        title="Move to"
+        :subtitle="`${selectedIds.length} item${selectedIds.length !== 1 ? 's' : ''}`"
+        :actions="spaceActions"
+        @close="isSpacePickerOpen = false"
+        @select="handleSpacePick"
     />
 
     <ConvertItemsModal
