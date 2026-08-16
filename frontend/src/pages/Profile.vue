@@ -6,7 +6,6 @@ import ProfileAccountPanel from "../components/Profile/ProfileAccountPanel.vue";
 import ProfileHistoryPanel from "../components/Profile/ProfileHistoryPanel.vue";
 import ProfileCreditsPanel from "../components/Profile/ProfileCreditsPanel.vue";
 import {useAuthStore} from "../stores/auth.ts";
-import {onMounted} from "vue";
 import {useAiGenerationStore} from "../stores/aiGeneration.ts";
 
 type ProfileTab = "account" | "history" | "credits";
@@ -39,13 +38,10 @@ const displayName = computed(() => user.value?.name || user.value?.email?.split(
 
 const initial = computed(() => displayName.value.trim().charAt(0).toUpperCase() || "?");
 
-// Re-asked on mount rather than trusted from boot: a scan may have spent one
-// since, and this is the page someone opens to check exactly that.
+// Read from the store, never fetched here. The app already asks once at boot,
+// and the Credits panel refreshes it when opened — this page mounting is not a
+// reason to ask again on the two tabs that do not show credits.
 const ai = useAiGenerationStore();
-
-onMounted(() => {
-    ai.fetchCredits();
-});
 </script>
 
 <template>

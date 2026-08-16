@@ -45,6 +45,8 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
 
     Route::get('/ai/credits', [AiCreditController::class, 'show'])
         ->middleware('throttle:60,1');
+    Route::get('/ai/credits/ledger', [AiCreditController::class, 'ledger'])
+        ->middleware('throttle:60,1');
 
     Route::post('/recipe/ai/generate-recipe', [RecipeController::class, 'generateAiRecipeFromIngredients'])
         ->middleware('throttle:10,1');

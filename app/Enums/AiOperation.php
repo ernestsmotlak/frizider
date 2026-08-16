@@ -22,6 +22,17 @@ enum AiOperation: string
         };
     }
 
+    /** What this was, in a sentence a user would recognise. */
+    public function label(): string
+    {
+        return match ($this) {
+            self::GenerateRecipeFromIngredients => 'Recipe from ingredients',
+            self::TurnVegetarian => 'Recipe turned vegetarian',
+            self::TurnVegan => 'Recipe turned vegan',
+            self::PantryFromPhoto => 'Shelf scan',
+        };
+    }
+
     /**
      * Whether the result is a list the user reviews before it becomes real,
      * rather than a row written on their behalf. Review results are the only
