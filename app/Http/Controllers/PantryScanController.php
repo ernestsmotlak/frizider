@@ -131,11 +131,6 @@ class PantryScanController extends Controller
             'error' => $log->status === AiGenerationStatus::Failed
                 ? 'The scan failed. Your credit was refunded.'
                 : null,
-            // Absent once released, so the review screen simply stops showing a
-            // thumbnail rather than rendering a broken one.
-            'photo_url' => $this->photos->exists($log)
-                ? "/api/pantry/ai/generations/{$log->id}/photo"
-                : null,
             'confirmed_at' => $log->confirmed_at,
             'spaces' => SpaceStorage::where('user_id', $log->user_id)
                 ->orderByRaw('sort_order is null, sort_order')
@@ -143,22 +138,6 @@ class PantryScanController extends Controller
                 ->get(['id', 'name']),
             'items' => $log->result_json ?? [],
         ]);
-    }
-
-    /**
-     * The photo itself, behind the same auth as everything else. Never a
-     * public /storage path — this is a picture of the inside of someone's
-     * fridge, and a guessable URL is the wrong default for that.
-     */
-    public function photo(Request $request, UserAiRecipeLog $log)
-    {
-        $this->authorizeScan($request, $log);
-
-        $path = $this->photos->absolutePath($log);
-
-        abort_if($path === null || !is_file($path), 404);
-
-        return response()->file($path, ['Content-Type' => $this->photos->mime($log)]);
     }
 
     /**

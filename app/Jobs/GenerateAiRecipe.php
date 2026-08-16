@@ -100,6 +100,15 @@ class GenerateAiRecipe implements ShouldQueue
                 'completed_at' => now(),
             ]);
         });
+
+        // The answer is stored, and nothing reads the input again: the review
+        // screen shows the list, never the photo it came from. Guarded and last
+        // — a disk error must not fail a run that already succeeded, because
+        // failing it would refund a credit that was genuinely spent.
+        try {
+            $operation->releaseInputs($this->log);
+        } catch (Throwable) {
+        }
     }
 
     /**

@@ -65,8 +65,6 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
         ->middleware('throttle:6,1');
     Route::get('/pantry/ai/generations/{log}', [PantryScanController::class, 'show'])
         ->middleware('throttle:120,1');
-    Route::get('/pantry/ai/generations/{log}/photo', [PantryScanController::class, 'photo'])
-        ->middleware('throttle:120,1');
     Route::post('/pantry/ai/generations/{log}/confirm', [PantryScanController::class, 'confirm'])
         ->middleware('throttle:30,1');
     Route::delete('/pantry/ai/generations/{log}', [PantryScanController::class, 'destroy'])

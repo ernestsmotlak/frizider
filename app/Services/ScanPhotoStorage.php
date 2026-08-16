@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\Storage;
  * Where a scan photo lives, and when it stops living there.
  *
  * On the private disk, never the public one — this is a picture of the inside
- * of someone's fridge, and a guessable URL is the wrong default for that. It is
- * read back out through an authenticated route instead.
+ * of someone's fridge, and it is never served back to anyone. The only reader
+ * is the job, which sends it to the model and deletes it in the same breath;
+ * the review screen shows the list it produced, not the photo.
  *
  * The path travels in request_meta, so the queue payload carries a string
  * rather than a megabyte of base64 on every attempt.
@@ -64,14 +65,6 @@ class ScanPhotoStorage
         if ($path === null) return null;
 
         return Storage::disk(self::DISK)->get($path);
-    }
-
-    /** Absolute path for streaming a response. */
-    public function absolutePath(UserAiRecipeLog $log): ?string
-    {
-        $path = $this->path($log);
-
-        return $path === null ? null : Storage::disk(self::DISK)->path($path);
     }
 
     /**

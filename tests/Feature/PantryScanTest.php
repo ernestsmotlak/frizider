@@ -54,23 +54,31 @@ class PantryScanTest extends TestCase
         $this->assertSame(0, PantryItem::count(), 'nothing reaches the pantry unreviewed');
     }
 
-    public function test_the_photo_is_kept_for_the_review_and_served_behind_auth(): void
+    /**
+     * The photo exists for exactly as long as the model needs it. Nothing ever
+     * serves it back — the review screen shows the list, not the shelf — so
+     * holding it until the user confirms would be storing a picture of the
+     * inside of someone's fridge for no one to look at.
+     */
+    public function test_the_photo_is_deleted_as_soon_as_it_has_been_read(): void
     {
         [$user] = $this->readyUser();
         $id = $this->scan($user)->json('generation_id');
 
+        $log = UserAiRecipeLog::findOrFail($id);
+
+        $this->assertSame(AiGenerationStatus::Completed, $log->status);
+        $this->assertNotEmpty($log->result_json, 'the list outlives the photo');
+        $this->assertFalse(
+            Storage::disk('local')->exists($log->request_meta['photo_path']),
+            'the photo goes the moment the read is done',
+        );
+
         $this->actingAs($user, 'api')
             ->getJson("/api/pantry/ai/generations/{$id}")
             ->assertOk()
-            ->assertJsonPath('photo_url', "/api/pantry/ai/generations/{$id}/photo")
+            ->assertJsonMissingPath('photo_url')
             ->assertJsonStructure(['items', 'spaces', 'status', 'confirmed_at']);
-
-        $this->actingAs($user, 'api')->get("/api/pantry/ai/generations/{$id}/photo")->assertOk();
-
-        // Someone else's fridge is nobody's business.
-        $this->actingAs(User::factory()->create(), 'api')
-            ->get("/api/pantry/ai/generations/{$id}/photo")
-            ->assertNotFound();
     }
 
     public function test_confirming_writes_the_edited_list_not_the_suggestion(): void
@@ -95,9 +103,7 @@ class PantryScanTest extends TestCase
         $this->assertSame($space->id, $items[0]->space_id);
         $this->assertNull($items[1]->space_id, 'unassigned survives as unassigned');
 
-        $log = UserAiRecipeLog::findOrFail($id);
-        $this->assertNotNull($log->confirmed_at);
-        $this->assertFalse(Storage::disk('local')->exists($log->request_meta['photo_path']), 'the photo is released');
+        $this->assertNotNull(UserAiRecipeLog::findOrFail($id)->confirmed_at);
     }
 
     public function test_confirming_twice_adds_one_pantry(): void
@@ -130,18 +136,16 @@ class PantryScanTest extends TestCase
         $this->assertSame(0, PantryItem::count());
     }
 
-    public function test_discarding_drops_the_suggestion_and_the_photo(): void
+    public function test_discarding_drops_the_suggestion(): void
     {
         [$user] = $this->readyUser();
         $id = $this->scan($user)->json('generation_id');
-        $path = UserAiRecipeLog::findOrFail($id)->request_meta['photo_path'];
 
         $this->actingAs($user, 'api')->deleteJson("/api/pantry/ai/generations/{$id}")->assertOk();
 
         $log = UserAiRecipeLog::findOrFail($id);
         $this->assertNull($log->result_json);
         $this->assertNotNull($log->acknowledged_at, 'a discarded scan stops being news');
-        $this->assertFalse(Storage::disk('local')->exists($path));
         $this->assertSame(0, PantryItem::count());
     }
 

@@ -34,12 +34,12 @@ load-bearing: "Fridge — dairy, leftovers" assigns far better than "Fridge".
    `persist()`: does **not** touch the pantry, just returns the items for `result_json`.
 5. **Prompt + schema.** `resources/prompts/pantry_from_photo.md`, short, appended after `system.md`.
    No JSON or field names in it. `PantryItemsSchema::get($spaceIds)`.
-6. **Review + confirm.** `GET /pantry/ai/generations/{id}` returns `result_json` + photo URL.
+6. **Review + confirm.** `GET /pantry/ai/generations/{id}` returns `result_json`.
    `POST .../confirm` takes the **edited** list (not `result_json` — that was only a suggestion),
    re-checks each `space_id` belongs to the user, writes via `PantryIntakeService::add()`,
    acknowledges the log.
-7. **Cleanup.** Delete the file when the log goes terminal — success path *and* `failed()`. Sweep
-   for orphaned uploads alongside `ai:sweep-stalled`.
+7. **Cleanup.** Delete the file the moment the model has answered — success path *and* `failed()`.
+   Sweep for orphaned uploads alongside `ai:sweep-stalled`.
 
 ## Review screen
 
@@ -49,12 +49,19 @@ load-bearing: "Fridge — dairy, leftovers" assigns far better than "Fridge".
   X to drop. No modal.
 - Included by default, easy to remove — the user is confirming, not re-entering.
 - Reuse `SelectionDock` for the "Add N items" bar and `ActionSheet` for the space picker.
-- Photo thumbnail at the top — they're verifying a list against a source.
+- **No photo on the screen.** Tried it as a thumbnail and it earned nothing: the user took the
+  shot seconds ago and is stood at the shelf, so they check the list against the shelf, not
+  against a 56px square. Dropping it is what lets the photo die with the job.
 - Nothing persists until confirm; state lives on the server, so backgrounding the app is safe.
 
 ## Notes
 
 - Downscale to ~1200px on the frontend before upload. A 4MB phone photo buys nothing but tokens.
+- The photo is never served back to the client — there is no route for it. It is written by the
+  upload, read once by the job, and deleted in the same breath.
+- Output is always English, whatever language the packaging is in. The rule lives in `system.md`
+  and has to say so about photos explicitly: left to itself the model reads "mleko" off a carton,
+  decides the input language is Slovenian, and answers in Slovenian.
 - Verify the returned `space_id` belongs to the user server-side anyway. The enum should make it
   impossible; one query means a provider quirk can't cross a user boundary.
 
@@ -82,7 +89,6 @@ backoff for vision calls than for text.
   "generation_id": 12,
   "status": "completed",
   "error": null,
-  "photo_url": "/storage/scans/....jpg",
   "confirmed_at": null,
   "spaces": [{"id": 3, "name": "Fridge"}],
   "items": [{"name": "Milk", "space_id": 3, "notes": null}]
