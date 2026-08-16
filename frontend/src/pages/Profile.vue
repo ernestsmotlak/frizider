@@ -6,6 +6,8 @@ import ProfileAccountPanel from "../components/Profile/ProfileAccountPanel.vue";
 import ProfileHistoryPanel from "../components/Profile/ProfileHistoryPanel.vue";
 import ProfileCreditsPanel from "../components/Profile/ProfileCreditsPanel.vue";
 import {useAuthStore} from "../stores/auth.ts";
+import {onMounted} from "vue";
+import {useAiGenerationStore} from "../stores/aiGeneration.ts";
 
 type ProfileTab = "account" | "history" | "credits";
 
@@ -36,6 +38,14 @@ const user = computed(() => auth.user as { name?: string; email?: string } | nul
 const displayName = computed(() => user.value?.name || user.value?.email?.split("@")[0] || "Chef");
 
 const initial = computed(() => displayName.value.trim().charAt(0).toUpperCase() || "?");
+
+// Re-asked on mount rather than trusted from boot: a scan may have spent one
+// since, and this is the page someone opens to check exactly that.
+const ai = useAiGenerationStore();
+
+onMounted(() => {
+    ai.fetchCredits();
+});
 </script>
 
 <template>
@@ -49,6 +59,18 @@ const initial = computed(() => displayName.value.trim().charAt(0).toUpperCase() 
                     <p class="identity-email">{{ user?.email ?? "Not signed in" }}</p>
                 </div>
             </section>
+
+            <!-- Above the tabs rather than inside the Credits panel, so the
+                 number is there on all three. A balance you have to go
+                 looking for is one you find out about from a 402. -->
+            <div
+                v-if="ai.creditsRemaining !== null"
+                class="credit-strip"
+                :class="ai.creditsRemaining === 0 ? 'credit-strip--empty' : ''"
+            >
+                <span class="credit-strip__count">{{ ai.creditsRemaining }}</span>
+                <span>AI generation{{ ai.creditsRemaining === 1 ? '' : 's' }} left</span>
+            </div>
 
             <nav class="tab-strip" aria-label="Profile sections">
                 <button
@@ -79,6 +101,35 @@ const initial = computed(() => displayName.value.trim().charAt(0).toUpperCase() 
 .profile-page {
     max-width: 32rem;
     margin: 0 auto;
+}
+
+.credit-strip {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--accent-soft) 60%, white 40%);
+    background: color-mix(in srgb, var(--accent-soft) 22%, white 78%);
+    font-size: 0.8rem;
+    color: var(--text-soft, #4b5563);
+}
+
+.credit-strip__count {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+.credit-strip--empty {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.credit-strip--empty .credit-strip__count {
+    color: #b91c1c;
 }
 
 .identity-card {

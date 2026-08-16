@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiCreditController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CookingSessionController;
 use App\Http\Controllers\CookingSessionTimerController;
@@ -41,6 +42,9 @@ Route::middleware(['jwt.cookie', 'auth:api'])->group(function () {
     Route::post('recipe/{recipe}/ingredient/{ingredient}/toggle-completed', [RecipeController::class, 'toggleIngredientCompleted']);
     Route::delete('recipe/{recipe}/instruction/{instruction}', [RecipeController::class, 'deleteInstructionFromRecipe']);
     Route::post('recipe/{recipe}/instruction/{instruction}/toggle-completed', [RecipeController::class, 'toggleInstructionCompleted']);
+
+    Route::get('/ai/credits', [AiCreditController::class, 'show'])
+        ->middleware('throttle:60,1');
 
     Route::post('/recipe/ai/generate-recipe', [RecipeController::class, 'generateAiRecipeFromIngredients'])
         ->middleware('throttle:10,1');

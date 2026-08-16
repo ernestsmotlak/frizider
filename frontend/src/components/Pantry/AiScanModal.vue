@@ -137,7 +137,17 @@ watch(() => store.submissionStatus, (status) => {
                     Quantities and expiry dates are not read from a photo — add those later if you need them.
                 </p>
 
-                <p class="text-xs text-gray-400">Uses 1 AI credit.</p>
+                <!-- The price was always here; the balance is the half that
+                     stops a 402 landing after the photo is already framed. -->
+                <p class="text-xs text-gray-400">
+                    Uses 1 AI credit.
+                    <span
+                        v-if="store.creditsRemaining !== null"
+                        :class="store.creditsRemaining > 0 ? 'text-violet-600' : 'text-red-600 font-semibold'"
+                    >
+                        {{ store.creditsRemaining > 0 ? `${store.creditsRemaining} left` : 'None left' }}
+                    </span>
+                </p>
             </div>
 
             <!-- In flight -->

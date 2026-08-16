@@ -103,6 +103,8 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
     /** Set when we stop watching before the work finished. */
     const stalled = ref<string | null>(null);
     const creditsRemaining = ref<number | null>(null);
+    /** False also when the balance has never been fetched — assume nothing. */
+    const canUseAi = ref(false);
     const modalOpen = ref(false);
     const expanded = ref(false);
 
@@ -256,6 +258,24 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
     };
 
     /**
+     * The balance, asked for rather than inferred. Every spend response
+     * carries it, but that only helps once something has already been spent —
+     * without this the number is null for the whole of a session that does
+     * nothing, which is exactly the session about to be surprised by a 402.
+     */
+    const fetchCredits = (): Promise<void> =>
+        axios.get("/api/ai/credits")
+            .then((response) => {
+                creditsRemaining.value = response.data.credits_remaining ?? null;
+                canUseAi.value = response.data.can_use_ai === true;
+            })
+            .catch(() => {
+                // Best effort. An unknown balance renders as nothing at all,
+                // never as zero — claiming empty when we do not know is worse
+                // than saying nothing.
+            });
+
+    /**
      * Once per app load: ask what is running or waiting to be announced, and
      * pick up from there. Nothing is stored client-side between loads — the
      * server is asked who the user is and answers with their work.
@@ -263,6 +283,8 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
     const bootCheck = () => {
         if (booted) return;
         booted = true;
+
+        fetchCredits();
 
         refresh()
             .then(() => {
@@ -369,6 +391,8 @@ export const useAiGenerationStore = defineStore("aiGeneration", () => {
         stalled,
         expanded,
         creditsRemaining,
+        canUseAi,
+        fetchCredits,
         modalOpen,
         submissionId: submittedId,
         submissionStatus,

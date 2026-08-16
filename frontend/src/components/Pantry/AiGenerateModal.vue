@@ -126,7 +126,15 @@ watch(() => store.submissionStatus, (status) => {
                     A recipe can use at most {{ MAX_INGREDIENTS }} ingredients — remove {{ chips.length - MAX_INGREDIENTS }} to continue.
                 </p>
 
-                <p class="text-xs text-gray-400">Uses 1 AI credit.</p>
+                <p class="text-xs text-gray-400">
+                    Uses 1 AI credit.
+                    <span
+                        v-if="store.creditsRemaining !== null"
+                        :class="store.creditsRemaining > 0 ? 'text-violet-600' : 'text-red-600 font-semibold'"
+                    >
+                        {{ store.creditsRemaining > 0 ? `${store.creditsRemaining} left` : 'None left' }}
+                    </span>
+                </p>
             </div>
 
             <!-- In flight -->

@@ -2,7 +2,7 @@
 import {computed, onMounted, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import BackButton from "../components/BackButton.vue";
-import LogoComponent from "../components/LogoComponent.vue";
+import AiJobsBadge from "../components/AiJobsBadge.vue";
 import AiGenerationPill from "../components/AiGenerationPill.vue";
 import ActionSheet, {type SheetAction} from "../components/ActionSheet.vue";
 import {useAiGenerationStore} from "../stores/aiGeneration.ts";
@@ -118,12 +118,16 @@ watch(() => selectionDock.active, (active) => {
             <div class="mesh-background__grain"></div>
         </div>
 
-        <div class="relative z-10 max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
+        <!-- Above the slot below, not level with it. Both are positioned
+             siblings, so at equal z-index the later one paints on top and the
+             jobs dropdown opens behind the page. z-index inside the header
+             cannot fix that — it only sorts within this layer. -->
+        <div class="relative z-30 max-w-md mx-auto flex flex-row justify-between px-5 pt-6">
             <div class="">
                 <BackButton/>
             </div>
             <div class="">
-                <LogoComponent/>
+                <AiJobsBadge/>
             </div>
         </div>
         <div class="relative z-10 max-w-md mx-auto min-h-screen">
