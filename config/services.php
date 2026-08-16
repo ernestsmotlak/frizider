@@ -36,7 +36,6 @@ return [
     ],
 
     'ai' => [
-        'driver' => env('AI_RECIPE_DRIVER', 'fake'),
         'model' => env('AI_MODEL', 'gemini-3.5-flash'),
         'gemini' => [
             'key' => env('GEMINI_KEY'),
@@ -45,8 +44,6 @@ return [
             // queue retry_after (90).
             'timeout' => env('AI_HTTP_TIMEOUT', 45),
         ],
-        'fake_delay' => env('AI_FAKE_DELAY', 3),
-        'fake_failure_rate' => env('AI_FAKE_FAILURE_RATE', 0),
     ],
 
 ];

@@ -134,11 +134,11 @@ Then seven operation prompts, each a short task description appended after `syst
   prompt), `model()` from config with a per-operation override, and `promptVersion()`
 - `Operations/` — seven concrete handlers, one per operation
 - `AiOperationRegistry.php` — resolves an `AiOperation` case to its handler
-- `FakeAiClient.php` — fabricates a valid response by **walking the schema**, so any new operation
-  gets a working fake for free. Must also fail on command (e.g. the string `"fail"` appearing in
-  the input) — this is the only way to test the refund path, since a real API can't be made to
-  fail on demand.
-- `GeminiAiClient.php` — the real client
+- `GeminiAiClient.php` — the real client, and the only one. A `FakeAiClient` that walked the
+  schema and fabricated an answer was built and later removed: it sat behind the `default` arm of
+  a driver switch, so any config value that was not exactly `gemini` served invented data to real
+  users and charged a credit for it. Tests fake the HTTP transport instead (`TestCase::fakeGemini`),
+  which keeps the request encoding and response handling under test rather than bypassing them.
 
 ### 2c. Prompts as versioned files, not DB rows
 
@@ -218,10 +218,9 @@ pantry operations.
 1. Prompt files + `PromptRepository`
 2. Value objects (`AiPart`, `AiRequest`, `AiResponse`) + `AiClient` interface
 3. Schemas
-4. `FakeAiClient` — testable standalone before anything existing breaks
-5. Operations + registry
-6. `AiOperation` enum replacement, config, bindings
-7. **Last:** rewire the job and controllers, since that's the only step that can break something
+4. Operations + registry
+5. `AiOperation` enum replacement, config, bindings
+6. **Last:** rewire the job and controllers, since that's the only step that can break something
    currently working
 
 ---
@@ -231,8 +230,8 @@ pantry operations.
 - One recipe operation and one pantry operation, each end-to-end: submit → job → persist
 - A forced failure (`"fail"` in the input) confirming the refund still fires and the log reaches
   `failed` with an error message and `completed_at` set
-- Every registered operation's schema is walkable by `FakeAiClient` — catches malformed schemas
-  before Gemini ever sees one
+- Every registered operation builds a request without throwing — catches malformed schemas before
+  Gemini ever sees one
 - Reconciliation returns zero rows:
 
 ```sql

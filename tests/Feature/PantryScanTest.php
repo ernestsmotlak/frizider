@@ -30,14 +30,12 @@ class PantryScanTest extends TestCase
 
         // QUEUE_CONNECTION is sync in phpunit.xml, so the upload runs the job
         // inline and one request covers upload through to the stored result.
-        config(['services.ai.driver' => 'fake', 'services.ai.fake_delay' => 0]);
-
         Storage::fake('local');
     }
 
     public function test_a_photo_becomes_a_list_and_touches_nothing(): void
     {
-        [$user] = $this->readyUser();
+        [$user, $space] = $this->readyUser();
 
         $response = $this->scan($user);
 
@@ -47,7 +45,10 @@ class PantryScanTest extends TestCase
         $log = UserAiRecipeLog::findOrFail($response->json('generation_id'));
 
         $this->assertSame(AiGenerationStatus::Completed, $log->status);
-        $this->assertNotEmpty($log->result_json, 'the scan produced a list');
+        $this->assertSame([
+            ['name' => 'Milk', 'space_id' => $space->id, 'notes' => 'half full'],
+            ['name' => 'Olives', 'space_id' => null, 'notes' => null],
+        ], $log->result_json, 'the answer survives the round trip, assignments and all');
         $this->assertNull($log->confirmed_at);
 
         // The whole reason this is a review flow.
@@ -206,6 +207,14 @@ class PantryScanTest extends TestCase
             'name' => 'Fridge',
             'description' => 'Dairy, leftovers, opened jars',
         ]);
+
+        // What the model is going to say about the shelf. Set here rather than
+        // in setUp because the assigned space has to be one this user owns —
+        // an id from anywhere else is exactly what persist() drops.
+        $this->fakeGemini(['items' => [
+            ['name' => 'Milk', 'space_id' => $space->id, 'notes' => 'half full'],
+            ['name' => 'Olives', 'space_id' => null, 'notes' => null],
+        ]]);
 
         return [$user, $space];
     }

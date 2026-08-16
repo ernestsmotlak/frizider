@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Ai\AiRequest;
 use App\Ai\AiResponse;
-use App\Ai\FakeAiClient;
 use App\Contracts\AiClient;
 use App\Enums\AiCreditTransactionType;
 use App\Enums\AiGenerationStatus;
@@ -17,12 +16,24 @@ use App\Models\UserAiRecipeLog;
 use App\Services\AiCreditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class SweepStalledAiGenerationsTest extends TestCase
 {
     use RefreshDatabase;
+
+    /** A well-formed answer, so nothing here turns on a malformed one. */
+    public const RECIPE = [
+        'name' => 'Tomato pasta',
+        'description' => 'Quick weeknight pasta.',
+        'servings' => 2,
+        'prep_time' => 5,
+        'cook_time' => 15,
+        'ingredients' => [
+            ['name' => 'Tomatoes', 'quantity' => 2, 'unit' => 'pcs', 'notes' => null],
+        ],
+        'instructions' => ['Chop the tomatoes.', 'Simmer and serve.'],
+    ];
 
     public function test_a_run_nobody_finished_is_failed_and_refunded(): void
     {
@@ -82,8 +93,7 @@ class SweepStalledAiGenerationsTest extends TestCase
         $this->assertSame(2, $credits->balance($user->id));
 
         // The long-lost worker finally answers.
-        config(['services.ai.driver' => 'fake', 'services.ai.fake_delay' => 0]);
-        Http::fake();
+        $this->fakeGemini(self::RECIPE);
 
         GenerateAiRecipe::dispatchSync($log->refresh(), $charge);
 
@@ -101,16 +111,21 @@ class SweepStalledAiGenerationsTest extends TestCase
     {
         [$log, $charge, $credits, $user] = $this->charged(AiGenerationStatus::Processing, ageMinutes: 30);
 
+        // The one place a stand-in client is the point rather than a shortcut:
+        // the sweep has to land *during* the provider call, which is the one
+        // moment a faked transport cannot express.
         $this->app->bind(AiClient::class, fn() => new class implements AiClient {
             public function send(AiRequest $request): AiResponse
             {
                 Artisan::call('ai:sweep-stalled');
 
-                return (new FakeAiClient)->send($request);
+                return new AiResponse(
+                    data: SweepStalledAiGenerationsTest::RECIPE,
+                    tokensUsed: 1234,
+                    model: 'gemini-test',
+                );
             }
         });
-
-        config(['services.ai.fake_delay' => 0]);
 
         // Still running when the job starts — the opening check cannot catch this.
         $this->assertSame(AiGenerationStatus::Processing, $log->refresh()->status);

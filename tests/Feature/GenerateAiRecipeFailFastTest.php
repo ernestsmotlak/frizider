@@ -85,7 +85,6 @@ class GenerateAiRecipeFailFastTest extends TestCase
     private function pending(): array
     {
         config([
-            'services.ai.driver' => 'gemini',
             'services.ai.model' => 'gemini-3.5-flash',
             'services.ai.gemini.base_url' => 'https://generativelanguage.googleapis.com/v1beta',
             'services.ai.gemini.key' => 'test-key',

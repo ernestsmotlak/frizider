@@ -28,6 +28,9 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!-- The suite drives the real Gemini client over a faked transport, so
+             the key from .env has no business being in the test process. -->
+        <env name="GEMINI_KEY" value="test-key"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

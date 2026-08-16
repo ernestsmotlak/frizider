@@ -69,8 +69,8 @@ load-bearing: "Fridge — dairy, leftovers" assigns far better than "Fridge".
 
 Frontend and backend are both in. 35 tests pass, 9 of them covering the scan flow. What is left is
 the real-world part: nobody has pointed it at Gemini with an actual shelf photo, so the prompt and
-the space-assignment quality are unproven. `AI_RECIPE_DRIVER=fake` walks the schema and returns
-plausible nonsense, which is enough to exercise every path but says nothing about accuracy.
+the space-assignment quality are unproven. The tests drive the real client over a faked HTTP
+transport, which exercises every path but says nothing about accuracy — the answer is canned.
 
 Not done: a separate `ai-vision` queue (one line plus a worker flag, deliberately skipped so a
 worker started without `--queue` does not silently stop processing scans), and a longer retry

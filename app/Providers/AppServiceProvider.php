@@ -13,12 +13,12 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(\App\Ai\PromptRepository::class);
 
-        $this->app->bind(\App\Contracts\AiClient::class, function () {
-            return match (config('services.ai.driver')) {
-                'gemini' => new \App\Ai\GeminiAiClient(),
-                default => new \App\Ai\FakeAiClient(),
-            };
-        });
+        // One provider, bound outright. There used to be a driver switch here
+        // with a stand-in client behind the default arm, which meant any value
+        // that was not exactly "gemini" — a typo, a missing key, a stale config
+        // cache — quietly served fabricated data to real users and charged a
+        // credit for it. Tests fake the transport instead; see TestCase.
+        $this->app->bind(\App\Contracts\AiClient::class, \App\Ai\GeminiAiClient::class);
     }
 
     /**
