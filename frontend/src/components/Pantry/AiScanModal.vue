@@ -64,7 +64,12 @@ watch(() => props.isOpen, (open) => {
 });
 
 onUnmounted(() => {
-    store.modalOpen = false;
+    // Only when this copy is the one holding the flag. There are two of these
+    // mounted on the pantry pages now — one in the layout for the actions
+    // sheet, one on the page — and a closed copy going away must not clear a
+    // flag the open one set, or the pill starts talking over it.
+    if (props.isOpen) store.modalOpen = false;
+
     releasePreview();
 });
 

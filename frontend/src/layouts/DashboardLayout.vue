@@ -5,6 +5,7 @@ import BackButton from "../components/BackButton.vue";
 import AiJobsBadge from "../components/AiJobsBadge.vue";
 import AiGenerationPill from "../components/AiGenerationPill.vue";
 import ActionSheet, {type SheetAction} from "../components/ActionSheet.vue";
+import AiScanModal from "../components/Pantry/AiScanModal.vue";
 import {useAiGenerationStore} from "../stores/aiGeneration.ts";
 import {useSelectionDockStore} from "../stores/selectionDock.ts";
 
@@ -15,29 +16,62 @@ const selectionDock = useSelectionDockStore();
 
 const isActionPickerOpen = ref(false);
 
-/** A sheet action that navigates somewhere. */
+/** A sheet action, most of which navigate somewhere. */
 type DashboardAction = SheetAction & {
-    route: string;
+    route?: string;
 };
 
-const dashboardActions: DashboardAction[] = [
-    {
-        id: 'shopping',
-        label: 'Shopping',
-        description: 'Check items and buy',
-        route: '/shopping',
-        featured: true,
-        icon: 'cart',
-    },
-    {
-        id: 'cooking',
-        label: 'Cooking',
-        description: 'Follow steps and cook',
-        route: '/cooking',
-        featured: true,
-        icon: 'pot',
-    },
-];
+/**
+ * Why the scan is here at all: it used to take three taps to reach — Pantry,
+ * Storage Spaces, then the strip — which is three taps too many for something
+ * you do standing at an open fridge. This button is the easiest one on the
+ * screen to hit.
+ *
+ * Computed rather than a constant because the last row's availability moves:
+ * it depends on credits, and the answer arrives after the first paint.
+ */
+const dashboardActions = computed<DashboardAction[]>(() => {
+    const balance = aiGenerationStore.creditsRemaining;
+
+    // null means the balance has not come back yet. Unknown is not empty —
+    // disabling on a pending fetch would grey the row out on every cold start
+    // and leave it grey for good if the request ever failed.
+    const known = balance !== null;
+    const blocked = known && (!aiGenerationStore.canUseAi || balance === 0);
+
+    return [
+        {
+            id: 'shopping',
+            label: 'Shopping',
+            description: 'Check items and buy',
+            route: '/shopping',
+            featured: true,
+            icon: 'cart',
+        },
+        {
+            id: 'cooking',
+            label: 'Cooking',
+            description: 'Follow steps and cook',
+            route: '/cooking',
+            featured: true,
+            icon: 'pot',
+        },
+        {
+            id: 'scan-shelf',
+            label: 'Scan items',
+            // Short enough to sit on one line like its neighbours. The photo
+            // is already implied by the label and the icon; the price is the
+            // only part that is not, and saying it here is cheaper than a 402
+            // after the camera, the upload and the wait.
+            description: 'Uses 1 credit',
+            featured: true,
+            icon: 'sparkles',
+            filePicker: {accept: 'image/*', capture: 'environment'},
+            disabled: blocked,
+            disabledReason: aiGenerationStore.canUseAi ? 'No credits left' : 'AI is not enabled',
+        },
+    ];
+});
 
 const isRecipesTab = computed(() => {
     if (route.path.startsWith('/recipes')) return true;
@@ -79,10 +113,27 @@ const toggleActionPicker = () => {
 const openAction = (action: SheetAction) => {
     closeActionPicker();
 
-    const target = dashboardActions.find((candidate) => candidate.id === action.id);
-    if (target) {
+    const target = dashboardActions.value.find((candidate) => candidate.id === action.id);
+
+    if (target?.route) {
         router.push(target.route);
     }
+};
+
+// The photo is already in hand — the sheet's row is the file input itself, so
+// the tap that opened the camera is the same tap that chose the picture.
+const pendingPhoto = ref<File | null>(null);
+const isScanModalOpen = ref(false);
+
+const handlePhotoPicked = (_action: SheetAction, file: File) => {
+    closeActionPicker();
+    pendingPhoto.value = file;
+    isScanModalOpen.value = true;
+};
+
+const closeScanModal = () => {
+    isScanModalOpen.value = false;
+    pendingPhoto.value = null;
 };
 
 onMounted(() => {
@@ -141,6 +192,13 @@ watch(() => selectionDock.active, (active) => {
         :actions="dashboardActions"
         @close="closeActionPicker"
         @select="openAction"
+        @pick="handlePhotoPicked"
+    />
+
+    <AiScanModal
+        :is-open="isScanModalOpen"
+        :file="pendingPhoto"
+        @close="closeScanModal"
     />
 
     <AiGenerationPill/>
