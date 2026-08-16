@@ -18,7 +18,10 @@ The following rules apply to every task.
 
 ## Language and style
 
-- Write in the same language as the user's input. If the language is unclear, use English.
+- Always answer in English, whatever language the input is in. The input may be text written in
+  another language, or a photo of packaging labelled in one; neither changes the language you
+  write in. Translate rather than copy — a carton labelled "mleko" is "milk", and a note about
+  it belongs in English too.
 - Keep text short and practical. This is a phone app, not a cookbook.
 
 ## Input handling

@@ -40,7 +40,6 @@ const loading = ref(true);
 const loadError = ref("");
 const status = ref<ScanStatus>("pending");
 const scanError = ref<string | null>(null);
-const photoUrl = ref<string | null>(null);
 const confirmed = ref(false);
 const spaces = ref<ScanSpace[]>([]);
 const items = ref<ScanItem[]>([]);
@@ -118,7 +117,6 @@ const toItem = (row: any): ScanItem => ({
 const applyResponse = (data: any) => {
     status.value = data.status;
     scanError.value = data.error ?? null;
-    photoUrl.value = data.photo_url ?? null;
     confirmed.value = data.confirmed_at !== null && data.confirmed_at !== undefined;
     spaces.value = data.spaces ?? [];
 
@@ -262,25 +260,12 @@ onBeforeUnmount(() => {
     <DashboardLayout>
         <div class="pt-7 px-5" :style="showList ? 'padding-bottom: 1rem;' : ''">
             <div class="bg-white app-surface-gradient rounded-2xl shadow-xl p-6 border-2 border-slate-300">
-                <div class="flex items-start gap-4">
-                    <div class="flex-1 min-w-0">
-                        <h2 class="text-2xl font-bold tracking-tight text-gray-900">Review scan</h2>
-                        <p v-if="showList" class="text-xs text-gray-500">
-                            {{ named.length }} item{{ named.length === 1 ? '' : 's' }} found · nothing is added yet
-                        </p>
-                        <p v-else-if="isRunning" class="text-xs text-gray-500">Reading the photo</p>
-                    </div>
-
-                    <a
-                        v-if="photoUrl"
-                        :href="photoUrl"
-                        target="_blank"
-                        rel="noopener"
-                        class="w-14 h-14 shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 hover:scale-105 transition-transform"
-                        title="Open the photo"
-                    >
-                        <img :src="photoUrl" alt="The scanned shelf" class="w-full h-full object-cover"/>
-                    </a>
+                <div class="min-w-0">
+                    <h2 class="text-2xl font-bold tracking-tight text-gray-900">Review scan</h2>
+                    <p v-if="showList" class="text-xs text-gray-500">
+                        {{ named.length }} item{{ named.length === 1 ? '' : 's' }} found · nothing is added yet
+                    </p>
+                    <p v-else-if="isRunning" class="text-xs text-gray-500">Reading the photo</p>
                 </div>
 
                 <hr class="border-gray-200 my-4"/>
