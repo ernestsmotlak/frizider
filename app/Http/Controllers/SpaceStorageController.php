@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PantryItem;
 use App\Models\SpaceStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -57,6 +58,13 @@ class SpaceStorageController extends Controller
         return response()->json([
             'data' => $spaces,
             'allRecipes' => $allSpaces,
+            // Items with no space are not a space, so they cannot be a row in
+            // this list — but they are invisible everywhere else, so the count
+            // rides along and the page gives them a card of their own. A real
+            // row with a null id would flow straight into rename and delete.
+            'unassigned_count' => PantryItem::where('user_id', $this->user()->id)
+                ->whereNull('space_id')
+                ->count(),
         ]);
     }
 

@@ -16,6 +16,7 @@ import Shopping from "../pages/Shopping.vue";
 import Cooking from "../pages/Cooking.vue";
 import StorageSpacesPage from "../pages/Pantry/StorageSpacesPage.vue";
 import StorageSpacePage from "../pages/Pantry/StorageSpacePage.vue";
+import UnassignedItemsPage from "../pages/Pantry/UnassignedItemsPage.vue";
 import NewStorageSpace from "../pages/NewStorageSpace.vue";
 import PantryScanReviewPage from "../pages/Pantry/PantryScanReviewPage.vue";
 import Profile from "../pages/Profile.vue";
@@ -99,6 +100,14 @@ const router = createRouter({
             path: '/storage-spaces',
             name: 'Storage Spaces',
             component: StorageSpacesPage,
+            meta: {requiresAuth: true}
+        },
+        // Above /storage-spaces/:id, or the dynamic segment swallows the word
+        // "unassigned" and tries to load it as an id.
+        {
+            path: '/storage-spaces/unassigned',
+            name: 'Unassigned Items',
+            component: UnassignedItemsPage,
             meta: {requiresAuth: true}
         },
         {

@@ -21,6 +21,9 @@ export function usePagination<T>(options: PaginationOptions) {
     const hasMore = ref(true);
     const isLoading = ref(false);
     const allRows = ref(0);
+    // Whatever else the endpoint sends alongside the page. Counts that are not
+    // rows have nowhere else to travel.
+    const meta = ref<Record<string, any>>({});
     let scrollTimeout: number | null = null;
 
     const getPayload = (): Record<string, unknown> => {
@@ -42,6 +45,7 @@ export function usePagination<T>(options: PaginationOptions) {
             .then((response: any) => {
                 const paginator = response.data.data;
                 allRows.value = response.data.allRecipes ?? 0;
+                meta.value = response.data;
                 if (page === 1) {
                     items.value = paginator.data;
                 } else {
@@ -97,6 +101,7 @@ export function usePagination<T>(options: PaginationOptions) {
         isLoading,
         fetchPage,
         allRows,
+        meta,
         refresh,
     };
 }

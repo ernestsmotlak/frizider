@@ -28,7 +28,9 @@ export interface PantryItem {
 
 const props = defineProps<{
     pantryItems: PantryItem[];
-    spaceId: number;
+    // null on the Unassigned page, which is a real place to stand rather than
+    // a missing space — adding an item there should leave it unassigned.
+    spaceId: number | null;
 }>();
 
 const emit = defineEmits<{

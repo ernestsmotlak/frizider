@@ -5,6 +5,7 @@ import router from "../../router";
 import StorageSpaceCard from "../../components/Pantry/StorageSpaceCard.vue";
 import AiScanModal from "../../components/Pantry/AiScanModal.vue";
 import {usePagination} from "../../composables/usePagination.ts";
+import {computed} from "vue";
 
 export interface SpaceStorage {
     id: number;
@@ -18,7 +19,7 @@ export interface SpaceStorage {
 
 const searchTerm = ref("");
 
-const {items: spaceStorages, isLoading, hasMore, allRows, refresh} = usePagination<SpaceStorage>({
+const {items: spaceStorages, isLoading, hasMore, allRows, meta, refresh} = usePagination<SpaceStorage>({
     endpoint: '/api/get-storage-spaces',
     errorMessage: 'Could not fetch storage spaces.',
     payload: () => ({
@@ -41,6 +42,11 @@ onUnmounted(() => {
         window.clearTimeout(searchTimeout);
     }
 });
+
+// Only worth a card when there is something in it, and hidden while searching:
+// unassigned is not a space, so it has no name to match against.
+const unassignedCount = computed<number>(() => meta.value.unassigned_count ?? 0);
+const showUnassigned = computed(() => unassignedCount.value > 0 && searchTerm.value.trim() === '');
 
 const handleStorageSpaceClick = (id: number) => {
     router.push('/storage-spaces/' + id);
@@ -189,6 +195,34 @@ const closeScanModal = () => {
                     <p v-if="hasMore && spaceStorages.length > 0 && !isLoading" class="text-sm text-gray-500 mt-2">
                         Scroll down for more storage spaces
                     </p>
+                </div>
+
+                <!-- Outside the grid and above the empty state, because the
+                     case that produces the most unassigned items is a scan by
+                     someone who has not made a single space yet. -->
+                <div v-if="showUnassigned" class="px-4 pb-4">
+                    <button
+                        @click="router.push('/storage-spaces/unassigned')"
+                        class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/60 hover:border-amber-400 hover:bg-amber-100/60 active:scale-[0.99] transition-all duration-200 text-left"
+                    >
+                        <span class="w-9 h-9 shrink-0 rounded-lg bg-white border border-amber-200 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M12 9v3.75m0 3.75h.008M10.34 3.94l-8.1 14.02A1.5 1.5 0 0 0 3.54 20.2h16.92a1.5 1.5 0 0 0 1.3-2.24l-8.1-14.02a1.5 1.5 0 0 0-2.6 0z"></path>
+                            </svg>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block text-sm font-semibold text-amber-900">Unassigned</span>
+                            <span class="block text-xs text-amber-700/80">
+                                {{ unassignedCount }} item{{ unassignedCount !== 1 ? 's' : '' }} with no storage space
+                            </span>
+                        </span>
+                        <svg class="w-5 h-5 shrink-0 text-amber-400" fill="none" stroke="currentColor" stroke-width="2"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        </svg>
+                    </button>
                 </div>
 
                 <div v-if="spaceStorages.length === 0 && !isLoading"

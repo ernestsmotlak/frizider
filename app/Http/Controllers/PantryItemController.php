@@ -19,7 +19,13 @@ class PantryItemController extends Controller
     {
         $query = PantryItem::where('user_id', auth()->id());
 
-        if ($request->filled('space_id')) {
+        // An explicit ask for the items that belong nowhere. A flag of its own
+        // rather than a null space_id, because filled() cannot express one —
+        // an empty parameter and an absent one look identical to it, which is
+        // why there was no way to reach these items at all.
+        if ($request->boolean('unassigned')) {
+            $query->whereNull('space_id');
+        } elseif ($request->filled('space_id')) {
             $query->where('space_id', $request->input('space_id'));
         }
 
